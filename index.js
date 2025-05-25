@@ -5,10 +5,9 @@ require('dotenv').config();
 
 app.set('view engine','ejs');
 
-app.get('/',(req,res)=>{
+app.get('/admin',(req,res)=>{
 
-    console.log('my project works absolutely fine');
-    res.send('hey');
+    res.render('home');
 });
 
 // hello
