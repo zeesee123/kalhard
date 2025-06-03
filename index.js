@@ -2,6 +2,8 @@ const express=require('express');
 const app=express();
 const path=require('path');
 
+const routes=require('./routes/web');
+
 require('dotenv').config();
 
 app.set('view engine','ejs');
