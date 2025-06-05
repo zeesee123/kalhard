@@ -12,7 +12,12 @@ app.use('/admin/assets',express.static(path.join(__dirname,'public')));
 
 app.get('/admin',(req,res)=>{
 
-    res.render('home');
+    res.render('dashboard');
+});
+
+app.get('/admin/home',(req,res)=>{
+
+    res.render('homepage');
 });
 
 // hello

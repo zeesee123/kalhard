@@ -1,0 +1,55 @@
+<%-include('templates/header')%>
+
+<h1>Homepage</h1>
+
+<section>
+
+    <h3>Section 1(Tech-driven growth on your mind ?)</h3>
+
+    <div class="mb-3">
+        <label for="" class="form-label">heading</label>
+        <input type="text" name="sec1title" class="form-control" value="old value">
+    </div>
+
+    <div class="mb-3">
+        <label for="" class="form-label">content</label>
+        <textarea name="sec1text" id="" cols="30" rows="5" class="form-control">old value</textarea>
+    </div>
+
+    <div class="row">
+        <div class="mb-3 col-6">
+            <label for="" class="form-label">banner image</label>
+            <input type="file" class="form-control img_inpp" name="sec1image">
+            
+        </div>
+        <div class="mb-3 col-2 pt-4">
+            
+            <button type="button" class="btn btn-danger clear-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="reset image"><i class="bi bi-arrow-clockwise"></i></button>
+        </div>
+        <div class="mb-3 col-4">
+            <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail">
+            
+        </div>
+    </div>
+
+    <div class="mb-3 d-flex">
+        <div class="mx-2">
+            <label for="" class="form-label">button text(What we do)</label>
+            <input type="text" class="form-control" name="sec2btn_text" value="old value">
+        </div>
+
+        <div class="mx-2">
+            <label for="" class="form-label">button url</label>
+            <input type="text" class="form-control" name="sec2btn_url" value="old value">
+        </div>
+
+    </div>
+
+
+
+
+
+</section>
+
+
+<%-include('templates/footer')%>
