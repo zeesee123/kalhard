@@ -29,6 +29,23 @@ const storage = multer.diskStorage({
   const upload = multer({ storage });
 
 
+  const session = require('express-session');
+const flash = require('connect-flash');
+
+app.use(session({
+  secret: 'someSecretKey', // keep this secure
+  resave: false,
+  saveUninitialized: true
+}));
+app.use(flash());
+
+// Make flash messages available to all views
+app.use((req, res, next) => {
+  res.locals.success = req.flash('success');
+  res.locals.error = req.flash('error');
+  next();
+});
+
 app.set('view engine','ejs');
 
 // Middleware to parse URL-encoded form data
@@ -75,16 +92,22 @@ app.post('/admin/test', upload.single('sec1image'), async (req, res) => {
       sec1title: req.body.sec1title,
       sec1text: req.body.sec1text,
       sec1image: newImagePath,
-      sec1btn_text: req.body.sec2btn_text,
-      sec1btn_url: req.body.sec2btn_url,
+      sec1btn_text: req.body.sec1btn_text,
+      sec1btn_url: req.body.sec1btn_url,
     };
   
     // 5. Update or insert
-    await collection.updateOne(
-      { page: "homepage" },
-      { $set: formData },
-      { upsert: true }
-    );
+
+    await collection.findOneAndUpdate(
+        {},                   // Empty filter → first document
+        { $set: formData },       // Fields to update
+        { upsert: true }      // Insert if not found
+      );
+    // await collection.updateOne(
+    //   { page: "homepage" },
+    //   { $set: formData },
+    //   { upsert: true }
+    // );
   
     res.send('✅ Saved and image updated if needed');
   });
