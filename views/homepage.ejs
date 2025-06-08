@@ -8,54 +8,60 @@
     
 </div>
 
-<form action="/admin/test" method="POST" enctype="multipart/form-data">
+<form action="/admin/test" method="POST" enctype="multipart/form-data" id="main_form">
 <section>
 
-    
+    <div class="card pt-3 p-4">
+
         <h3>Section 1 (<%=section.sec1title||'Tech driven growth on your mind ?' %>)</h3>
         
 
 
-    <div class="mb-3">
-        <label for="" class="form-label">heading</label>
-        <input type="text" name="sec1title" class="form-control" value="<%=section.sec1title||'' %>">
+        <div class="mb-3">
+            <label for="" class="form-label">heading</label>
+            <input type="text" name="sec1title" class="form-control" value="<%=section.sec1title||'' %>">
+        </div>
+    
+        <div class="mb-3">
+            <label for="" class="form-label">content</label>
+            <textarea name="sec1text" cols="30" rows="5" class="form-control"><%=section.sec1text||'' %></textarea>
+        </div>
+    
+        <div class="row">
+            <div class="mb-3 col-6">
+                <label for="" class="form-label">banner image</label>
+                <input type="file" class="form-control img_inpp" name="sec1image">
+                
+            </div>
+            <div class="mb-3 col-2 pt-4">
+                
+                <button type="button" class="btn btn-danger clear-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="reset image"><i class="bi bi-arrow-clockwise"></i></button>
+            </div>
+            <div class="mb-3 col-4">
+                <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
+                <img class="Thumbnail" src="<%= section.sec1image ? '/admin/assets/dist' + section.sec1image : '/admin/assets/dist/defaultimages/default.jpg' %>"  width="400" alt="Default picture Thumbnail">
+                
+            </div>
+        </div>
+    
+        <div class="mb-3 d-flex">
+            <div class="mx-2">
+                <label for="" class="form-label">button text(What we do)</label>
+                <input type="text" class="form-control" name="sec1btn_text" value="<%=section.sec1btn_text||'' %>">
+            </div>
+    
+            <div class="mx-2">
+                <label for="" class="form-label">button url</label>
+                <input type="text" class="form-control" name="sec1btn_url" value="<%=section.sec1btn_url||'' %>">
+            </div>
+    
+        </div>
+
+        
     </div>
 
-    <div class="mb-3">
-        <label for="" class="form-label">content</label>
-        <textarea name="sec1text" cols="30" rows="5" class="form-control"><%=section.sec1text||'' %></textarea>
-    </div>
-
-    <div class="row">
-        <div class="mb-3 col-6">
-            <label for="" class="form-label">banner image</label>
-            <input type="file" class="form-control img_inpp" name="sec1image">
-            
-        </div>
-        <div class="mb-3 col-2 pt-4">
-            
-            <button type="button" class="btn btn-danger clear-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="reset image"><i class="bi bi-arrow-clockwise"></i></button>
-        </div>
-        <div class="mb-3 col-4">
-            <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-            <img class="Thumbnail" src="<%= section.sec1image ? '/admin/assets/dist' + section.sec1image : '/admin/assets/dist/defaultimages/default.jpg' %>"  width="400" alt="Default picture Thumbnail">
-            
-        </div>
-    </div>
-
-    <div class="mb-3 d-flex">
-        <div class="mx-2">
-            <label for="" class="form-label">button text(What we do)</label>
-            <input type="text" class="form-control" name="sec1btn_text" value="<%=section.sec1btn_text||'' %>">
-        </div>
-
-        <div class="mx-2">
-            <label for="" class="form-label">button url</label>
-            <input type="text" class="form-control" name="sec1btn_url" value="<%=section.sec1btn_url||'' %>">
-        </div>
-
-    </div>
-
+    
+      
 
 
 
@@ -63,8 +69,9 @@
 </section>
 
 <div class="text-end p-3" style="bottom:0;position:sticky;">
-    <button class="btn btn-lg btn-primary p-3"><i class="bi bi-floppy2-fill mx-2"></i>Save</button>
-  </div>
+    <button class="btn btn-lg btn-primary p-3" id="spin_submit" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Save"><i class="bi bi-floppy2-fill mx-2" ></i></button> 
+     
+</div>
 
 </form>
 
@@ -394,7 +401,7 @@ clearBtns.forEach((v,i)=>{
     const img = document.querySelectorAll('.Thumbnail')[i];
 
   
-    img.src=`{{asset_env('images/default.jpg')}}`;
+    img.src=`/admin/assets/dist/defaultimages/default.jpg`;
     
 console.log(document.querySelectorAll('.img_inpp'));
     document.querySelectorAll('.img_inpp')[i].value='';
@@ -1310,6 +1317,24 @@ reloadTable(type);
     changeModal_content(this.getAttribute('data-type'),'eradicator',this.getAttribute('data-id'));
 
   });
+
+</script>
+
+<script>
+    let main_form=document.getElementById('main_form');
+
+    let spin_submit=document.getElementById('spin_submit');
+
+    main_form.addEventListener('submit',(e)=>{
+
+        e.preventDefault();
+
+        spin_submit.innerHTML=`<div class="spinner-border mx-2" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>`;
+        
+        console.log('submit event');
+    });
 
 </script>
 
