@@ -2,14 +2,14 @@
 
 <h1>Homepage</h1>
 
-<form action="/admin/test" method="POST">
+<form action="/admin/test" method="POST" enctype="multipart/form-data">
 <section>
 
-    <h3>Section 1(Tech-driven growth on your mind ?)</h3>
+    <h3>Section 1(<%=section.sec1title||'Tech driven growth on your mind ?' %> ?)</h3>
 
     <div class="mb-3">
         <label for="" class="form-label">heading</label>
-        <input type="text" name="sec1title" class="form-control" value="old value">
+        <input type="text" name="sec1title" class="form-control" value="<%=section.sec1title||'' %>">
     </div>
 
     <div class="mb-3">
@@ -28,7 +28,8 @@
             <button type="button" class="btn btn-danger clear-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="reset image"><i class="bi bi-arrow-clockwise"></i></button>
         </div>
         <div class="mb-3 col-4">
-            <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail">
+            <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
+            <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
             
         </div>
     </div>
@@ -36,12 +37,12 @@
     <div class="mb-3 d-flex">
         <div class="mx-2">
             <label for="" class="form-label">button text(What we do)</label>
-            <input type="text" class="form-control" name="sec2btn_text" value="old value">
+            <input type="text" class="form-control" name="sec1btn_text" value="old value">
         </div>
 
         <div class="mx-2">
             <label for="" class="form-label">button url</label>
-            <input type="text" class="form-control" name="sec2btn_url" value="old value">
+            <input type="text" class="form-control" name="sec1btn_url" value="old value">
         </div>
 
     </div>
@@ -63,7 +64,7 @@
 https://cdn.jsdelivr.net/npm/filepond@4.32.7/dist/filepond.min.js
 "></script>
 
-{{-- <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script> --}}
+
 <script src="
 https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-plugin-image-preview.min.js
 "></script>

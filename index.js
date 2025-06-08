@@ -1,10 +1,33 @@
 const express=require('express');
 const app=express();
 const path=require('path');
+const mongoose=require('mongoose');
+const multer=require('multer');
+const fs=require('fs');
 
 const routes=require('./routes/web');
 
 require('dotenv').config();
+
+console.log('this is mongoose',mongoose);
+mongoose.connect(process.env.CONNECTION_STRING,{dbName:"calhard"}).then(() => console.log('✅ MongoDB connected'))
+.catch(err => console.error('❌ Connection failed', err));;
+
+
+//multer for file uploads
+// Multer setup for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'public/dist/uploads/');
+    },
+    filename: function (req, file, cb) {
+      const uniqueName = Date.now() + '-' + file.originalname;
+      cb(null, uniqueName);
+    }
+  });
+
+  const upload = multer({ storage });
+
 
 app.set('view engine','ejs');
 
@@ -21,16 +44,50 @@ app.get('/admin',(req,res)=>{
     res.render('dashboard');
 });
 
-app.get('/admin/home',(req,res)=>{
+app.get('/admin/home',async(req,res)=>{
 
-    res.render('homepage');
+    const data = await mongoose.connection.db.collection('homepage').findOne({});
+    console.log(data);
+    res.render('homepage',{section:data||{}});
 });
 
-app.post('/admin/test',(req,res)=>{
-    setTimeout(() => {
-        res.send('<h1>Form Submitted</h1>');
-      }, 1500); // 1.5s delay
-})
+app.post('/admin/test', upload.single('sec1image'), async (req, res) => {
+    const collection = mongoose.connection.db.collection('homepage');
+
+    // 1. Find existing document
+    const existingDoc = await collection.findOne({ page: "homepage" });
+  
+    // 2. If there's an old image and new one is uploaded, delete the old image file
+    if (existingDoc && existingDoc.sec1image && req.file) {
+      const oldImagePath = path.join(__dirname, 'public', existingDoc.sec1image);
+      fs.unlink(oldImagePath, err => {
+        if (err) console.log('Old image delete failed:', err);
+        else console.log('Old image deleted:', oldImagePath);
+      });
+    }
+  
+    // 3. Build new image path
+    const newImagePath = req.file ? '/uploads/' + req.file.filename : existingDoc?.sec1image || null;
+  
+    // 4. Build form data
+    const formData = {
+      page: "homepage",
+      sec1title: req.body.sec1title,
+      sec1text: req.body.sec1text,
+      sec1image: newImagePath,
+      sec1btn_text: req.body.sec2btn_text,
+      sec1btn_url: req.body.sec2btn_url,
+    };
+  
+    // 5. Update or insert
+    await collection.updateOne(
+      { page: "homepage" },
+      { $set: formData },
+      { upsert: true }
+    );
+  
+    res.send('✅ Saved and image updated if needed');
+  });
 
 // hello
 app.listen(process.env.PORT,()=>{
