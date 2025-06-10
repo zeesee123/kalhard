@@ -8,8 +8,8 @@ const fs=require('fs');
 const routes=require('./routes/web');
 
 require('dotenv').config();
-
-console.log('this is mongoose',mongoose);
+console.log(process.env.PORT);
+// console.log('this is mongoose',mongoose);
 mongoose.connect(process.env.CONNECTION_STRING,{dbName:"calhard"}).then(() => console.log('✅ MongoDB connected'))
 .catch(err => console.error('❌ Connection failed', err));;
 
@@ -114,7 +114,7 @@ app.post('/admin/test', upload.single('sec1image'), async (req, res) => {
 
 // hello
 app.listen(process.env.PORT,()=>{
-    console.log('the server is listening');
+    console.log('the server is listening','http://localhost:3000');
 });
 
 

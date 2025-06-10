@@ -13,7 +13,7 @@
 
     <div class="card pt-3 p-4">
 
-        <h3>Section 1 (<%=section.sec1title||'Tech driven growth on your mind ?' %>)</h3>
+        <h3>Hero Section (<%=section.sec1title||'Tech driven growth on your mind ?' %>)</h3>
         
 
 
@@ -60,6 +60,43 @@
         
     </div>
 
+    <!-- ------------- -->
+    <hr>
+    <!-- ------------- -->
+
+     <div class="card pt-3 p-4">
+
+        <h3>Journey(<%=section.sec1title||'Tech driven growth on your mind ?' %>)</h3>
+        
+
+
+        <div class="mb-3">
+            <label for="" class="form-label">heading</label>
+            <input type="text" name="sec1title" class="form-control" value="<%=section.sec2title||'' %>">
+        </div>
+    
+        <div class="mb-3">
+            <label for="" class="form-label">content</label>
+            <textarea name="sec1text" cols="30" rows="5" class="form-control"><%=section.sec2text||'' %></textarea>
+        </div>
+    
+       
+    
+        <div class="mb-3 d-flex">
+            <div class="mx-2">
+                <label for="" class="form-label">button text(What we do)</label>
+                <input type="text" class="form-control" name="sec1btn_text" value="<%=section.sec1btn_text||'' %>">
+            </div>
+    
+            <div class="mx-2">
+                <label for="" class="form-label">button url</label>
+                <input type="text" class="form-control" name="sec1btn_url" value="<%=section.sec1btn_url||'' %>">
+            </div>
+    
+        </div>
+
+        
+    </div>
     
       
 
@@ -1334,6 +1371,8 @@ reloadTable(type);
       </div>`;
         
         console.log('submit event');
+
+        main_form.submit();
     });
 
 </script>
