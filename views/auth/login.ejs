@@ -12,18 +12,18 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>Sign in - AKV</title>
+    <title>Sign in - Calsoft</title>
     <!-- CSS files -->
-    <link href="admin/assets/dist/css/tabler.min.css?1692870487" rel="stylesheet"/>
-    <link href="admin/assets/dist/css/tabler-flags.min.css?1692870487" rel="stylesheet"/>
-    <link href="admin/assets/dist/css/tabler-payments.min.css?1692870487" rel="stylesheet"/>
-    <link href="admin/assets/dist/css/tabler-vendors.min.css?1692870487" rel="stylesheet"/>
-    <link href="admin/assets/dist/css/demo.min.css?1692870487" rel="stylesheet"/>
-    <link href="admin/assets/dist/css/tabler.min.css?1692870487" rel="stylesheet"/>
-    <link href="admin/assets/dist/css/tabler-flags.min.css?1692870487" rel="stylesheet"/>
-    <link href="admin/assets/dist/css/tabler-payments.min.css?1692870487" rel="stylesheet"/>
-    <link href="admin/assets/dist/css/tabler-vendors.min.css?1692870487" rel="stylesheet"/>
-    <link href="admin/assets/dist/css/demo.min.css?1692870487" rel="stylesheet"/>
+    <link href="/admin/assets/dist/css/tabler.min.css?1692870487" rel="stylesheet"/>
+    <link href="/admin/assets/dist/css/tabler-flags.min.css?1692870487" rel="stylesheet"/>
+    <link href="/admin/assets/dist/css/tabler-payments.min.css?1692870487" rel="stylesheet"/>
+    <link href="/admin/assets/dist/css/tabler-vendors.min.css?1692870487" rel="stylesheet"/>
+    <link href="/admin/assets/dist/css/demo.min.css?1692870487" rel="stylesheet"/>
+    <link href="/admin/assets/dist/css/tabler.min.css?1692870487" rel="stylesheet"/>
+    <link href="/admin/assets/dist/css/tabler-flags.min.css?1692870487" rel="stylesheet"/>
+    <link href="/admin/assets/dist/css/tabler-payments.min.css?1692870487" rel="stylesheet"/>
+    <link href="/admin/assets/dist/css/tabler-vendors.min.css?1692870487" rel="stylesheet"/>
+    <link href="/admin/assets/dist/css/demo.min.css?1692870487" rel="stylesheet"/>
     <style>
       @import url('https://rsms.me/inter/inter.css');
       :root {
@@ -38,7 +38,7 @@
     <script src="./dist/js/demo-theme.min.js?1692870487"></script>
     <div class="page page-center">
       
-      @if(session('error'))
+      <% if (error && error.length > 0) { %>
 
         <div class="alert  alert-important alert-danger alert-dismissible">
           <div class="d-flex">
@@ -48,37 +48,39 @@
           </div>
           <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
         </div>
+
+        <% } %>
     
-      @endif
+  
 
       <div class="container container-tight py-4">
         <div class="text-center mb-4">
           <a href="." class="navbar-brand navbar-brand-autodark">
-            <img src="{{asset_env('/images/akvlogo.svg')}}" width="110" height="32" alt="Tabler" class="navbar-brand-image mb-3">
-            <h1>AKV</h1>
-            {{-- test --}}
+            <img src="/admin/assets/dist/defaultimages/logo2.jpeg" width="110" height="32" alt="Tabler" class="navbar-brand-image mb-3">
+            <!-- <h1>AKV</h1>
+            {{-- test --}} -->
           </a>
         </div>
         <div class="card card-md">
           <div class="card-body">
             <h2 class="h2 text-center mb-4">Login to your account</h2>
             <form action="{{url('/admin/login')}}" method="post" autocomplete="off" novalidate>
-              @csrf
+              <!-- @csrf -->
               <div class="mb-3">
                 <label class="form-label">Email address</label>
-                <input type="email" class="form-control" placeholder="your@email.com" autocomplete="off" name="email" value="{{old('email')}}">
-                @error('email')
+                <input type="email" class="form-control" placeholder="your@email.com" autocomplete="off" name="email" value="">
+                <!-- @error('email')
             <div class="text-danger mt-2">
                 {{$message}}
             </div>
-            @enderror
+            @enderror -->
               </div>
               <div class="mb-2">
                 <label class="form-label">
                   Password
-                  {{-- <span class="form-label-description">
+                  <!-- {{-- <span class="form-label-description">
                     <a href="./forgot-password.html">I forgot password</a>
-                  </span> --}}
+                  </span> --}} -->
                 </label>
                 <div class="input-group input-group-flat">
                   <input type="password" class="form-control"  placeholder="Your password"  id="pwd" autocomplete="off" name="password">
@@ -89,11 +91,11 @@
                   </span>
                   
                 </div>
-                @error('password')
+                <!-- @error('password')
             <div class="text-danger mt-2">
                 {{$message}}
             </div>
-            @enderror
+            @enderrors -->
               </div>
               <div class="mb-2">
                 <label class="form-check">

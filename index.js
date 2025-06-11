@@ -14,6 +14,12 @@ mongoose.connect(process.env.CONNECTION_STRING,{dbName:"calhard"}).then(() => co
 .catch(err => console.error('❌ Connection failed', err));;
 
 
+function isAuthenticated(req, res, next) {
+  if (req.session.userId) return next();
+  req.flash('error', 'You must be logged in');
+  return res.redirect('/login');
+}
+
 //multer for file uploads
 // Multer setup for file uploads
 const storage = multer.diskStorage({
@@ -61,6 +67,20 @@ app.get('/admin',(req,res)=>{
     res.render('dashboard');
 });
 
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    req.flash('error', 'Invalid credentials');
+    return res.redirect('/login');
+  }
+
+  req.session.userId = user._id; // store user session
+  req.flash('success', 'Logged in successfully');
+  res.redirect('/admin/home');
+});
+
 app.get('/admin/home',async(req,res)=>{
 
     const data = await mongoose.connection.db.collection('homepage').findOne({});
@@ -68,7 +88,15 @@ app.get('/admin/home',async(req,res)=>{
     res.render('homepage',{section:data||{}});
 });
 
+app.get('/admin/login',(req,res)=>{
+  res.render('auth/login');
+})
+
 app.post('/admin/test', upload.single('sec1image'), async (req, res) => {
+
+
+  try{
+
     const collection = mongoose.connection.db.collection('homepage');
 
     // 1. Find existing document
@@ -108,8 +136,17 @@ app.post('/admin/test', upload.single('sec1image'), async (req, res) => {
     //   { $set: formData },
     //   { upsert: true }
     // );
-  
-    res.send('✅ Saved and image updated if needed');
+ 
+    req.flash('success', 'Saved successfully!');
+res.redirect('/admin/home');
+
+  }catch(er){
+
+    req.flash('error', 'Something went wrong');
+    res.redirect('/admin/home');
+  }
+    
+    
   });
 
 // hello

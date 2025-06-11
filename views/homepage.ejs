@@ -8,6 +8,22 @@
     
 </div>
 
+
+<% if (success && success.length > 0) { %>
+  <div class="alert alert-important alert-success alert-dismissible">
+    <div class="d-flex"><i class="bi bi-check-circle-fill mx-1"></i><%= success[0] %></div>
+    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    
+  </div>
+<% } %>
+
+<% if (error && error.length > 0) { %>
+  <div class="alert alert-danger alert-important alert-dismissible">
+    <div class="d-flex"><i class="bi bi-exclamation-triangle-fill mx-1"></i><%= error[0] %></div>
+    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+  </div>
+<% } %>
+
 <form action="/admin/test" method="POST" enctype="multipart/form-data" id="main_form">
 <section>
 
@@ -64,7 +80,7 @@
     <hr>
     <!-- ------------- -->
 
-     <div class="card pt-3 p-4">
+     <!-- <div class="card pt-3 p-4">
 
         <h3>Journey(<%=section.sec1title||'Tech driven growth on your mind ?' %>)</h3>
         
@@ -72,12 +88,12 @@
 
         <div class="mb-3">
             <label for="" class="form-label">heading</label>
-            <input type="text" name="sec1title" class="form-control" value="<%=section.sec2title||'' %>">
+            <input type="text" name="sec2title" class="form-control" value="<%=section.sec2title||'' %>">
         </div>
     
         <div class="mb-3">
             <label for="" class="form-label">content</label>
-            <textarea name="sec1text" cols="30" rows="5" class="form-control"><%=section.sec2text||'' %></textarea>
+            <textarea name="sec2text" cols="30" rows="5" class="form-control"><%=section.sec2text||'' %></textarea>
         </div>
     
        
@@ -85,18 +101,18 @@
         <div class="mb-3 d-flex">
             <div class="mx-2">
                 <label for="" class="form-label">button text(What we do)</label>
-                <input type="text" class="form-control" name="sec1btn_text" value="<%=section.sec1btn_text||'' %>">
+                <input type="text" class="form-control" name="sec2btn_text" value="<%=section.sec1btn_text||'' %>">
             </div>
     
             <div class="mx-2">
                 <label for="" class="form-label">button url</label>
-                <input type="text" class="form-control" name="sec1btn_url" value="<%=section.sec1btn_url||'' %>">
+                <input type="text" class="form-control" name="sec2btn_url" value="<%=section.sec1btn_url||'' %>">
             </div>
     
         </div>
 
         
-    </div>
+    </div> -->
     
       
 
