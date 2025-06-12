@@ -45,6 +45,8 @@ app.use(session({
 }));
 app.use(flash());
 
+app.use(express.json());
+
 // Make flash messages available to all views
 app.use((req, res, next) => {
   res.locals.success = req.flash('success');
@@ -67,7 +69,7 @@ app.get('/admin',(req,res)=>{
     res.render('dashboard');
 });
 
-router.post('/login', async (req, res) => {
+app.post('/login', async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
 
@@ -117,7 +119,8 @@ app.post('/admin/test', upload.single('sec1image'), async (req, res) => {
     // 4. Build form data
     const formData = {
       page: "homepage",
-      sec1title: req.body.sec1title,
+      sec1title1:req.body.sec1title1,
+      sec1title2:req.body.sec1title2,
       sec1text: req.body.sec1text,
       sec1image: newImagePath,
       sec1btn_text: req.body.sec1btn_text,
@@ -137,7 +140,7 @@ app.post('/admin/test', upload.single('sec1image'), async (req, res) => {
     //   { upsert: true }
     // );
  
-    req.flash('success', 'Saved successfully!');
+    req.flash('success', 'All changes have been applied.');
 res.redirect('/admin/home');
 
   }catch(er){
@@ -149,9 +152,23 @@ res.redirect('/admin/home');
     
   });
 
+
+  //api routes come in here 
+
+  app.get('/api/homepage',async(req,res)=>{
+
+    const data = await mongoose.connection.db.collection('homepage').findOne({});
+    console.log(data);
+    res.json({data:data});
+  });
+
 // hello
-app.listen(process.env.PORT,()=>{
-    console.log('the server is listening','http://localhost:3000');
+app.listen(process.env.PORT,(er)=>{
+  if (er) {
+    console.error('❌ Failed to start server:', err.message);
+    process.exit(1);
+  }
+    console.log('the server is listening',`http://localhost:${process.env.PORT}`);
 });
 
 
