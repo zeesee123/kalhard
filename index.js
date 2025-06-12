@@ -90,6 +90,14 @@ app.get('/admin/home',async(req,res)=>{
     res.render('homepage',{section:data||{}});
 });
 
+
+app.get('/admin/homenew',async(req,res)=>{
+
+    const data = await mongoose.connection.db.collection('homepage').findOne({});
+    console.log(data);
+    res.render('homepagenew',{section:data||{}});
+});
+
 app.get('/admin/login',(req,res)=>{
   res.render('auth/login');
 })
@@ -125,6 +133,8 @@ app.post('/admin/test', upload.single('sec1image'), async (req, res) => {
       sec1image: newImagePath,
       sec1btn_text: req.body.sec1btn_text,
       sec1btn_url: req.body.sec1btn_url,
+      sec2title1:req.body.sec2title1,
+      sec2title2:req.body.sec2title2
     };
   
     // 5. Update or insert
