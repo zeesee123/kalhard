@@ -37,7 +37,7 @@
   <div class="accordion-item mb-3">
     <h2 class="accordion-header">
       <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-        Hero Section
+        <i class="bi bi-lightning-fill mx-2"></i>Hero Section
       </button>
     </h2>
     <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
@@ -51,6 +51,23 @@
   (Tech driven growth on your mind ?)
 <% } %></h3>
         
+
+<div class="row">
+  <div class="mb-3 col-6">
+      <label for="" class="form-label">banner image</label>
+      <input type="file" class="form-control img_inpp" name="sec1image">
+      
+  </div>
+  <div class="mb-3 col-2 pt-4">
+      
+      <button type="button" class="btn btn-danger clear-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="reset image"><i class="bi bi-arrow-clockwise"></i></button>
+  </div>
+  <div class="mb-3 col-4">
+      <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
+      <img class="Thumbnail" src="<%= section.sec1image ? '/admin/assets/dist' + section.sec1image : '/admin/assets/dist/defaultimages/default.jpg' %>"  width="400" alt="Default picture Thumbnail">
+      
+  </div>
+</div>
 
 
         <div class="row">
@@ -74,22 +91,7 @@
             <textarea name="sec1text" cols="30" rows="5" class="form-control"><%=section.sec1text||'' %></textarea>
         </div>
     
-        <div class="row">
-            <div class="mb-3 col-6">
-                <label for="" class="form-label">banner image</label>
-                <input type="file" class="form-control img_inpp" name="sec1image">
-                
-            </div>
-            <div class="mb-3 col-2 pt-4">
-                
-                <button type="button" class="btn btn-danger clear-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="reset image"><i class="bi bi-arrow-clockwise"></i></button>
-            </div>
-            <div class="mb-3 col-4">
-                <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-                <img class="Thumbnail" src="<%= section.sec1image ? '/admin/assets/dist' + section.sec1image : '/admin/assets/dist/defaultimages/default.jpg' %>"  width="400" alt="Default picture Thumbnail">
-                
-            </div>
-        </div>
+        
     
         <div class="mb-3 d-flex">
             <div class="mx-2">
@@ -151,7 +153,7 @@
   <div class="accordion-item mb-3">
     <h2 class="accordion-header">
       <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-        Journey
+        <i class="bi bi-graph-up-arrow mx-2"></i>Journey
       </button>
     </h2>
     <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
@@ -184,7 +186,43 @@ We make it simple)
         </div>
        
     
-        
+        <h4>Logos with text and description(Architect,Engineer+modernize,secure Apps & data....)</h4>
+        <div class="" id="ourbusiness_cards">
+          <div class="mb-3 row">
+              
+            <div class="col-3">
+              <input type="text" placeholder="title" class="form-control" name="sec5_stitle[]">
+          </div>
+              <div class="col-3">
+                  <input type="file" placeholder="image" class="form-control" name="sec5_img[]">
+              </div>
+              
+              <div class="col-3">
+                  <textarea class="form-control" name="sec5_scontent[]" cols="30" rows="5"></textarea>
+                  
+              </div>
+              
+              <div class="col-3">
+                  <button class="btn btn-primary" type="button" onclick="addourbusiness_cards()">+</button>
+              </div>     
+          </div>
+      </div>
+
+      <table class="table" id="ourbusiness_table">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">image</th>
+              <th scope="col">title</th>
+              
+            
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+          </tbody>
+        </table>
         
 
         
@@ -198,7 +236,7 @@ We make it simple)
   <div class="accordion-item mb-3">
   <h2 class="accordion-header">
     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCustomers" aria-expanded="false" aria-controls="collapseCustomers">
-      Customers
+      <i class="bi bi-person-check-fill mx-2"></i>Customers
     </button>
   </h2>
   <div id="collapseCustomers" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
@@ -211,7 +249,7 @@ We make it simple)
 <div class="accordion-item mb-3">
   <h2 class="accordion-header">
     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseIndustries" aria-expanded="false" aria-controls="collapseIndustries">
-      Industries
+      <i class="bi bi-globe2 mx-2"></i>Industries
     </button>
   </h2>
   <div id="collapseIndustries" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
@@ -224,7 +262,7 @@ We make it simple)
 <div class="accordion-item mb-3">
   <h2 class="accordion-header">
     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWhatsNew" aria-expanded="false" aria-controls="collapseWhatsNew">
-      What's New
+      <i class="bi bi-megaphone mx-2"></i>What's New
     </button>
   </h2>
   <div id="collapseWhatsNew" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
@@ -237,7 +275,7 @@ We make it simple)
 <div class="accordion-item mb-3">
   <h2 class="accordion-header">
     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePartners" aria-expanded="false" aria-controls="collapsePartners">
-      Partners
+      <i class="bi bi-people-fill mx-2"></i>Partners
     </button>
   </h2>
   <div id="collapsePartners" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
@@ -250,7 +288,7 @@ We make it simple)
 <div class="accordion-item mb-3">
   <h2 class="accordion-header">
     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseServices" aria-expanded="false" aria-controls="collapseServices">
-      Services
+      <i class="bi bi-gear-wide-connected mx-2"></i>Services
     </button>
   </h2>
   <div id="collapseServices" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
@@ -263,7 +301,7 @@ We make it simple)
 <div class="accordion-item mb-3">
   <h2 class="accordion-header">
     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCaseStudies" aria-expanded="false" aria-controls="collapseCaseStudies">
-      Case Studies
+      <i class="bi bi-journal-richtext mx-2"></i>Case Studies
     </button>
   </h2>
   <div id="collapseCaseStudies" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
