@@ -190,20 +190,24 @@ We make it simple)
         <div class="" id="ourbusiness_cards">
           <div class="mb-3 row">
               
-            <div class="col-3">
-              <input type="text" placeholder="title" class="form-control" name="sec5_stitle[]">
+            <div class="col-2">
+              <input type="text" placeholder="title" class="form-control" name="sec2_stitle[]">
           </div>
               <div class="col-3">
-                  <input type="file" placeholder="image" class="form-control" name="sec5_img[]">
+                  <input type="file" placeholder="image" class="form-control img_inpp" name="sec2_simg[]">
               </div>
               
               <div class="col-3">
-                  <textarea class="form-control" name="sec5_scontent[]" cols="30" rows="5"></textarea>
+                  <textarea class="form-control" name="sec2_scontent[]" placeholder="content" cols="30" rows="5"></textarea>
                   
               </div>
+
+              <div class="col-1">
+                <img src="" alt="" class="Thumbnail" style="height:10vmin;width:auto;">
+              </div>
               
               <div class="col-3">
-                  <button class="btn btn-primary" type="button" onclick="addourbusiness_cards()">+</button>
+                  <button class="btn btn-primary" type="button" onclick="addjourney_cards()">+</button>
               </div>     
           </div>
       </div>
@@ -804,7 +808,7 @@ field2.insertAdjacentHTML('beforeend',`<div class="mb-3 row">
 }
 
 
-function addourbusiness_cards(){
+function addjourney_cards(){
 
        
 
