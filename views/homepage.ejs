@@ -187,14 +187,14 @@ We make it simple)
        
     
         <h4>Logos with text and description(Architect,Engineer+modernize,secure Apps & data....)</h4>
-        <div class="" id="ourbusiness_cards">
+        <div class="" id="journey_cards">
           <div class="mb-3 row">
               
             <div class="col-2">
               <input type="text" placeholder="title" class="form-control" name="sec2_stitle[]">
           </div>
               <div class="col-3">
-                  <input type="file" placeholder="image" class="form-control img_inpp" name="sec2_simg[]">
+                  <input type="file" placeholder="image" class="form-control img_inpp" name="sec2_simg" multiple>
               </div>
               
               <div class="col-3">
@@ -212,7 +212,7 @@ We make it simple)
           </div>
       </div>
 
-      <table class="table" id="ourbusiness_table">
+      <table class="table" id="journey_table">
           <thead>
             <tr>
               <th scope="col">#</th>
@@ -261,13 +261,13 @@ We make it simple)
           <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title 1(coloured text)</label>
-            <input type="text" name="sec2title1" class="form-control" value="<%=section.sec2title1||'' %>">
+            <input type="text" name="customers_title1" class="form-control" value="<%=section.sec2title1||'' %>">
         </div>
           </div>
           <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title 2(rest text)</label>
-            <input type="text" name="sec2title2" class="form-control" value="<%=section.sec2title2||'' %>">
+            <input type="text" name="customers_title2" class="form-control" value="<%=section.sec2title2||'' %>">
         </div>
           </div>
         </div>
@@ -343,13 +343,13 @@ We make it simple)
           <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title 1</label>
-            <input type="text" name="sec2title1" class="form-control" value="<%=section.sec2title1||'' %>">
+            <input type="text" name="industries_title1" class="form-control" value="<%=section.sec2title1||'' %>">
         </div>
           </div>
           <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title 2</label>
-            <input type="text" name="sec2title2" class="form-control" value="<%=section.sec2title2||'' %>">
+            <input type="text" name="industries_title2" class="form-control" value="<%=section.sec2title2||'' %>">
         </div>
           </div>
         </div>
@@ -424,13 +424,13 @@ We make it simple)
           <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title 1</label>
-            <input type="text" name="sec2title1" class="form-control" value="<%=section.sec2title1||'' %>">
+            <input type="text" name="whatsnew_title1" class="form-control" value="<%=section.sec2title1||'' %>">
         </div>
           </div>
           <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title 2</label>
-            <input type="text" name="sec2title2" class="form-control" value="<%=section.sec2title2||'' %>">
+            <input type="text" name="whatsnew_title2" class="form-control" value="<%=section.sec2title2||'' %>">
         </div>
           </div>
         </div>
@@ -505,13 +505,13 @@ We make it simple)
           <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title 1</label>
-            <input type="text" name="sec2title1" class="form-control" value="<%=section.sec2title1||'' %>">
+            <input type="text" name="partners_title1" class="form-control" value="<%=section.sec2title1||'' %>">
         </div>
           </div>
           <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title 2</label>
-            <input type="text" name="sec2title2" class="form-control" value="<%=section.sec2title2||'' %>">
+            <input type="text" name="partners_title2" class="form-control" value="<%=section.sec2title2||'' %>">
         </div>
           </div>
         </div>
@@ -586,13 +586,13 @@ We make it simple)
           <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title 1</label>
-            <input type="text" name="sec2title1" class="form-control" value="<%=section.sec2title1||'' %>">
+            <input type="text" name="services_title1" class="form-control" value="<%=section.sec2title1||'' %>">
         </div>
           </div>
           <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title 2</label>
-            <input type="text" name="sec2title2" class="form-control" value="<%=section.sec2title2||'' %>">
+            <input type="text" name="services_title2" class="form-control" value="<%=section.sec2title2||'' %>">
         </div>
           </div>
         </div>
@@ -667,13 +667,13 @@ We make it simple)
           <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title 1</label>
-            <input type="text" name="sec2title1" class="form-control" value="<%=section.sec2title1||'' %>">
+            <input type="text" name="case_title1" class="form-control" value="<%=section.sec2title1||'' %>">
         </div>
           </div>
           <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title 2</label>
-            <input type="text" name="sec2title2" class="form-control" value="<%=section.sec2title2||'' %>">
+            <input type="text" name="case_title2" class="form-control" value="<%=section.sec2title2||'' %>">
         </div>
           </div>
         </div>
@@ -734,6 +734,10 @@ We make it simple)
 </form>
 
 
+<!-- datable -->
+
+<script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
+
 <script src="
 https://cdn.jsdelivr.net/npm/filepond@4.32.7/dist/filepond.min.js
 "></script>
@@ -742,6 +746,8 @@ https://cdn.jsdelivr.net/npm/filepond@4.32.7/dist/filepond.min.js
 <script src="
 https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-plugin-image-preview.min.js
 "></script>
+
+
 
 <script>
 
@@ -753,7 +759,7 @@ https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-
 
     let field2=document.getElementById('impact_highlights');
 
-    let field3=document.getElementById('ourbusiness_cards');
+    let field3=document.getElementById('journey_cards');
 
     let field4=document.getElementById('ourjourney_leaves');
 
@@ -815,16 +821,22 @@ function addjourney_cards(){
 
 field3.insertAdjacentHTML('beforeend',`<div class="mb-3 row">
     
-    <div class="col-3">
-                        <input type="file" placeholder="icon" class="form-control" name="icon_service[]">
-                    </div>
-                    <div class="col-3">
-                        <input type="text" placeholder="icon" class="form-control" name="icon_service[]">
-                    </div>
-                    <div class="col-3">
-                        <textarea class="form-control" name="desc[]" cols="30" rows="5"></textarea>
-                        
-                    </div>
+  <div class="col-2">
+              <input type="text" placeholder="title" class="form-control" name="sec2_stitle[]">
+          </div>
+              <div class="col-3">
+                  <input type="file" placeholder="image" class="form-control img_inpp" name="sec2_simg">
+              </div>
+              
+              <div class="col-3">
+                  <textarea class="form-control" name="sec2_scontent[]" placeholder="content" cols="30" rows="5"></textarea>
+                  
+              </div>
+
+              <div class="col-1">
+                <img src="" alt="" class="Thumbnail" style="height:10vmin;width:auto;">
+              </div>
+           
     <div class="col-3">
         <button class="btn btn-primary" type="button" onclick="addourbusiness_cards()">+</button>
         <button class="btn btn-danger" type="button" onclick="remove_input(this)">-</button>
@@ -1100,6 +1112,23 @@ imageInputs.forEach((input, index) => {
 });
 
 
+//dynamic inputs thumbnail
+
+$('#journey_cards').on('change', '.img_inpp', function (e) {
+    const file = e.target.files[0];
+    const $row = $(this).closest('.row'); // This finds the row that this input belongs to
+    const $thumb = $row.find('.Thumbnail'); // Finds the image preview in the same row
+
+    if (file && $thumb.length) {
+        const reader = new FileReader();
+        reader.onload = function (ev) {
+            $thumb.attr('src', ev.target.result).show(); // Updates only the correct image
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+
 // datatable part
 
 var table1=$('#whatwedo_table').DataTable({
@@ -1241,13 +1270,13 @@ var table1=$('#whatwedo_table').DataTable({
               }]
   });
 
-  var table4=$('#ourjourney_table').DataTable({
-              ajax:"{{url('admin/hometable/section6')}}",
+  var table4=$('#journey_table').DataTable({
+              ajax:"/admin/table/homepage/sec2_entries",
               processing:true,
               columns:[
                 {"data":"id"},
-                {"data":"year"},
                 {"data":"title"},
+                {"data":"image"},
                 // {"data":"description"},
                 {"data":"actions"}],
               order:[],

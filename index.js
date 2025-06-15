@@ -102,7 +102,13 @@ app.get('/admin/login',(req,res)=>{
   res.render('auth/login');
 })
 
-app.post('/admin/test', upload.single('sec1image'), async (req, res) => {
+// app.post('/admin/test', upload.single('sec1image'), async (req, res) => {
+
+  app.post('/admin/test', upload.fields([
+    { name: 'sec1image', maxCount: 1 },
+    { name: 'sec2_simg' } // handles all journey card images
+  ]), async (req, res) => {
+  
 
 
   try{
@@ -113,17 +119,32 @@ app.post('/admin/test', upload.single('sec1image'), async (req, res) => {
     const existingDoc = await collection.findOne({ page: "homepage" });
   
     // 2. If there's an old image and new one is uploaded, delete the old image file
-    if (existingDoc && existingDoc.sec1image && req.file) {
-      const oldImagePath = path.join(__dirname, 'public', existingDoc.sec1image);
-      fs.unlink(oldImagePath, err => {
-        if (err) console.log('Old image delete failed:', err);
-        else console.log('Old image deleted:', oldImagePath);
+    const sec1imageFile = req.files?.sec1image?.[0];
+
+if (existingDoc && existingDoc.sec1image && sec1imageFile) {
+  const oldImagePath = path.join(__dirname, 'public', existingDoc.sec1image);
+  fs.unlink(oldImagePath, err => {
+    if (err) console.log('Old image delete failed:', err);
+    else console.log('Old image deleted:', oldImagePath);
+  });
+}
+
+const newImagePath = sec1imageFile ? '/uploads/' + sec1imageFile.filename : existingDoc?.sec1image || null;
+
+    //journey entries
+    const journeyEntries = [];
+
+    const titles = req.body.sec2_stitle || [];
+    const contents = req.body.sec2_scontent || [];
+    const images = req.files?.sec2_simg || [];
+
+    for (let i = 0; i < titles.length; i++) {
+      journeyEntries.push({
+        title: titles[i],
+        content: contents[i],
+        image: images[i] ? '/uploads/' + images[i].filename : null
       });
     }
-  
-    // 3. Build new image path
-    const newImagePath = req.file ? '/uploads/' + req.file.filename : existingDoc?.sec1image || null;
-  
     // 4. Build form data
     const formData = {
       page: "homepage",
@@ -134,7 +155,8 @@ app.post('/admin/test', upload.single('sec1image'), async (req, res) => {
       sec1btn_text: req.body.sec1btn_text,
       sec1btn_url: req.body.sec1btn_url,
       sec2title1:req.body.sec2title1,
-      sec2title2:req.body.sec2title2
+      sec2title2:req.body.sec2title2,
+      sec2_entries: journeyEntries
     };
   
     // 5. Update or insert
@@ -155,11 +177,60 @@ res.redirect('/admin/home');
 
   }catch(er){
 
+    console.log(er.message);
+
     req.flash('error', 'Something went wrong');
     res.redirect('/admin/home');
   }
     
     
+  });
+
+  //routes for loading the table data
+
+  app.get('/admin/table/:page/:entries',async(req,res)=>{
+
+
+    const { page, entries } = req.params;  // e.g., "homepage", "sec2_entries"
+  const collection = mongoose.connection.db.collection(page);
+
+  try {
+    const doc = await collection.findOne({ page });
+
+    if (!doc || !doc[entries]) {
+      return res.status(404).json({ data: [], message: 'No entries found' });
+    }
+
+    const data = [];
+    let c = 1;
+
+    for (const item of doc[entries]) {
+      const formatted = {
+        id: c++,
+        ...(item.title && { title: item.title }),
+        ...(item.content && { content: item.content }),
+        ...(item.image && {
+          image: `<img src="/admin/assets/dist/uploads/${item.image}" style="width: 100px; height: auto; object-fit: contain;">`
+        }),
+        actions: `
+          <button type="button" class="btn btn-success editer" data-id="${c - 1}" data-type="${entries}" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+            <i class="bi bi-pencil-square mx-1"></i> EDIT
+          </button>
+          <button type="button" class="btn btn-danger mx-1 eradicator" data-id="${c - 1}" data-type="${entries}" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+            <i class="bi bi-trash3-fill mx-1"></i> DELETE
+          </button>
+        `
+      };
+
+      data.push(formatted);
+    }
+
+    res.json({ data });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+
   });
 
 
