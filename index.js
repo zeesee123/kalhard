@@ -132,19 +132,29 @@ if (existingDoc && existingDoc.sec1image && sec1imageFile) {
 const newImagePath = sec1imageFile ? '/uploads/' + sec1imageFile.filename : existingDoc?.sec1image || null;
 
     //journey entries
-    const journeyEntries = [];
+    const existingEntries = existingDoc?.sec2_entries || [];
+let usedIds = existingEntries.map(e => parseInt(e.id)).filter(id => !isNaN(id));
+let currentCounter = usedIds.length > 0 ? Math.max(...usedIds) + 1 : 1;
 
-    const titles = req.body.sec2_stitle || [];
-    const contents = req.body.sec2_scontent || [];
-    const images = req.files?.sec2_simg || [];
+const titles = req.body.sec2_stitle || [];
+const contents = req.body.sec2_scontent || [];
+const images = req.files?.sec2_simg || [];
 
-    for (let i = 0; i < titles.length; i++) {
-      journeyEntries.push({
-        title: titles[i],
-        content: contents[i],
-        image: images[i] ? '/uploads/' + images[i].filename : null
-      });
-    }
+const journeyEntries = [...existingEntries]; // start with existing ones
+
+for (let i = 0; i < titles.length; i++) {
+  // Optional: skip blank entries
+  if (!titles[i] && !contents[i] && !images[i]) continue;
+
+  journeyEntries.push({
+    id: currentCounter.toString(),
+    title: titles[i],
+    content: contents[i],
+    image: images[i] ? '/uploads/' + images[i].filename : null
+  });
+
+  currentCounter++;
+}
     // 4. Build form data
     const formData = {
       page: "homepage",
@@ -210,7 +220,7 @@ res.redirect('/admin/home');
         ...(item.title && { title: item.title }),
         ...(item.content && { content: item.content }),
         ...(item.image && {
-          image: `<img src="/admin/assets/dist/uploads/${item.image}" style="width: 100px; height: auto; object-fit: contain;">`
+          image: `<img src="/admin/assets/dist${item.image}" style="width: 100px; height: auto; object-fit: contain;">`
         }),
         actions: `
           <button type="button" class="btn btn-success editer" data-id="${c - 1}" data-type="${entries}" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
