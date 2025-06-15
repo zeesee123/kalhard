@@ -69,7 +69,7 @@ app.get('/admin',(req,res)=>{
     res.render('dashboard');
 });
 
-app.post('/login', async (req, res) => {
+app.post('/admin/login', async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
 
