@@ -10,7 +10,7 @@
 
 
 <div class="d-flex justify-content-between mt-4">
-    <h1><i class="bi bi-house-door mx-2"></i>Homepage</h1>
+    <h1><i class="bi bi-house-door mx-2"></i>Landing page</h1>
     <a href="http://localhost:3000" target="_blank"><button class="btn btn-primary"><i class="bi bi-eye-fill mx-1"></i>Preview</button></a>
     
 </div>
@@ -70,20 +70,20 @@
 </div>
 
 
-        <div class="row">
-          <div class="col-6">
+     
+          <div class="col-12">
              <div class="mb-3">
             <label for="" class="form-label">Title 1 (Bold text)</label>
             <input type="text" name="sec1title1" class="form-control" value="<%=section.sec1title1||'' %>">
         </div>
           </div>
-          <div class="col-6">
+          <div class="col-12">
              <div class="mb-3">
             <label for="" class="form-label">Title 2</label>
             <input type="text" name="sec1title2" class="form-control" value="<%=section.sec1title2||'' %>">
         </div>
           </div>
-        </div>
+       
        
     
         <div class="mb-3">
@@ -216,8 +216,9 @@ We make it simple)
           <thead>
             <tr>
               <th scope="col">#</th>
-              <th scope="col">image</th>
               <th scope="col">title</th>
+              <th scope="col">image</th>
+              
               
             
               <th scope="col">Actions</th>
@@ -300,9 +301,8 @@ We make it simple)
           <thead>
             <tr>
               <th scope="col">#</th>
-               <th scope="col">title</th>
               <th scope="col">image</th>
-             
+              <th scope="col">title</th>
               
             
               <th scope="col">Actions</th>

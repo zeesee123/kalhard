@@ -208,7 +208,8 @@ res.redirect('/admin/home');
     const doc = await collection.findOne({ page });
 
     if (!doc || !doc[entries]) {
-      return res.status(404).json({ data: [], message: 'No entries found' });
+      return res.status(200).json({ data: [] });
+      //return res.status(404).json({ data: [], message: 'No entries found' });
     }
 
     const data = [];
@@ -241,6 +242,16 @@ res.redirect('/admin/home');
     res.status(500).json({ message: 'Server error' });
   }
 
+  });
+
+
+  app.get('/admin/landing_page',async(req,res)=>{
+
+    const data = await mongoose.connection.db.collection('homepage').findOne({});
+    console.log(data);
+    
+
+    res.render('landingpage',{section:data||{}});
   });
 
 
