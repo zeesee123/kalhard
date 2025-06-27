@@ -245,7 +245,7 @@ res.redirect('/admin/home');
   });
 
 
-  app.get('/admin/landing_page',async(req,res)=>{
+  app.get('/admin/landingpage/:page',async(req,res)=>{
 
     const data = await mongoose.connection.db.collection('homepage').findOne({});
     console.log(data);
