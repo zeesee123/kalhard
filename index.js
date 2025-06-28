@@ -259,6 +259,112 @@ res.redirect('/admin/home');
     res.render('landingpage',{section:data||{},page:req.params.page,ucfirst});
   });
 
+  app.post('/admin/landingpage',upload.fields([
+    { name: 'hero_image', maxCount: 1 },
+    { name: 'knowmore_image', maxCount: 1 },
+    { name: 'businessinvalue_img' } // handles all journey card images
+  ]),async(req,res)=>{
+
+    console.log('hit');
+  
+
+
+    
+      try {
+        const collection = mongoose.connection.db.collection('landingpage');
+    
+        // 1. Find existing document
+        const existingDoc = await collection.findOne({ page: req.body.page });
+    
+        // 2. Hero image handling
+        const heroimageFile = req.files?.hero_image?.[0];
+        if (existingDoc && existingDoc.hero_image && heroimageFile) {
+          const oldImagePath = path.join(__dirname, 'public', existingDoc.hero_image);
+          fs.unlink(oldImagePath, err => {
+            if (err) console.log('Old hero image delete failed:', err);
+            else console.log('Old hero image deleted:', oldImagePath);
+          });
+        }
+        const newHeroImagePath = heroimageFile ? '/uploads/' + heroimageFile.filename : existingDoc?.hero_image || null;
+    
+        // 3. Know more image handling
+        const knowmoreImageFile = req.files?.knowmore_image?.[0];
+        const knowmoreImagePath = knowmoreImageFile
+          ? '/uploads/' + knowmoreImageFile.filename
+          : existingDoc?.knowmoreimage || null;
+    
+        // 4. Business value cards handling (previously sec2_entries)
+        const existingBusinessCards = existingDoc?.business_cards || [];
+        let usedIds = existingBusinessCards.map(e => parseInt(e.id)).filter(id => !isNaN(id));
+        let currentCounter = usedIds.length > 0 ? Math.max(...usedIds) + 1 : 1;
+    
+        const businessTitles = req.body.businessinvalue_stitle || [];
+        const businessContents = req.body.businessinvalue_scontent || [];
+        const businessImages = req.files?.businessinvalue_img || [];
+    
+        const businessCards = [...existingBusinessCards];
+        for (let i = 0; i < businessTitles.length; i++) {
+          if (!businessTitles[i] && !businessContents[i] && !businessImages[i]) continue;
+    
+          businessCards.push({
+            id: currentCounter.toString(),
+            number: businessTitles[i],
+            content: businessContents[i],
+            image: businessImages[i] ? '/uploads/' + businessImages[i].filename : null
+          });
+    
+          currentCounter++;
+        }
+    
+        // 5. Construct final data
+        const formData = {
+          page: req.body.page || "homepage",
+    
+          // Hero section
+          hero_title1: req.body.hero_title1,
+          hero_title2: req.body.hero_title2,
+          hero_content: req.body.hero_content,
+          hero_image: newHeroImagePath,
+          herobtn_text: req.body.herobtn_text,
+          herobtn_url: req.body.herobtn_url,
+    
+          // Calsoft in focus
+          calsoftinfocus_title: req.body.calsoftinfocus_title,
+          calsoftinfocus_checkboxtext: req.body.calsoftinfocus_checkboxtext,
+          calsoftinfocus_text: req.body.calsoftinfocus_text,
+    
+          // Business value section
+          business_cards: businessCards,
+    
+          // Know more section
+          knowmore_title1: req.body.knowmore_title1,
+          knowmore_text: req.body.knowmore_text,
+          knowmore_btn_text: req.body.knowmore_btn_text,
+          knowmore_btn_url: req.body.knowmore_btn_url,
+          knowmoreimage: knowmoreImagePath
+        };
+    
+        // 6. Save to DB
+        await collection.findOneAndUpdate(
+          {},
+          { $set: formData },
+          { upsert: true }
+        );
+    
+       
+        req.flash('success', 'All changes have been applied.');
+        res.redirect(`/admin/landingpage/${req.body.page}`);
+    
+      } catch (er) {
+        console.log(er.message);
+       
+        req.flash('error', 'Something went wrong');
+        res.redirect('/admin/home');
+      }
+      
+      
+    });
+
 
   //api routes come in here 
 

@@ -31,7 +31,7 @@
   </div>
 <% } %> -->
 
-<form action="/admin/test" method="POST" enctype="multipart/form-data" id="main_form">
+<form action="/admin/landingpage" method="POST" enctype="multipart/form-data" id="main_form">
 
     <div class="accordion mt-3" id="accordionExample">
   <div class="accordion-item mb-3">
@@ -290,17 +290,22 @@ We make it simple)
         <h5>Cards with count(Increased,faster,simplified....)</h5>
         <div class="" id="ourbusiness_cards">
           <div class="mb-3 row">
-            <div class="col-3">
-              <input type="file" placeholder="image" class="form-control" name="businessinvalue_img[]">
+            <div class="col-2">
+              <input type="text" placeholder="Number" class="form-control" name="businessinvalue_stitle[]">
           </div>
             <div class="col-3">
-              <input type="text" placeholder="Number" class="form-control" name="businessinvalue_stitle[]">
+              <input type="file" placeholder="image" class="form-control" name="businessinvalue_img[]">
+              
           </div>
               
               
               <div class="col-3">
-                <input type="text" placeholder="Text" class="form-control" name="businessinvalue_stitle[]">
+                <textarea class="form-control" name="businessinvalue_scontent[]" placeholder="content" cols="30" rows="5"></textarea>
                   
+              </div>
+
+              <div class="col-1">
+                <img src="" alt="" class="Thumbnail" style="height:10vmin;width:auto;">
               </div>
               
               <div class="col-3">
@@ -418,7 +423,7 @@ We make it simple)
 </div>
 
 <div>
-  <input type="hidden" page="<%=page%>">
+  <input type="hidden" value="<%=page%>" name="page">
 </div>
 
 <div class="text-end p-3" style="bottom:0;position:sticky;z-index: 1030;">
