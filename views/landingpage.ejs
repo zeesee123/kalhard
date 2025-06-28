@@ -55,7 +55,7 @@
 <div class="row">
   <div class="mb-3 col-6">
       <label for="" class="form-label">Banner image</label>
-      <input type="file" class="form-control img_inpp" name="sec1image">
+      <input type="file" class="form-control img_inpp" name="hero_image">
       
   </div>
   <div class="mb-3 col-2 pt-4">
@@ -74,13 +74,13 @@
           <div class="col-12">
              <div class="mb-3">
             <label for="" class="form-label">Title 1 (Bold text)</label>
-            <input type="text" name="sec1title1" class="form-control" value="<%=section.sec1title1||'' %>">
+            <input type="text" name="hero_title1" class="form-control" value="<%=section.sec1title1||'' %>">
         </div>
           </div>
           <div class="col-12">
              <div class="mb-3">
             <label for="" class="form-label">Title 2(normal text)</label>
-            <input type="text" name="sec1title2" class="form-control" value="<%=section.sec1title2||'' %>">
+            <input type="text" name="hero_title2" class="form-control" value="<%=section.sec1title2||'' %>">
         </div>
           </div>
        
@@ -88,7 +88,7 @@
     
         <div class="mb-3">
             <label for="" class="form-label">Content</label>
-            <textarea name="sec1text" cols="30" rows="5" class="form-control"><%=section.sec1text||'' %></textarea>
+            <textarea name="hero_content" cols="30" rows="5" class="form-control"><%=section.sec1text||'' %></textarea>
         </div>
     
         
@@ -96,12 +96,12 @@
         <div class="mb-3 d-flex">
             <div class="mx-2">
                 <label for="" class="form-label">Button text ( Download case study )</label>
-                <input type="text" class="form-control" name="sec1btn_text" value="<%=section.sec1btn_text||'' %>">
+                <input type="text" class="form-control" name="herobtn_text" value="<%=section.sec1btn_text||'' %>">
             </div>
     
             <div class="mx-2">
                 <label for="" class="form-label">Button url</label>
-                <input type="text" class="form-control" name="sec1btn_url" value="<%=section.sec1btn_url||'' %>">
+                <input type="text" class="form-control" name="herobtn_url" value="<%=section.sec1btn_url||'' %>">
             </div>
     
         </div>
@@ -174,7 +174,7 @@ We make it simple)
           <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title 1 (Bold text)</label>
-            <input type="text" name="sec2title1" class="form-control" value="<%=section.sec2title1||'' %>">
+            <input type="text" name="calsoftinfocus_title" class="form-control" value="<%=section.sec2title1||'' %>">
         </div>
           </div>
           <!-- <div class="col-6">
@@ -187,12 +187,12 @@ We make it simple)
 
         <div class="mb-3">
           <label for="" class="form-label">Content</label>
-          <textarea name="sec1text" cols="30" rows="5" class="form-control"><%=section.sec1text||'' %></textarea>
+          <textarea name="calsoftinfocus_text" cols="30" rows="5" class="form-control"><%=section.sec1text||'' %></textarea>
       </div>
 
       <div class="mb-3">
         <label for="" class="form-label">text next to the checkbox</label>
-        <input type="text" name="sec2title1" class="form-control" value="<%=section.sec2title1||'' %>">
+        <input type="text" name="calsoftinfocus_checkboxtext" class="form-control" value="<%=section.sec2title1||'' %>">
 
     </div>
 
@@ -261,7 +261,7 @@ We make it simple)
     <div class="accordion-body">
       <div class="card pt-3 p-4">
 
-        <h3>business value
+        <h3>Business value
         <% if (section.sec2title1 && section.sec2title2) { %>
   (<%= section.sec2title1 + ' ' + section.sec2title2 %>)
 <% } else { %>
@@ -274,8 +274,8 @@ We make it simple)
         <div class="row mb-3">
           <div class="col-6">
              <div class="mb-3">
-            <label for="" class="form-label">Title 1(coloured text)</label>
-            <input type="text" name="customers_title1" class="form-control" value="<%=section.sec2title1||'' %>">
+            <label for="" class="form-label">Title(coloured text)</label>
+            <input type="text" name="businessinvalue_title" class="form-control" value="<%=section.sec2title1||'' %>">
         </div>
           </div>
           <!-- <div class="col-6">
@@ -287,19 +287,19 @@ We make it simple)
         </div>
        
     
-        <h5>Cards with count(25+ years of experience, 1500+ innovators....)</h5>
+        <h5>Cards with count(Increased,faster,simplified....)</h5>
         <div class="" id="ourbusiness_cards">
           <div class="mb-3 row">
             <div class="col-3">
-              <input type="file" placeholder="image" class="form-control" name="sec5_img[]">
+              <input type="file" placeholder="image" class="form-control" name="businessinvalue_img[]">
           </div>
             <div class="col-3">
-              <input type="text" placeholder="Number" class="form-control" name="sec5_stitle[]">
+              <input type="text" placeholder="Number" class="form-control" name="businessinvalue_stitle[]">
           </div>
               
               
               <div class="col-3">
-                <input type="text" placeholder="Text" class="form-control" name="sec5_stitle[]">
+                <input type="text" placeholder="Text" class="form-control" name="businessinvalue_stitle[]">
                   
               </div>
               
@@ -357,7 +357,7 @@ We make it simple)
 <div class="row">
   <div class="mb-3 col-6">
       <label for="" class="form-label">Banner image</label>
-      <input type="file" class="form-control img_inpp" name="sec1image">
+      <input type="file" class="form-control img_inpp" name="knowmore_image">
       
   </div>
   <div class="mb-3 col-2 pt-4">
@@ -376,7 +376,7 @@ We make it simple)
           <div class="col-12">
              <div class="mb-3">
             <label for="" class="form-label">Title 1 (Bold text)</label>
-            <input type="text" name="sec1title1" class="form-control" value="<%=section.sec1title1||'' %>">
+            <input type="text" name="knowmore_title1" class="form-control" value="<%=section.sec1title1||'' %>">
         </div>
           </div>
           <!-- <div class="col-12">
@@ -390,7 +390,7 @@ We make it simple)
     
         <div class="mb-3">
             <label for="" class="form-label">Content</label>
-            <textarea name="sec1text" cols="30" rows="5" class="form-control"><%=section.sec1text||'' %></textarea>
+            <textarea name="knowmore_text" cols="30" rows="5" class="form-control"><%=section.sec1text||'' %></textarea>
         </div>
     
         
@@ -398,12 +398,12 @@ We make it simple)
         <div class="mb-3 d-flex">
             <div class="mx-2">
                 <label for="" class="form-label">Button text ( Download case study )</label>
-                <input type="text" class="form-control" name="sec1btn_text" value="<%=section.sec1btn_text||'' %>">
+                <input type="text" class="form-control" name="knowmore_btn_text" value="<%=section.sec1btn_text||'' %>">
             </div>
     
             <div class="mx-2">
                 <label for="" class="form-label">Button url</label>
-                <input type="text" class="form-control" name="sec1btn_url" value="<%=section.sec1btn_url||'' %>">
+                <input type="text" class="form-control" name="knowmore_btn_url" value="<%=section.sec1btn_url||'' %>">
             </div>
     
         </div>
