@@ -13,11 +13,16 @@ console.log(process.env.PORT);
 mongoose.connect(process.env.CONNECTION_STRING,{dbName:"calhard"}).then(() => console.log('✅ MongoDB connected'))
 .catch(err => console.error('❌ Connection failed', err));;
 
-
+//helper functions
 function isAuthenticated(req, res, next) {
   if (req.session.userId) return next();
   req.flash('error', 'You must be logged in');
   return res.redirect('/login');
+}
+
+//function for capitalizing the first letter 
+function ucfirst(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 //multer for file uploads
@@ -251,7 +256,7 @@ res.redirect('/admin/home');
     console.log(data);
     
 
-    res.render('landingpage',{section:data||{}});
+    res.render('landingpage',{section:data||{},page:req.params.page,ucfirst});
   });
 
 
