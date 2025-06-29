@@ -287,14 +287,14 @@ We make it simple)
         </div>
        
     
-        <h5>Cards with count(Increased,faster,simplified....)</h5>
+        <h5>Icons(Increased,faster,simplified....)</h5>
         <div class="" id="ourbusiness_cards">
           <div class="mb-3 row">
             <div class="col-2">
-              <input type="text" placeholder="Number" class="form-control" name="businessinvalue_stitle[]">
+              <input type="text" placeholder="Title" class="form-control" name="businessinvalue_stitle[]">
           </div>
             <div class="col-3">
-              <input type="file" placeholder="image" class="form-control" name="businessinvalue_img[]">
+              <input type="file" placeholder="image" class="form-control img_inpp" name="businessinvalue_img">
               
           </div>
               
@@ -459,7 +459,7 @@ https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-
 
     let field2=document.getElementById('impact_highlights');
 
-    let field3=document.getElementById('journey_cards');
+    let field3=document.getElementById('ourbusiness_cards');
 
     let field4=document.getElementById('ourjourney_leaves');
 
@@ -514,7 +514,7 @@ field2.insertAdjacentHTML('beforeend',`<div class="mb-3 row">
 }
 
 
-function addjourney_cards(){
+function addourbusiness_cards(){
 
        
 
@@ -522,14 +522,16 @@ function addjourney_cards(){
 field3.insertAdjacentHTML('beforeend',`<div class="mb-3 row">
     
   <div class="col-2">
-              <input type="text" placeholder="title" class="form-control" name="sec2_stitle[]">
+              <input type="text" placeholder="Title" class="form-control" name="businessinvalue_stitle[]">
           </div>
-              <div class="col-3">
-                  <input type="file" placeholder="image" class="form-control img_inpp" name="sec2_simg">
-              </div>
+            <div class="col-3">
+              <input type="file" placeholder="image" class="form-control img_inpp" name="businessinvalue_img">
+              
+          </div>
+              
               
               <div class="col-3">
-                  <textarea class="form-control" name="sec2_scontent[]" placeholder="content" cols="30" rows="5"></textarea>
+                <textarea class="form-control" name="businessinvalue_scontent[]" placeholder="content" cols="30" rows="5"></textarea>
                   
               </div>
 
@@ -814,7 +816,7 @@ imageInputs.forEach((input, index) => {
 
 //dynamic inputs thumbnail
 
-$('#journey_cards').on('change', '.img_inpp', function (e) {
+$('#ourbusiness_cards').on('change', '.img_inpp', function (e) {
     const file = e.target.files[0];
     const $row = $(this).closest('.row'); // This finds the row that this input belongs to
     const $thumb = $row.find('.Thumbnail'); // Finds the image preview in the same row
@@ -1310,14 +1312,14 @@ var table1=$('#whatwedo_table').DataTable({
   const tableMap = {
     "section3": table1,
     "section4": table2,
-    "section5": table3,
-    "section6": table4,
-    "section7": table5,
-    "section8": table6,
-    "section9": table7,
-    "section10": table8,
-    "section12": table9,
-    "section13": table10
+    // "section5": table3,
+    // "section6": table4,
+    // "section7": table5,
+    // "section8": table6,
+    // "section9": table7,
+    // "section10": table8,
+    // "section12": table9,
+    // "section13": table10
 };
 
 
