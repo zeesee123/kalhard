@@ -60,7 +60,7 @@ href="https://cdn.jsdelivr.net/npm/sweetalert2@11.17.2/dist/sweetalert2.min.css
 
   </head>
   <body >
-    <script src="{{asset_env('dist/js/demo-theme.min.js?1692870487')}}"></script>
+    <script src="/admin/assets/dist/js/demo-theme.min.js"></script>
     <div class="page">
       <!-- Sidebar -->
       <aside class="navbar navbar-vertical navbar-expand-lg " id="sidebar-menu" data-bs-theme="dark">
@@ -259,24 +259,28 @@ href="https://cdn.jsdelivr.net/npm/sweetalert2@11.17.2/dist/sweetalert2.min.css
                           <a href="/admin/landingpage/brochures" class="dropdown-item">
                             Brochures
                           </a>
-                          <!-- <a href="./sign-up.html" class="dropdown-item">
-                            Sign up
+                          
+                        </div>
+                      </div>
+
+                      <div class="dropend">
+                        <a class="dropdown-item dropdown-toggle" href="#sidebar-authentication" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="false" >
+                          Blog
+                        </a>
+                        <div class="dropdown-menu">
+                          <a href="/admin/add_blog" class="dropdown-item">
+                            Add blog
                           </a>
-                          <a href="./forgot-password.html" class="dropdown-item">
-                            Forgot password
+                          <a href="/admin/view_blogs" class="dropdown-item">
+                            View blogs
                           </a>
-                          <a href="./terms-of-service.html" class="dropdown-item">
-                            Terms of service
+                          <a href="/admin/create_category" class="dropdown-item">
+                            Create category
                           </a>
-                          <a href="./auth-lock.html" class="dropdown-item">
-                            Lock screen
+                          <a href="/admin/create_subcategory" class="dropdown-item">
+                            Create Sub-category
                           </a>
-                          <a href="./2-step-verification.html" class="dropdown-item">
-                            2 step verification
-                          </a>
-                          <a href="./2-step-verification-code.html" class="dropdown-item">
-                            2 step verification code
-                          </a> -->
+                          
                         </div>
                       </div>
                       <!-- <a class="dropdown-item" href="/admin/landing_page">
@@ -319,7 +323,7 @@ href="https://cdn.jsdelivr.net/npm/sweetalert2@11.17.2/dist/sweetalert2.min.css
                 </div>
               </li>
 
-              <li class="nav-item dropdown">
+              <li class="nav-item dropdown"> <toggle></toggle>
                 <a class="nav-link dropdown-toggle" href="#navbar-base" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="false" >
                   <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/package -->
                     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" /><path d="M12 12l8 -4.5" /><path d="M12 12l0 9" /><path d="M12 12l-8 -4.5" /><path d="M16 5.25l-8 4.5" /></svg>

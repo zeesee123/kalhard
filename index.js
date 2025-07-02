@@ -259,6 +259,30 @@ res.redirect('/admin/home');
     res.render('landingpage',{section:data||{},page:req.params.page,ucfirst});
   });
 
+  app.get('/admin/add_blog',(req,res)=>{
+
+    res.render('add_blog',{ucfirst});
+  });
+
+
+  app.get('/admin/view_blogs',(req,res)=>{
+
+
+    res.render('');
+  });
+
+  app.get('/admin/create_category',(req,res)=>{
+
+    res.render('');
+
+  });
+
+  app.get('/admin/create_subcategory',(req,res)=>{
+
+
+    res.render('');
+  });
+
   app.post('/admin/landingpage',upload.fields([
     { name: 'hero_image', maxCount: 1 },
     { name: 'knowmore_image', maxCount: 1 },
@@ -332,6 +356,7 @@ res.redirect('/admin/home');
           calsoftinfocus_title: req.body.calsoftinfocus_title,
           calsoftinfocus_checkboxtext: req.body.calsoftinfocus_checkboxtext,
           calsoftinfocus_text: req.body.calsoftinfocus_text,
+          hubspot_form:req.body.hubspot_form,
     
           // Business value section
           business_cards: businessCards,

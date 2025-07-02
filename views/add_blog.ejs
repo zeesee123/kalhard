@@ -10,7 +10,7 @@
 
 
 <div class="d-flex justify-content-between mt-4">
-    <h1><i class="bi bi-rocket-takeoff-fill mx-2"></i>Landing page (<%=ucfirst(page)%>)</h1>
+    <h1><i class="bi bi-rocket-takeoff-fill mx-2"></i>Add blog (<%=ucfirst(page)%>)</h1>
     <a href="http://localhost:3000" target="_blank"><button class="btn btn-primary"><i class="bi bi-eye-fill mx-1"></i>Preview</button></a>
     
 </div>
@@ -44,17 +44,12 @@
       <div class="accordion-body">
        <div class="card pt-3 p-4">
 
-        <h3>Hero Section 
-        <% if (section.hero_title1) { %>
-  (<%= section.hero_title1%>)
-<% } else { %>
-  (Tech driven growth on your mind ?)
-<% } %></h3>
+        
         
 
 <div class="row">
   <div class="mb-3 col-6">
-      <label for="" class="form-label">Banner image</label>
+      <label for="" class="form-label">Featured image</label>
       <input type="file" class="form-control img_inpp" name="hero_image">
       
   </div>
@@ -73,16 +68,16 @@
      
           <div class="col-12">
              <div class="mb-3">
-            <label for="" class="form-label">Title 1 (Bold text)</label>
+            <label for="" class="form-label">Blog title</label>
             <input type="text" name="hero_title1" class="form-control" value="<%=section.hero_title1||'' %>">
         </div>
           </div>
-          <div class="col-12">
+          <!-- <div class="col-12">
              <div class="mb-3">
             <label for="" class="form-label">Title 2(normal text)</label>
             <input type="text" name="hero_title2" class="form-control" value="<%=section.hero_title2||'' %>">
         </div>
-          </div>
+          </div> -->
        
        
     
@@ -451,6 +446,12 @@ https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-
 "></script>
 
 
+<script>
+      tinymce.init({
+        selector: '#mytextarea',
+        license_key: 'gpl'
+      });
+    </script>
 
 <script>
 
