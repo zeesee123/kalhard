@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 const User = require('./models/User');
 
 async function seed() {
-  await mongoose.connect(process.env.CONNECTION_STRING, { dbName: 'calhard' });
+  await mongoose.connect(process.env.CONNECTION_STRING, { dbName: process.env.DB_NAME });
 
   const hashedPassword = await bcrypt.hash('admin123', 12);
 
