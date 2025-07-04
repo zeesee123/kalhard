@@ -25,6 +25,14 @@ function ucfirst(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+
+  // ✅ Ensure uploads directory exists
+  const uploadsDir = path.join(__dirname, 'public','dist', 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    console.log('Uploads directory created:', uploadsDir);
+  }
+
 //multer for file uploads
 // Multer setup for file uploads
 const storage = multer.diskStorage({
@@ -293,12 +301,7 @@ res.redirect('/admin/home');
   
 
 
-    // ✅ Ensure uploads directory exists
-  const uploadsDir = path.join(__dirname, 'public','dist', 'uploads');
-  if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-    console.log('Uploads directory created:', uploadsDir);
-  }
+  
     
       try {
         const collection = mongoose.connection.db.collection('landingpage');
