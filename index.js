@@ -294,7 +294,7 @@ res.redirect('/admin/home');
 
 
     // ✅ Ensure uploads directory exists
-  const uploadsDir = path.join(__dirname, 'public', 'uploads');
+  const uploadsDir = path.join(__dirname, 'public','dist', 'uploads');
   if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
     console.log('Uploads directory created:', uploadsDir);
