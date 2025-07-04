@@ -10,8 +10,8 @@ const routes=require('./routes/web');
 require('dotenv').config();
 console.log(process.env.PORT);
 // console.log('this is mongoose',mongoose);
-mongoose.connect(process.env.CONNECTION_STRING,{dbName:"calhard"}).then(() => console.log('✅ MongoDB connected'))
-.catch(err => console.error('❌ Connection failed', err));;
+mongoose.connect(process.env.CONNECTION_STRING,{dbName:process.env.DB_NAME}).then(() => console.log('✅ MongoDB connected'))
+.catch(err => console.error('❌ Connection failed', err));
 
 //helper functions
 function isAuthenticated(req, res, next) {
