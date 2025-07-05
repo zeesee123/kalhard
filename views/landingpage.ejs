@@ -481,13 +481,59 @@
 
 
 
+     <div class="row">
+  <div class="mb-3 col-6">
+      <label for="" class="form-label">Banner image</label>
+      <input type="file" class="form-control img_inpp" name="knowmore_image">
+      
+  </div>
+  <div class="mb-3 col-2 pt-4">
+      
+      <button type="button" class="btn btn-danger clear-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="reset image"><i class="bi bi-arrow-clockwise"></i></button>
+  </div>
+  <div class="mb-3 col-4">
+      <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
+      <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
+      
+  </div>
+</div>
+
+
      
-          <!-- <div class="col-12">
+          <div class="col-12">
              <div class="mb-3">
             <label for="" class="form-label">Title 1 (Bold text)</label>
+            <input type="text" name="knowmore_title1" class="form-control" >
+        </div>
+          </div>
+          <!-- <div class="col-12">
+             <div class="mb-3">
+            <label for="" class="form-label">Title 2(normal text)</label>
+         
         </div>
           </div> -->
-         
+       
+       
+    
+        <div class="mb-3">
+            <label for="" class="form-label">Content</label>
+            <textarea name="knowmore_text" cols="30" rows="5" class="form-control"></textarea>
+        </div>
+    
+        
+    
+        <div class="mb-3 d-flex">
+            <div class="mx-2">
+                <label for="" class="form-label">Button text ( Download case study )</label>
+                <input type="text" class="form-control" name="knowmore_btn_text">
+            </div>
+    
+            <div class="mx-2">
+                <label for="" class="form-label">Button url</label>
+                <input type="text" class="form-control" name="knowmore_btn_url">
+            </div>
+    
+        </div>
         
 
         

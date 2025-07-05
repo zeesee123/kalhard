@@ -279,6 +279,38 @@ res.redirect('/admin/home');
   });
 
 
+  app.post('/admin/add_author', async (req, res) => {
+  try {
+    const authorName = req.body.author?.trim();
+
+    if (!authorName) {
+      req.flash('error', 'Author name is required.');
+      return res.redirect('/admin/add_author');
+    }
+
+    const collection = mongoose.connection.db.collection('authors');
+
+    const existing = await collection.findOne({ name: authorName });
+    if (existing) {
+      req.flash('error', 'Author already exists.');
+      return res.redirect('/admin/add_author');
+    }
+
+    await collection.insertOne({
+      name: authorName,
+      createdAt: new Date()
+    });
+
+    req.flash('success', 'Author added successfully!');
+    res.redirect('/admin/add_author');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Something went wrong');
+    res.redirect('/admin/add_author');
+  }
+});
+
+
   app.get('/admin/landingpage/:page',async(req,res)=>{
 
     // const data = await mongoose.connection.db.collection('landingpage').findOne({page:req.params.page});
