@@ -45,7 +45,11 @@
        <div class="card pt-3 p-4">
 
         <h3>Hero Section 
-       </h3>
+        <% if (section.hero_title1) { %>
+  (<%= section.hero_title1%>)
+<% } else { %>
+  (Tech driven growth on your mind ?)
+<% } %></h3>
         
 
 <div class="row">
@@ -60,7 +64,7 @@
   </div>
   <div class="mb-3 col-4">
       <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-      <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
+      <img class="Thumbnail" src="<%= section.hero_image ? '/admin/assets/dist' + section.hero_image : '/admin/assets/dist/defaultimages/default.jpg' %>"  width="400" alt="Default picture Thumbnail">
       
   </div>
 </div>
@@ -78,7 +82,7 @@
   </div>
   <div class="mb-3 col-4">
       <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-      <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
+      <img class="Thumbnail" src="<%= section.card_one ? '/admin/assets/dist' + section.card_one : '/admin/assets/dist/defaultimages/default.jpg' %>"  width="400" alt="Default picture Thumbnail">
       
   </div>
 </div>
@@ -96,7 +100,7 @@
   </div>
   <div class="mb-3 col-4">
       <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-      <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
+      <img class="Thumbnail" src="<%= section.hero_image ? '/admin/assets/dist' + section.card_two : '/admin/assets/dist/defaultimages/default.jpg' %>"  width="400" alt="Default picture Thumbnail">
       
   </div>
 </div>
@@ -107,13 +111,13 @@
           <div class="col-12">
              <div class="mb-3">
             <label for="" class="form-label">Title 1 (Bold text)</label>
-            <input type="text" name="hero_title1" class="form-control" >
+            <input type="text" name="hero_title1" class="form-control" value="<%=section.hero_title1||'' %>">
         </div>
           </div>
           <div class="col-12">
              <div class="mb-3">
             <label for="" class="form-label">Title 2(normal text)</label>
-            <input type="text" name="hero_title2" class="form-control" >
+            <input type="text" name="hero_title2" class="form-control" value="<%=section.hero_title2||'' %>">
         </div>
           </div>
        
@@ -121,7 +125,7 @@
     
         <div class="mb-3">
             <label for="" class="form-label">Content</label>
-            <textarea name="hero_content" cols="30" rows="5" class="form-control"></textarea>
+            <textarea name="hero_content" cols="30" rows="5" class="form-control"><%=section.hero_content||'' %></textarea>
         </div>
     
         
@@ -129,12 +133,12 @@
         <div class="mb-3 d-flex">
             <div class="mx-2">
                 <label for="" class="form-label">Button text ( Download case study )</label>
-                <input type="text" class="form-control" name="herobtn_text" >
+                <input type="text" class="form-control" name="herobtn_text" value="<%=section.herobtn_text||'' %>">
             </div>
     
             <div class="mx-2">
                 <label for="" class="form-label">Button url</label>
-                <input type="text" class="form-control" name="herobtn_url" >
+                <input type="text" class="form-control" name="herobtn_url" value="<%=section.herobtn_url||'' %>">
             </div>
     
         </div>
@@ -148,10 +152,32 @@
 
      <!-- <div class="card pt-3 p-4">
 
-        
+        <h3>Journey(<%=section.sec1title||'Tech driven growth on your mind ?' %>)</h3>
         
 
 
+        <div class="mb-3">
+            <label for="" class="form-label">heading</label>
+            <input type="text" name="sec2title" class="form-control" value="<%=section.sec2title||'' %>">
+        </div>
+    
+        <div class="mb-3">
+            <label for="" class="form-label">content</label>
+            <textarea name="sec2text" cols="30" rows="5" class="form-control"><%=section.sec2text||'' %></textarea>
+        </div>
+    
+       
+    
+        <div class="mb-3 d-flex">
+            <div class="mx-2">
+                <label for="" class="form-label">button text(What we do)</label>
+                <input type="text" class="form-control" name="sec2btn_text" value="<%=section.sec1btn_text||'' %>">
+            </div>
+    
+            <div class="mx-2">
+                <label for="" class="form-label">button url</label>
+                <input type="text" class="form-control" name="sec2btn_url" value="<%=section.sec1btn_url||'' %>">
+            </div>
     
         </div>
 
@@ -172,7 +198,12 @@
         <div class="card pt-3 p-4">
 
         <h3>calsoft in focus
-       </h3>
+        <% if (section.calsoftinfocus_title) { %>
+  (<%= section.calsoftinfocus_title %>)
+<% } else { %>
+  (Innovate at every stage of your digital journey
+We make it simple)
+<% } %></h3>
         
 
 
@@ -180,25 +211,25 @@
           <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title 1 (Bold text)</label>
-            <input type="text" name="calsoftinfocus_title" class="form-control" >
+            <input type="text" name="calsoftinfocus_title" class="form-control" value="<%=section.calsoftinfocus_title||'' %>">
         </div>
           </div>
           <!-- <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title 2</label>
-          
+            <input type="text" name="sec2title2" class="form-control" value="<%=section.sec2title2||'' %>">
         </div>
           </div> -->
         </div>
 
         <div class="mb-3">
           <label for="" class="form-label">Content</label>
-          <textarea name="calsoftinfocus_text" cols="30" rows="5" class="form-control"></textarea>
+          <textarea name="calsoftinfocus_text" cols="30" rows="5" class="form-control"><%=section.calsoftinfocus_text||'' %></textarea>
       </div>
 
       <!-- <div class="mb-3">
         <label for="" class="form-label">text next to the checkbox</label>
-        <input type="text" name="calsoftinfocus_checkboxtext" class="form-control" ">
+        <input type="text" name="calsoftinfocus_checkboxtext" class="form-control" value="<%=section.calsoftinfocus_checkboxtext||'' %>">
 
     </div> -->
 
@@ -272,7 +303,12 @@
       <div class="card pt-3 p-4">
 
         <h3>Business value
-       </h3>
+        <% if (section.businessinvalue_title) { %>
+  (<%= section.businessinvalue_title %>)
+<% } else { %>
+  (Innovate at every stage of your digital journey
+We make it simple)
+<% } %></h3>
         
 
 
@@ -280,13 +316,13 @@
           <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title(coloured text)</label>
-            <input type="text" name="businessinvalue_title" class="form-control">
+            <input type="text" name="businessinvalue_title" class="form-control" value="<%=section.businessinvalue_title||'' %>">
         </div>
           </div>
           <!-- <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title 2(rest text)</label>
-         
+            <input type="text" name="customers_title2" class="form-control" value="<%=section.sec2title2||'' %>">
         </div>
           </div> -->
         </div>
@@ -355,7 +391,12 @@
       <div class="card pt-3 p-4">
 
         <h3>To know more 
-        </h3>
+        <% if (section.knowmore_title1) { %>
+  (<%= section.knowmore_title1%>)
+<% } else { %>
+  (Innovate at every stage of your digital journey
+We make it simple)
+<% } %></h3>
         
 
 
@@ -371,7 +412,7 @@
   </div>
   <div class="mb-3 col-4">
       <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-      <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
+      <img class="Thumbnail" src="<%= section.knowmore_image ? '/admin/assets/dist' + section.knowmore_image : '/admin/assets/dist/defaultimages/default.jpg' %>"  width="400" alt="Default picture Thumbnail">
       
   </div>
 </div>
@@ -381,13 +422,13 @@
           <div class="col-12">
              <div class="mb-3">
             <label for="" class="form-label">Title 1 (Bold text)</label>
-            <input type="text" name="knowmore_title1" class="form-control" >
+            <input type="text" name="knowmore_title1" class="form-control" value="<%=section.knowmore_title1||'' %>">
         </div>
           </div>
           <!-- <div class="col-12">
              <div class="mb-3">
             <label for="" class="form-label">Title 2(normal text)</label>
-         
+            <input type="text" name="sec1title2" class="form-control" value="<%=section.sec1title2||'' %>">
         </div>
           </div> -->
        
@@ -395,7 +436,7 @@
     
         <div class="mb-3">
             <label for="" class="form-label">Content</label>
-            <textarea name="knowmore_text" cols="30" rows="5" class="form-control"></textarea>
+            <textarea name="knowmore_text" cols="30" rows="5" class="form-control"><%=section.knowmore_text||'' %></textarea>
         </div>
     
         
@@ -403,12 +444,12 @@
         <div class="mb-3 d-flex">
             <div class="mx-2">
                 <label for="" class="form-label">Button text ( Download case study )</label>
-                <input type="text" class="form-control" name="knowmore_btn_text">
+                <input type="text" class="form-control" name="knowmore_btn_text" value="<%=section.knowmore_btn_text||'' %>">
             </div>
     
             <div class="mx-2">
                 <label for="" class="form-label">Button url</label>
-                <input type="text" class="form-control" name="knowmore_btn_url">
+                <input type="text" class="form-control" name="knowmore_btn_url" value="<%=section.knowmore_btn_url||'' %>">
             </div>
     
         </div>
@@ -450,7 +491,7 @@
           <!-- <div class="col-12">
              <div class="mb-3">
             <label for="" class="form-label">Title 1 (Bold text)</label>
-           
+            <input type="text" name="knowmore_title1" class="form-control" value="<%=section.knowmore_title1||'' %>">
         </div>
           </div> -->
          
@@ -485,6 +526,7 @@
           <!-- <div class="col-12">
              <div class="mb-3">
             <label for="" class="form-label">Title 1 (Bold text)</label>
+            <input type="text" name="knowmore_title1" class="form-control" value="<%=section.knowmore_title1||'' %>">
         </div>
           </div> -->
          

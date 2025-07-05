@@ -33,17 +33,38 @@ function ucfirst(str) {
     console.log('Uploads directory created:', uploadsDir);
   }
 
+  // ✅ Ensure uploads directory exists
+  const casestudyDir = path.join(__dirname, 'public','dist', 'casestudies');
+  if (!fs.existsSync(casestudyDir)) {
+    fs.mkdirSync(casestudyDir, { recursive: true });
+    console.log('Uploads directory created:', casestudyDir);
+  }
+
 //multer for file uploads
 // Multer setup for file uploads
+// const storage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//       cb(null, 'public/dist/uploads/');
+//     },
+//     filename: function (req, file, cb) {
+//       const uniqueName = Date.now() + '-' + file.originalname;
+//       cb(null, uniqueName);
+//     }
+//   });
+
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
+  destination: function (req, file, cb) {
+    if (file.fieldname === 'case_study') {
+      cb(null, 'public/dist/casestudies/');
+    } else {
       cb(null, 'public/dist/uploads/');
-    },
-    filename: function (req, file, cb) {
-      const uniqueName = Date.now() + '-' + file.originalname;
-      cb(null, uniqueName);
     }
-  });
+  },
+  filename: function (req, file, cb) {
+    const uniqueName = Date.now() + '-' + file.originalname;
+    cb(null, uniqueName);
+  }
+});
 
   const upload = multer({ storage });
 
@@ -260,11 +281,12 @@ res.redirect('/admin/home');
 
   app.get('/admin/landingpage/:page',async(req,res)=>{
 
-    const data = await mongoose.connection.db.collection('landingpage').findOne({page:req.params.page});
-    console.log(data);
+    // const data = await mongoose.connection.db.collection('landingpage').findOne({page:req.params.page});
+    // console.log(data);
     
 
-    res.render('landingpage',{section:data||{},page:req.params.page,ucfirst});
+    // res.render('landingpage',{section:data||{},page:req.params.page,ucfirst});
+    res.render('landingpage',{page:req.params.page,ucfirst});
   });
 
   app.get('/admin/add_blog',(req,res)=>{
@@ -294,7 +316,10 @@ res.redirect('/admin/home');
   app.post('/admin/landingpage',upload.fields([
     { name: 'hero_image', maxCount: 1 },
     { name: 'knowmore_image', maxCount: 1 },
-    { name: 'businessinvalue_img' } // handles all journey card images
+    { name:'card_one',maxCount:1},
+    { name:'card_two',maxCount:1},
+    { name: 'businessinvalue_img' } ,// handles all journey card images
+    { name: 'case_study', maxCount: 1 }
   ]),async(req,res)=>{
 
     console.log('hit');
@@ -307,47 +332,125 @@ res.redirect('/admin/home');
         const collection = mongoose.connection.db.collection('landingpage');
     
         // 1. Find existing document
-        const existingDoc = await collection.findOne({ page: req.body.page });
+        // const existingDoc = await collection.findOne({ page: req.body.page });
     
         // 2. Hero image handling
+        // const heroimageFile = req.files?.hero_image?.[0];
+        // if (existingDoc && existingDoc.hero_image && heroimageFile) {
+        //   const oldImagePath = path.join(__dirname, 'public', existingDoc.hero_image);
+        //   fs.unlink(oldImagePath, err => {
+        //     if (err) console.log('Old hero image delete failed:', err);
+        //     else console.log('Old hero image deleted:', oldImagePath);
+        //   });
+        // }
+        // const newHeroImagePath = heroimageFile ? '/uploads/' + heroimageFile.filename : existingDoc?.hero_image || null;
+
         const heroimageFile = req.files?.hero_image?.[0];
-        if (existingDoc && existingDoc.hero_image && heroimageFile) {
-          const oldImagePath = path.join(__dirname, 'public', existingDoc.hero_image);
-          fs.unlink(oldImagePath, err => {
-            if (err) console.log('Old hero image delete failed:', err);
-            else console.log('Old hero image deleted:', oldImagePath);
-          });
-        }
-        const newHeroImagePath = heroimageFile ? '/uploads/' + heroimageFile.filename : existingDoc?.hero_image || null;
+        const newHeroImagePath = heroimageFile ? '/uploads/' + heroimageFile.filename : null;
+
+        //card one
+              // 1. Find existing document
+        
+    
+        // 2. card image handling
+        // const cardoneimageFile = req.files?.card_one?.[0];
+        // if (existingDoc && existingDoc.card_one && cardoneimageFile) {
+        //   const oldImagePath = path.join(__dirname, 'public', existingDoc.card_one);
+        //   fs.unlink(oldImagePath, err => {
+        //     if (err) console.log('Old hero image delete failed:', err);
+        //     else console.log('Old hero image deleted:', oldImagePath);
+        //   });
+        // }
+        // const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.filename : existingDoc?.card_one || null;
+
+        // ✅ Card one image handling (pure insert logic)
+const cardoneimageFile = req.files?.card_one?.[0];
+const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.filename : null;
+
+
+        //card two
+
+        //card one
+              // 1. Find existing document
+        
+    
+        // 2. card image handling
+        // const cardtwoimageFile = req.files?.card_two?.[0];
+        // if (existingDoc && existingDoc.card_two && cardtwoimageFile) {
+        //   const oldImagePath = path.join(__dirname, 'public', existingDoc.card_two);
+        //   fs.unlink(oldImagePath, err => {
+        //     if (err) console.log('Old hero image delete failed:', err);
+        //     else console.log('Old hero image deleted:', oldImagePath);
+        //   });
+        // }
+        // const newcardtwoImagePath = cardtwoimageFile ? '/uploads/' + cardtwoimageFile.filename : existingDoc?.card_two || null;
+        // ✅ Card two image handling (pure insert logic)
+        const cardtwoimageFile = req.files?.card_two?.[0];
+        const newcardtwoImagePath = cardtwoimageFile ? '/uploads/' + cardtwoimageFile.filename : null;
+    
+  
     
         // 3. Know more image handling
-        const knowmoreImageFile = req.files?.knowmore_image?.[0];
+        // const knowmoreImageFile = req.files?.knowmore_image?.[0];
+        // const knowmoreImagePath = knowmoreImageFile
+        //   ? '/uploads/' + knowmoreImageFile.filename
+        //   : existingDoc?.knowmoreimage || null;
+         const knowmoreImageFile = req.files?.knowmore_image?.[0];
         const knowmoreImagePath = knowmoreImageFile
-          ? '/uploads/' + knowmoreImageFile.filename
-          : existingDoc?.knowmoreimage || null;
+  ? '/uploads/' + knowmoreImageFile.filename
+  : null;
+
+
+        //calsoft case study part
+
+        // Case Study PDF handling (NO existingDoc logic)
+        const caseStudyFile = req.files?.case_study?.[0];
+        const caseStudyPath = caseStudyFile
+          ? '/dist/casestudies/' + caseStudyFile.filename
+          : null;
     
         // 4. Business value cards handling (previously sec2_entries)
-        const existingBusinessCards = existingDoc?.business_cards || [];
-        let usedIds = existingBusinessCards.map(e => parseInt(e.id)).filter(id => !isNaN(id));
-        let currentCounter = usedIds.length > 0 ? Math.max(...usedIds) + 1 : 1;
+        // const existingBusinessCards = existingDoc?.business_cards || [];
+        // let usedIds = existingBusinessCards.map(e => parseInt(e.id)).filter(id => !isNaN(id));
+        // let currentCounter = usedIds.length > 0 ? Math.max(...usedIds) + 1 : 1;
     
-        const businessTitles = req.body.businessinvalue_stitle || [];
-        const businessContents = req.body.businessinvalue_scontent || [];
-        const businessImages = req.files?.businessinvalue_img || [];
+        // const businessTitles = req.body.businessinvalue_stitle || [];
+        // const businessContents = req.body.businessinvalue_scontent || [];
+        // const businessImages = req.files?.businessinvalue_img || [];
     
-        const businessCards = [...existingBusinessCards];
-        for (let i = 0; i < businessTitles.length; i++) {
-          if (!businessTitles[i] && !businessContents[i] && !businessImages[i]) continue;
+        // const businessCards = [...existingBusinessCards];
+        // for (let i = 0; i < businessTitles.length; i++) {
+        //   if (!businessTitles[i] && !businessContents[i] && !businessImages[i]) continue;
     
-          businessCards.push({
-            id: currentCounter.toString(),
-            number: businessTitles[i],
-            content: businessContents[i],
-            image: businessImages[i] ? '/uploads/' + businessImages[i].filename : null
-          });
+        //   businessCards.push({
+        //     id: currentCounter.toString(),
+        //     number: businessTitles[i],
+        //     content: businessContents[i],
+        //     image: businessImages[i] ? '/uploads/' + businessImages[i].filename : null
+        //   });
     
-          currentCounter++;
-        }
+        //   currentCounter++;
+        // }
+
+        let currentCounter = 1;
+
+const businessTitles = req.body.businessinvalue_stitle || [];
+const businessContents = req.body.businessinvalue_scontent || [];
+const businessImages = req.files?.businessinvalue_img || [];
+
+const businessCards = [];
+for (let i = 0; i < businessTitles.length; i++) {
+  if (!businessTitles[i] && !businessContents[i] && !businessImages[i]) continue;
+
+  businessCards.push({
+    id: currentCounter.toString(),
+    number: businessTitles[i],
+    content: businessContents[i],
+    image: businessImages[i] ? '/uploads/' + businessImages[i].filename : null
+  });
+
+  currentCounter++;
+}
     
         // 5. Construct final data
         const formData = {
@@ -358,6 +461,9 @@ res.redirect('/admin/home');
           hero_title2: req.body.hero_title2,
           hero_content: req.body.hero_content,
           hero_image: newHeroImagePath,
+          card_one:newcardoneImagePath,
+          card_two:newcardtwoImagePath,
+          case_study:caseStudyPath,
           herobtn_text: req.body.herobtn_text,
           herobtn_url: req.body.herobtn_url,
     
@@ -379,11 +485,12 @@ res.redirect('/admin/home');
         };
     
         // 6. Save to DB
-        await collection.findOneAndUpdate(
-          {},
-          { $set: formData },
-          { upsert: true }
-        );
+        // await collection.findOneAndUpdate(
+        //   {},
+        //   { $set: formData },
+        //   { upsert: true }
+        // );
+        await collection.insertOne(formData);
     
        
         req.flash('success', 'All changes have been applied.');
@@ -393,7 +500,7 @@ res.redirect('/admin/home');
         console.log(er.message);
        
         req.flash('error', 'Something went wrong');
-        res.redirect('/admin/home');
+        res.redirect(`/admin/landingpage/${req.body.page}`);
       }
       
       
