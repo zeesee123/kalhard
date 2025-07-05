@@ -303,7 +303,13 @@ res.redirect('/admin/home');
 
   app.get('/admin/create_category',(req,res)=>{
 
-    res.render('');
+    res.render('create_category');
+
+  });
+
+  app.get('/admin/add_author',(req,res)=>{
+
+    res.render('add_author');
 
   });
 
