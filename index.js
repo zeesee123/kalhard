@@ -4,6 +4,7 @@ const path=require('path');
 const mongoose=require('mongoose');
 const multer=require('multer');
 const fs=require('fs');
+const ObjectId = mongoose.Types.ObjectId;
 
 const routes=require('./routes/web');
 
@@ -12,6 +13,9 @@ console.log(process.env.PORT);
 // console.log('this is mongoose',mongoose);
 mongoose.connect(process.env.CONNECTION_STRING,{dbName:process.env.DB_NAME}).then(() => console.log('✅ MongoDB connected'))
 .catch(err => console.error('❌ Connection failed', err));
+
+
+
 
 //helper functions
 function isAuthenticated(req, res, next) {
@@ -24,6 +28,16 @@ function isAuthenticated(req, res, next) {
 function ucfirst(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+
+
+const calculateReadTime = (content) => {
+  const wordsPerMinute = 200; // or 250
+  const text = content.trim();
+  const wordCount = text.split(/\s+/).length;
+  const minutes = Math.ceil(wordCount / wordsPerMinute);
+  return minutes;
+};
 
 
   // ✅ Ensure uploads directory exists
@@ -414,22 +428,29 @@ app.post('/admin/blog/create', upload.single('blog_image'), async (req, res) => 
     const collection = mongoose.connection.db.collection('blogs');
 
     const blogData = {
-      title: title?.trim() || 'Untitled Blog',
-      content: content?.trim() || '',
-      category: category?.trim() || null,
-      author: author?.trim() || null,
-      image: blogImage,
-      date: date ? new Date(date) : new Date(), // defaults to today
-      publish: publish === 'on', // true/false
-      tag:tag,
-      meta: {
-        title: meta_title?.trim() || '',
-        slug: slug?.trim() || '',
-        description: meta_description?.trim() || '',
-        schema: schema_markup?.trim() || ''
-      },
-      createdAt: new Date()
-    };
+  title: title?.trim() || 'Untitled Blog',
+  content: content?.trim() || '',
+  category: category ? new ObjectId(category) : null,
+  author: author ? new ObjectId(author) : null,
+  image: blogImage,
+  date: date ? new Date(date) : new Date(),
+  publish: publish === 'on',
+  read_time:calculateReadTime(content),
+
+  tag: Array.isArray(tag)
+    ? tag.map(t => new ObjectId(t))         // if multiple tags
+    : tag
+    ? [new ObjectId(tag)]                  // if only one tag selected
+    : [],
+
+  meta: {
+    title: meta_title?.trim() || '',
+    slug: slug?.trim() || '',
+    description: meta_description?.trim() || '',
+    schema: schema_markup?.trim() || ''
+  },
+  createdAt: new Date()
+};
 
     await collection.insertOne(blogData);
 
