@@ -18,10 +18,19 @@ mongoose.connect(process.env.CONNECTION_STRING,{dbName:process.env.DB_NAME}).the
 
 
 //helper functions
+
+//auth functions
 function isAuthenticated(req, res, next) {
   if (req.session.userId) return next();
   req.flash('error', 'You must be logged in');
-  return res.redirect('/login');
+  return res.redirect('/admin/login');
+}
+
+function isGuest(req, res, next) {
+  if (req.session.userId) {
+    return res.redirect('/admin'); // or dashboard
+  }
+  next();
 }
 
 //function for capitalizing the first letter 
@@ -98,11 +107,21 @@ const storage = multer.diskStorage({
   const session = require('express-session');
 const flash = require('connect-flash');
 
+// app.use(session({
+//   secret: 'someSecretKey', // keep this secure
+//   resave: false,
+//   saveUninitialized: true
+// }));
+
 app.use(session({
-  secret: 'someSecretKey', // keep this secure
+  secret: 'someSecretKey',
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: false,
+  cookie: {
+    maxAge: null // default for non-remember
+  }
 }));
+
 app.use(flash());
 
 app.use(express.json());
@@ -126,24 +145,61 @@ app.use('/admin/assets',express.static(path.join(__dirname,'public')));
 
 app.use('/admin/assets/tinymce', express.static(path.join(__dirname, 'node_modules/tinymce')));
 
-app.get('/admin',(req,res)=>{
+app.get('/admin',isAuthenticated,(req,res)=>{
 
     res.render('dashboard');
 });
 
-app.post('/admin/login', async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
+// app.post('/admin/login', async (req, res) => {
+//   const { email, password } = req.body;
+//   const user = await User.findOne({ email });
 
-  if (!user || !(await bcrypt.compare(password, user.password))) {
-    req.flash('error', 'Invalid credentials');
-    return res.redirect('/login');
+//   if (!user || !(await bcrypt.compare(password, user.password))) {
+//     req.flash('error', 'Invalid credentials');
+//     return res.redirect('/login');
+//   }
+
+//   req.session.userId = user._id; // store user session
+//   req.flash('success', 'Logged in successfully');
+//   res.redirect('/admin/home');
+// });
+
+app.post('/admin/login', async (req, res) => {
+  const { email, password, remember } = req.body;
+  const errors = {};
+
+  if (!email) errors.email = 'Email is required';
+  if (!password) errors.password = 'Password is required';
+
+  if (Object.keys(errors).length) {
+    req.flash('loginErrors', errors);
+    req.flash('old', { email, remember });
+    return res.redirect('/admin/login');
   }
 
-  req.session.userId = user._id; // store user session
+  const user = await mongoose.connection.db.collection('users').findOne({ email });
+
+  const bcrypt = require('bcrypt'); // if not already at top
+
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    req.flash('loginErrors', { email: 'Invalid email or password' });
+    req.flash('old', { email, remember });
+    return res.redirect('/admin/login');
+  }
+
+  req.session.userId = user._id;
+
+  // Handle remember me
+  if (remember) {
+    req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+  } else {
+    req.session.cookie.expires = false;
+  }
+
   req.flash('success', 'Logged in successfully');
-  res.redirect('/admin/home');
+  res.redirect('/admin');
 });
+
 
 app.get('/admin/home',async(req,res)=>{
 
@@ -160,7 +216,7 @@ app.get('/admin/homenew',async(req,res)=>{
     res.render('homepagenew',{section:data||{}});
 });
 
-app.get('/admin/login',(req,res)=>{
+app.get('/admin/login',isGuest,(req,res)=>{
   res.render('auth/login');
 })
 
