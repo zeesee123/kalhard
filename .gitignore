@@ -2,5 +2,6 @@ node_modules/
 .env
 public/dist/uploads/
 public/dist/casestudies/
+public/dist/blogs/
 astro
 frontend
