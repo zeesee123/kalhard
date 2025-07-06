@@ -124,6 +124,8 @@ app.use(express.json());
 
 app.use('/admin/assets',express.static(path.join(__dirname,'public')));
 
+app.use('/admin/assets/tinymce', express.static(path.join(__dirname, 'node_modules/tinymce')));
+
 app.get('/admin',(req,res)=>{
 
     res.render('dashboard');
