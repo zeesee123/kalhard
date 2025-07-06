@@ -40,6 +40,15 @@ function ucfirst(str) {
     console.log('Uploads directory created:', casestudyDir);
   }
 
+  // ✅ Ensure uploads directory exists
+  const blogDir = path.join(__dirname, 'public','dist', 'blogs');
+  if (!fs.existsSync(blogDir)) {
+    fs.mkdirSync(blogDir, { recursive: true });
+    console.log('Uploads directory created:', blogDir);
+  }
+
+
+
 //multer for file uploads
 // Multer setup for file uploads
 // const storage = multer.diskStorage({
@@ -56,15 +65,18 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     if (file.fieldname === 'case_study') {
       cb(null, 'public/dist/casestudies/');
+    } else if (file.fieldname === 'blog_image') {
+      cb(null, 'public/dist/blogs/'); // <-- blog image goes here
     } else {
       cb(null, 'public/dist/uploads/');
     }
   },
   filename: function (req, file, cb) {
-    const uniqueName = Date.now() + '-' + file.originalname;
+    const uniqueName = Date.now() + '-' + file.originalname.replace(/\s+/g, '_');
     cb(null, uniqueName);
   }
 });
+
 
   const upload = multer({ storage });
 
@@ -311,6 +323,126 @@ res.redirect('/admin/home');
 });
 
 
+app.post('/admin/create_category', async (req, res) => {
+  try {
+    console.log(req.body);
+    console.log('hatt');
+    const authorName = req.body.category?.trim();
+
+    if (!authorName) {
+      req.flash('error', 'Author name is required.');
+      return res.redirect('/admin/create_category');
+    }
+
+    const collection = mongoose.connection.db.collection('categories');
+
+    const existing = await collection.findOne({ name: authorName });
+    if (existing) {
+      req.flash('error', 'Author already exists.');
+      return res.redirect('/admin/create_category');
+    }
+
+    await collection.insertOne({
+      name: authorName,
+      createdAt: new Date()
+    });
+
+    req.flash('success', 'Author added successfully!');
+    res.redirect('/admin/create_category');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Something went wrong');
+    res.redirect('/admin/create_category');
+  }
+});
+
+
+app.post('/admin/create_tags', async (req, res) => {
+  try {
+    console.log(req.body);
+    console.log('hatt');
+    const authorName = req.body.tag?.trim();
+
+    if (!authorName) {
+      req.flash('error', 'Tag name is required.');
+      return res.redirect('/admin/create_tags');
+    }
+
+    const collection = mongoose.connection.db.collection('tags');
+
+    const existing = await collection.findOne({ name: authorName });
+    if (existing) {
+      req.flash('error', 'Tag already exists.');
+      return res.redirect('/admin/create_tags');
+    }
+
+    await collection.insertOne({
+      name: authorName,
+      createdAt: new Date()
+    });
+
+    req.flash('success', 'Tag added successfully!');
+    res.redirect('/admin/create_tags');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Something went wrong');
+    res.redirect('/admin/create_tags');
+  }
+});
+
+
+
+app.post('/admin/blog/create', upload.single('blog_image'), async (req, res) => {
+  try {
+    const {
+      title,
+      content,
+      category,
+      author,
+      date,
+      publish,
+      meta_title,
+      slug,
+      tag,
+      meta_description,
+      schema_markup
+    } = req.body;
+
+    // Blog image path (inside /public/dist/blogs)
+    const blogImage = req.file ? '/blogs/' + req.file.filename : null;
+
+    const collection = mongoose.connection.db.collection('blogs');
+
+    const blogData = {
+      title: title?.trim() || 'Untitled Blog',
+      content: content?.trim() || '',
+      category: category?.trim() || null,
+      author: author?.trim() || null,
+      image: blogImage,
+      date: date ? new Date(date) : new Date(), // defaults to today
+      publish: publish === 'on', // true/false
+      tag:tag,
+      meta: {
+        title: meta_title?.trim() || '',
+        slug: slug?.trim() || '',
+        description: meta_description?.trim() || '',
+        schema: schema_markup?.trim() || ''
+      },
+      createdAt: new Date()
+    };
+
+    await collection.insertOne(blogData);
+
+    req.flash('success', 'Blog post added successfully!');
+    res.redirect('/admin/add_blog');
+  } catch (err) {
+    console.error('Error adding blog:', err);
+    req.flash('error', 'Something went wrong');
+    res.redirect('/admin/add_blog');
+  }
+});
+
+
   app.get('/admin/landingpage/:page',async(req,res)=>{
 
     // const data = await mongoose.connection.db.collection('landingpage').findOne({page:req.params.page});
@@ -321,9 +453,30 @@ res.redirect('/admin/home');
     res.render('landingpage',{page:req.params.page,ucfirst});
   });
 
-  app.get('/admin/add_blog',(req,res)=>{
+  app.get('/admin/add_blog',async(req,res)=>{
 
-    res.render('add_blog',{ucfirst});
+   try {
+    const authorCollection = mongoose.connection.db.collection('authors');
+    const categoryCollection = mongoose.connection.db.collection('categories');
+    const tagCollection = mongoose.connection.db.collection('tags');
+
+    const authors = await authorCollection.find({}).toArray();
+    const categories = await categoryCollection.find({}).toArray();
+
+        const tags = await tagCollection.find({}).toArray();
+    
+
+    res.render('add_blog', {
+      authors,
+      categories,
+      tags,
+      ucfirst
+    });
+  } catch (err) {
+    console.error('Error loading authors/categories/tags:', err);
+    req.flash('error', 'Could not load blog form');
+    res.redirect('/admin/dashboard'); // fallback
+  }
   });
 
 
@@ -336,6 +489,12 @@ res.redirect('/admin/home');
   app.get('/admin/create_category',(req,res)=>{
 
     res.render('create_category');
+
+  });
+
+  app.get('/admin/create_tags',(req,res)=>{
+
+    res.render('add_tags');
 
   });
 
@@ -444,7 +603,7 @@ const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.fi
         // Case Study PDF handling (NO existingDoc logic)
         const caseStudyFile = req.files?.case_study?.[0];
         const caseStudyPath = caseStudyFile
-          ? '/dist/casestudies/' + caseStudyFile.filename
+          ? '/casestudies/' + caseStudyFile.filename
           : null;
     
         // 4. Business value cards handling (previously sec2_entries)
