@@ -559,10 +559,11 @@ app.post('/admin/blog/create', upload.single('blog_image'), async (req, res) => 
   });
 
 
-  app.get('/admin/view_blogs',(req,res)=>{
+  app.get('/admin/view_blogs',async(req,res)=>{
 
 
-    res.render('');
+    const blogs=mongoose.connection.db.collection('blogs');
+    res.render('view_blogs',{blogs:blogs||null});
   });
 
   app.get('/admin/create_category',(req,res)=>{
@@ -791,6 +792,36 @@ for (let i = 0; i < businessTitles.length; i++) {
     console.log(data);
     res.json({data:data});
   });
+
+
+  
+  app.get('/api/casestudy/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 🛡️ Validate ID format
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid case study ID' });
+    }
+
+    // ✅ Convert to ObjectId
+    const objectId = new ObjectId(id);
+
+    // 🔍 Query MongoDB
+    const data = await mongoose.connection.db
+      .collection('landingpage')
+      .findOne({ _id: objectId });
+
+    if (!data) {
+      return res.status(404).json({ error: 'Case study not found' });
+    }
+
+    res.json({ data });
+  } catch (error) {
+    console.error('Error fetching case study:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 // hello
 app.listen(process.env.PORT,(er)=>{
