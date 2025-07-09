@@ -419,6 +419,43 @@ res.redirect('/admin/home');
   }
 });
 
+
+
+
+app.get('/admin/get_casestudies', async (req, res) => {
+  try {
+    const caseStudies = await mongoose.connection.db.collection('landingpage')
+      .find({ page: 'case_study' })
+      .sort({ _id: -1 })
+      .toArray();
+
+    const data = caseStudies.map((item, index) => ({
+      id: index + 1,
+      title: item.hero_title1 || 'Untitled',
+      image: item.card_one
+        ? `<img src="/admin/assets/dist${item.card_one}" style="width: 100px; height: auto; object-fit: contain;">`
+        : '',
+      actions: `
+        <a href="${item.case_study}" target="_blank" class="btn btn-primary mx-1">
+          <i class="bi bi-eye-fill"></i> Preview
+        </a>
+        <a href="/admin/edit_landingpage/${item.page}" class="btn btn-success mx-1">
+          <i class="bi bi-pencil-square"></i> Edit
+        </a>
+        <button type="button" class="btn btn-danger mx-1 eradicator" data-id="${item._id}" data-type="landingpage">
+          <i class="bi bi-trash3-fill"></i> Delete
+        </button>
+      `
+    }));
+
+    res.status(200).json({ data });
+  } catch (err) {
+    console.error('Error fetching case studies:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
   app.post('/admin/add_author', async (req, res) => {
   try {
     const authorName = req.body.author?.trim();
@@ -717,7 +754,7 @@ app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) =
     );
 
     req.flash('success', 'Blog updated successfully!');
-    res.redirect('/admin/blogs');
+    res.redirect(`/edit_blog/${req.params.id}`);
 
   } catch (err) {
     console.error('Error updating blog:', err);
@@ -732,6 +769,20 @@ app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) =
 
     const blogs=mongoose.connection.db.collection('blogs');
     res.render('view_blogs',{blogs:blogs||null});
+  });
+
+  app.get('/admin/create_category',(req,res)=>{
+
+    res.render('create_category');
+
+  });
+
+
+  app.get('/admin/view_casestudies',async(req,res)=>{
+
+
+    // const blogs=mongoose.connection.db.collection('blogs');
+    res.render('view_casestudies');
   });
 
   app.get('/admin/create_category',(req,res)=>{
