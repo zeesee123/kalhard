@@ -1042,26 +1042,22 @@ for (let i = 0; i < businessTitles.length; i++) {
   }
 });
 
-app.get('/api/casestudy',async(req,res)=>{
+app.get('/api/casestudy', async (req, res) => {
+  try {
+    const collection = mongoose.connection.db.collection('landingpage');
 
-try{
+    // Query only documents where page is 'case_study'
+    const data = await collection.find({ page: 'case_study' }).toArray();
 
-   const collection = mongoose.connection.db.collection('landingpage');
-    const data = await collection.find({}).toArray(); // fetch all documents
-
-  if (!data) {
+    if (!data || data.length === 0) {
       return res.status(404).json({ error: 'There are no case studies' });
     }
 
     res.json({ data });
-
-
-}catch(error){
-
+  } catch (error) {
     console.error('Error fetching case study:', error);
     res.status(500).json({ error: 'Server error' });
-}
-
+  }
 });
 
 // hello
