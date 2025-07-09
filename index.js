@@ -402,7 +402,7 @@ res.redirect('/admin/home');
         <a href="/blogs/preview/${item._id}" target="_blank" class="btn btn-primary mx-1">
           <i class="bi bi-eye-fill"></i> Preview
         </a>
-        <a href="/admin/blogs/edit/${item._id}" class="btn btn-success mx-1">
+        <a href="/admin/edit_blog/${item._id}" class="btn btn-success mx-1">
           <i class="bi bi-pencil-square"></i> Edit
         </a>
         <button type="button" class="btn btn-danger mx-1 eradicator" data-id="${item._id}" data-type="blogs">
@@ -613,6 +613,118 @@ app.post('/admin/blog/create', upload.single('blog_image'), async (req, res) => 
     res.redirect('/admin/dashboard'); // fallback
   }
   });
+
+
+  app.get('/admin/edit_blog/:id', async (req, res) => {
+  try {
+    const blogId = new ObjectId(req.params.id);
+    const db = mongoose.connection.db;
+
+    const [blog, authors, categories, tags] = await Promise.all([
+      db.collection('blogs').findOne({ _id: blogId }),
+      db.collection('authors').find({}).toArray(),
+      db.collection('categories').find({}).toArray(),
+      db.collection('tags').find({}).toArray()
+    ]);
+
+    if (!blog) {
+      req.flash('error', 'Blog not found');
+      return res.redirect('/admin/dashboard');
+    }
+
+    res.render('edit_blog', {
+      blog,         // send the blog for pre-filling
+      authors,
+      categories,
+      tags,
+      ucfirst
+    });
+
+  } catch (err) {
+    console.error('Error loading blog/edit form:', err);
+    req.flash('error', 'Could not load blog for editing');
+    res.redirect('/admin/dashboard');
+  }
+});
+
+
+
+app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) => {
+  try {
+    const blogId = new ObjectId(req.params.id);
+    const db = mongoose.connection.db;
+
+    // Fetch existing blog
+    const blog = await db.collection('blogs').findOne({ _id: blogId });
+    if (!blog) {
+      req.flash('error', 'Blog not found');
+      return res.redirect('/admin/dashboard');
+    }
+
+    const {
+      title,
+      content,
+      category,
+      author,
+      date,
+      publish,
+      meta_title,
+      slug,
+      tag,
+      meta_description,
+      schema_markup
+    } = req.body;
+
+    let blogImage = blog.image; // start with existing image
+
+    // ✅ If new image uploaded, delete old one
+    if (req.file) {
+      blogImage = '/blogs/' + req.file.filename;
+
+      if (blog.image) {
+        const oldImagePath = path.join(__dirname, 'public', 'dist', blog.image);
+        fs.unlink(oldImagePath, (err) => {
+          if (err) console.warn('Failed to delete old blog image:', err.message);
+        });
+      }
+    }
+
+    const updatedBlog = {
+      title: title?.trim() || 'Untitled Blog',
+      content: content?.trim() || '',
+      category: category ? new ObjectId(category) : null,
+      author: author ? new ObjectId(author) : null,
+      image: blogImage,
+      date: date ? new Date(date) : new Date(),
+      publish: publish === 'on',
+      read_time: calculateReadTime(content),
+      tag: Array.isArray(tag)
+        ? tag.map(t => new ObjectId(t))
+        : tag
+        ? [new ObjectId(tag)]
+        : [],
+      meta: {
+        title: meta_title?.trim() || '',
+        slug: slug?.trim() || '',
+        description: meta_description?.trim() || '',
+        schema: schema_markup?.trim() || ''
+      }
+    };
+
+    await db.collection('blogs').updateOne(
+      { _id: blogId },
+      { $set: updatedBlog }
+    );
+
+    req.flash('success', 'Blog updated successfully!');
+    res.redirect('/admin/blogs');
+
+  } catch (err) {
+    console.error('Error updating blog:', err);
+    req.flash('error', 'Something went wrong during blog update');
+    res.redirect('/admin/dashboard');
+  }
+});
 
 
   app.get('/admin/view_blogs',async(req,res)=>{
