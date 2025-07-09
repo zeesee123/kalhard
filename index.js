@@ -363,6 +363,62 @@ res.redirect('/admin/home');
   });
 
 
+  app.get('/admin/get_blogs', async (req, res) => {
+  try {
+
+  //   const collection = mongoose.connection.db.collection(page);
+
+  // try {
+  //   const doc = await collection.findOne({ page });
+    const blogs = await mongoose.connection.db.collection('blogs').aggregate([
+      {
+        $lookup: {
+          from: 'authors',
+          localField: 'author',
+          foreignField: '_id',
+          as: 'authorInfo'
+        }
+      },
+      {
+        $unwind: {
+          path: '$authorInfo',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $sort: { date: -1 }
+      }
+    ]).toArray();
+
+    const data = blogs.map((item, index) => ({
+      id: index + 1,
+      title: item.title || '',
+      author: item.authorInfo?.name || 'Unknown',
+      date: item.date ? new Date(item.date).toLocaleDateString() : '',
+      image: item.image
+        ? `<img src="/admin/assets/dist${item.image}" style="width: 100px; height: auto; object-fit: contain;">`
+        : '',
+      actions: `
+        <a href="/blogs/preview/${item._id}" target="_blank" class="btn btn-primary mx-1">
+          <i class="bi bi-eye-fill"></i> Preview
+        </a>
+        <a href="/admin/blogs/edit/${item._id}" class="btn btn-success mx-1">
+          <i class="bi bi-pencil-square"></i> Edit
+        </a>
+        <button type="button" class="btn btn-danger mx-1 eradicator" data-id="${item._id}" data-type="blogs">
+          <i class="bi bi-trash3-fill"></i> Delete
+        </button>
+      `
+    }));
+
+    res.status(200).json({ data });
+
+  } catch (err) {
+    console.error('Error fetching blogs:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
   app.post('/admin/add_author', async (req, res) => {
   try {
     const authorName = req.body.author?.trim();
@@ -821,6 +877,28 @@ for (let i = 0; i < businessTitles.length; i++) {
     console.error('Error fetching case study:', error);
     res.status(500).json({ error: 'Server error' });
   }
+});
+
+app.get('/api/casestudy',async(req,res)=>{
+
+try{
+
+   const collection = mongoose.connection.db.collection('landingpage');
+    const data = await collection.find({}).toArray(); // fetch all documents
+
+  if (!data) {
+      return res.status(404).json({ error: 'There are no case studies' });
+    }
+
+    res.json({ data });
+
+
+}catch(error){
+
+    console.error('Error fetching case study:', error);
+    res.status(500).json({ error: 'Server error' });
+}
+
 });
 
 // hello
