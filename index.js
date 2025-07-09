@@ -1060,6 +1060,133 @@ app.get('/api/casestudy', async (req, res) => {
   }
 });
 
+
+app.get('/api/blogs', async (req, res) => {
+  try {
+    const collection = mongoose.connection.db.collection('blogs');
+
+    const data = await collection.aggregate([
+      {
+        $match: { publish: true } // Only fetch published blogs
+      },
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'category',
+          foreignField: '_id',
+          as: 'categoryData'
+        }
+      },
+      {
+        $unwind: {
+          path: '$categoryData',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'authors',
+          localField: 'author',
+          foreignField: '_id',
+          as: 'authorData'
+        }
+      },
+      {
+        $unwind: {
+          path: '$authorData',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'tags',
+          localField: 'tag',
+          foreignField: '_id',
+          as: 'tagData'
+        }
+      },
+      {
+        $sort: { date: -1 } // optional: newest first
+      }
+    ]).toArray();
+
+    res.json({ data });
+  } catch (error) {
+    console.error('Error fetching blogs:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
+
+app.get('/api/blogs/:id', async (req, res) => {
+  try {
+    const blogId = req.params.id;
+
+    // Validate ObjectId
+    if (!ObjectId.isValid(blogId)) {
+      return res.status(400).json({ error: 'Invalid blog ID' });
+    }
+
+    const collection = mongoose.connection.db.collection('blogs');
+
+    const data = await collection.aggregate([
+      {
+        $match: {
+          _id: new ObjectId(blogId),
+          publish: true // only return if published
+        }
+      },
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'category',
+          foreignField: '_id',
+          as: 'categoryData'
+        }
+      },
+      {
+        $unwind: {
+          path: '$categoryData',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'authors',
+          localField: 'author',
+          foreignField: '_id',
+          as: 'authorData'
+        }
+      },
+      {
+        $unwind: {
+          path: '$authorData',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'tags',
+          localField: 'tag',
+          foreignField: '_id',
+          as: 'tagData'
+        }
+      }
+    ]).toArray();
+
+    if (!data || data.length === 0) {
+      return res.status(404).json({ error: 'Blog not found or unpublished' });
+    }
+
+    res.json({ data: data[0] }); // Return the single blog object
+  } catch (error) {
+    console.error('Error fetching blog:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
 // hello
 app.listen(process.env.PORT,(er)=>{
   if (er) {
