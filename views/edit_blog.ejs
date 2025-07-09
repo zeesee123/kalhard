@@ -10,8 +10,8 @@
 
 
 <div class="d-flex justify-content-between mt-4">
-    <h1><i class="bi bi bi-plus-circle mx-2"></i>Add blog</h1>
-    <a href="http://localhost:3000" target="_blank"><button class="btn btn-primary"><i class="bi bi-card-list mx-2"></i>View blogs</button></a>
+    <h1><i class="bi bi bi-plus-circle mx-2"></i>Edit blog</h1>
+    <a href="http://localhost:3000" target="_blank"><button class="btn btn-primary"><i class="bi bi-card-list mx-2"></i>Preview</button></a>
     
 </div>
 
@@ -31,7 +31,7 @@
   </div>
 <% } %> -->
 
-<form action="/admin/blog/edit/id" enctype="multipart/form-data" method="POST"  id="main_form">
+<form action="/admin/blog/edit/<%=blog._id%>" enctype="multipart/form-data" method="POST"  id="main_form">
 
     <div class="card pt-3 p-4">
 
@@ -49,21 +49,23 @@
   </div>
   <div class="mb-3 col-4">
       <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-      <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
+      <img class="Thumbnail" src="<%= blog.image ? '/admin/assets/dist' + blog.image : '/admin/assets/dist/defaultimages/default.jpg' %>"  width="400" alt="Default picture Thumbnail">
       
   </div>
 </div>
 
         <div class="mb-3 col-6">
           <label for="" class="form-label">blog title</label>
-          <input type="text" class="form-control" name="title">
+          <input type="text" class="form-control" name="title" value="<%=blog.title%>">
         </div>
 
-        <div class="mb-3 col-6">
+      <div class="mb-3 col-6">
   <label for="blog_category" class="form-label">Blog Category</label>
   <select name="category" id="blog_category" class="form-control">
     <% categories.forEach(cat => { %>
-      <option value="<%= cat._id %>"><%= ucfirst(cat.name) %></option>
+      <option value="<%= cat._id %>" <%= blog.category && blog.category.toString() === cat._id.toString() ? 'selected' : '' %>>
+        <%= ucfirst(cat.name) %>
+      </option>
     <% }); %>
   </select>
 </div>
@@ -72,24 +74,29 @@
   <label for="blog_author" class="form-label">Author Name</label>
   <select name="author" id="blog_author" class="form-control">
     <% authors.forEach(auth => { %>
-      <option value="<%= auth._id %>"><%= ucfirst(auth.name) %></option>
+      <option value="<%= auth._id %>" <%= blog.author && blog.author.toString() === auth._id.toString() ? 'selected' : '' %>>
+        <%= ucfirst(auth.name) %>
+      </option>
     <% }); %>
   </select>
 </div>
 
 
 <div class="mb-3 col-6">
-  <label for="blog_author" class="form-label">Tags</label>
-  <select name="tag" id="blog_author" class="form-control" multiple>
-    <% tags.forEach(tag => { %>
-      <option value="<%= tag._id %>"><%= ucfirst(tag.name) %></option>
+  <label for="blog_tags" class="form-label">Tags</label>
+  <select name="tag" id="blog_tags" class="form-control" multiple>
+    <% tags.forEach(t => { %>
+      <option value="<%= t._id %>" 
+        <%= blog.tag && blog.tag.some(tagId => tagId.toString() === t._id.toString()) ? 'selected' : '' %>>
+        <%= ucfirst(t.name) %>
+      </option>
     <% }); %>
   </select>
 </div>
 
         <div class="mb-3 col-6">
           <label for="" class="form-label">Date</label>
-          <input type="date" class="form-control">
+          <input type="date" class="form-control" name="date" value="<%= blog.date ? new Date(blog.date).toISOString().substring(0, 10) : '' %>">
           
           
         </div>
