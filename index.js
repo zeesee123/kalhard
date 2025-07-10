@@ -419,6 +419,46 @@ res.redirect('/admin/home');
   }
 });
 
+//rendering business cards
+
+app.get('/admin/table/case_study/:id/business_cards', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const collection = mongoose.connection.db.collection('landingpage');
+
+    const doc = await collection.findOne({ _id: new mongoose.Types.ObjectId(id) });
+
+    if (!doc) {
+      return res.status(404).json({ message: 'Case study not found' });
+    }
+
+    const cards = doc.business_cards || [];
+
+    const data = cards.map((card, index) => ({
+      id: index + 1,
+      title: card.number || '',
+      content: card.content || '',
+      image: card.image
+        ? `<img src="/admin/assets/dist${card.image}" style="width: 100px; height: auto; object-fit: contain;">`
+        : '',
+      actions: `
+        <button class="btn btn-success editer mx-1" data-id="${card.id}" data-type="business_cards" type="button">
+          <i class="bi bi-pencil-square"></i> Edit
+        </button>
+        <button class="btn btn-danger eradicator mx-1" data-id="${card.id}" data-type="business_cards" type="button">
+          <i class="bi bi-trash3-fill"></i> Delete
+        </button>
+      `
+    }));
+
+    res.status(200).json({ data });
+  } catch (err) {
+    console.error('Error fetching business cards:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 
 

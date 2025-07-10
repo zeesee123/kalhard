@@ -371,7 +371,7 @@
   </div>
   <div class="mb-3 col-4">
       <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-      <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
+      <img class="Thumbnail" src="<%= section.knowmore_image ? '/admin/assets/dist' + section.knowmore_image : '/admin/assets/dist/defaultimages/default.jpg' %>"  width="400" alt="Default picture Thumbnail">
       
   </div>
 </div>
@@ -381,7 +381,7 @@
           <div class="col-12">
              <div class="mb-3">
             <label for="" class="form-label">Title 1 (Bold text)</label>
-            <input type="text" name="knowmore_title1" class="form-control" >
+            <input type="text" name="knowmore_title1" class="form-control" value="<%=section.knowmore_title1%>">
         </div>
           </div>
           <!-- <div class="col-12">
@@ -395,7 +395,7 @@
     
         <div class="mb-3">
             <label for="" class="form-label">Content</label>
-            <textarea name="knowmore_text" cols="30" rows="5" class="form-control"></textarea>
+            <textarea name="knowmore_text" cols="30" rows="5" class="form-control"><%=section.knowmore_text%></textarea>
         </div>
     
         
@@ -403,7 +403,7 @@
         <div class="mb-3 d-flex">
             <div class="mx-2">
                 <label for="" class="form-label">Button text ( Download case study )</label>
-                <input type="text" class="form-control" name="knowmore_btn_text">
+                <input type="text" class="form-control" name="knowmore_btn_text" value="<%=section.knowmore_btn_text%>">
             </div>
     
             <div class="mx-2">
@@ -1063,8 +1063,8 @@ var table1=$('#whatwedo_table').DataTable({
   //             }]
   // });
 
-  var table4=$('#journey_table').DataTable({
-              ajax:"/admin/table/homepage/sec2_entries",
+  var table4=$('#ourbusiness_table').DataTable({
+              ajax:"/admin/table/case_study/<%=section._id%>/business_cards",
               processing:true,
               columns:[
                 {"data":"id"},
