@@ -429,6 +429,7 @@ app.get('/admin/get_casestudies', async (req, res) => {
       .sort({ _id: -1 })
       .toArray();
 
+      ///admin/case_study/:id
     const data = caseStudies.map((item, index) => ({
       id: index + 1,
       title: item.hero_title1 || 'Untitled',
@@ -439,7 +440,7 @@ app.get('/admin/get_casestudies', async (req, res) => {
         <a href="${item.case_study}" target="_blank" class="btn btn-primary mx-1">
           <i class="bi bi-eye-fill"></i> Preview
         </a>
-        <a href="/admin/edit_landingpage/${item.page}" class="btn btn-success mx-1">
+        <a href="/admin/edit_case_study/${item._id}" class="btn btn-success mx-1">
           <i class="bi bi-pencil-square"></i> Edit
         </a>
         <button type="button" class="btn btn-danger mx-1 eradicator" data-id="${item._id}" data-type="landingpage">
@@ -624,6 +625,39 @@ app.post('/admin/blog/create', upload.single('blog_image'), async (req, res) => 
     // res.render('landingpage',{section:data||{},page:req.params.page,ucfirst});
     res.render('landingpage',{page:req.params.page,ucfirst});
   });
+
+
+  //case study edit
+
+  app.get('/admin/edit_case_study/:id', async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const id = new ObjectId(req.params.id);
+
+    const section = await db.collection('landingpage').findOne({
+      _id: id,
+      page: 'case_study' // hardcoded page type
+    });
+
+    if (!section) {
+      req.flash('error', 'Case Study not found');
+      return res.redirect('/admin/dashboard');
+    }
+
+    res.render('edit_casestudy', {
+      section,
+      page: 'case_study',
+      ucfirst
+    });
+  } catch (err) {
+    console.error('Error loading case study:', err);
+    req.flash('error', 'Could not load case study');
+    res.redirect('/admin/dashboard');
+  }
+});
+
+
+//add blog 
 
   app.get('/admin/add_blog',async(req,res)=>{
 
