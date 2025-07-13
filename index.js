@@ -443,10 +443,10 @@ app.get('/admin/table/case_study/:id/business_cards', async (req, res) => {
         ? `<img src="/admin/assets/dist${card.image}" style="width: 100px; height: auto; object-fit: contain;">`
         : '',
       actions: `
-        <button class="btn btn-success editer mx-1" data-id="${card.id}" data-type="business_cards" type="button">
+        <button class="btn btn-success editer mx-1" data-id="${card.id}" data-type="casestudy_business_cards" type="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
           <i class="bi bi-pencil-square"></i> Edit
         </button>
-        <button class="btn btn-danger eradicator mx-1" data-id="${card.id}" data-type="business_cards" type="button">
+        <button class="btn btn-danger eradicator mx-1" data-id="${card.id}" data-type="casestudy_business_cards" type="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
           <i class="bi bi-trash3-fill"></i> Delete
         </button>
       `
@@ -697,6 +697,35 @@ app.post('/admin/blog/create', upload.single('blog_image'), async (req, res) => 
 });
 
 
+//case study individual
+
+app.get('/admin/get_resource/casestudy_business_cards/:docId/:cardId', async (req, res) => {
+  try {
+    const { docId, cardId } = req.params;
+
+    const doc = await mongoose.connection.db.collection('landingpage').findOne({
+      _id: new mongoose.Types.ObjectId(docId),
+      page: 'case_study',
+    });
+
+    if (!doc) {
+      return res.status(404).json({ message: 'Case study not found' });
+    }
+
+    const card = doc.business_cards?.find(card => card.id === cardId);
+
+    if (!card) {
+      return res.status(404).json({ message: 'Business card not found' });
+    }
+
+    res.status(200).json({ card });
+  } catch (err) {
+    console.error('Error fetching single business card:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
 //add blog 
 
   app.get('/admin/add_blog',async(req,res)=>{
@@ -876,6 +905,68 @@ app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) =
     res.render('add_author');
 
   });
+
+
+  //code for editing case study thing
+
+  app.post('/admin/edit/casestudy_business_cards/:docId', upload.single('image'), async (req, res) => {
+  try {
+    const docId = req.params.docId;
+    const cardId = req.body.id;
+    const { number, content } = req.body;
+
+    if (!cardId) {
+      return res.status(400).json({ status: 'error', message: 'Card ID is missing.' });
+    }
+
+    const collection = mongoose.connection.db.collection('landingpage');
+    const doc = await collection.findOne({ _id: new ObjectId(docId) });
+
+    if (!doc) {
+      return res.status(404).json({ status: 'error', message: 'Document not found.' });
+    }
+
+    const cards = doc.business_cards || [];
+
+    let oldImagePath = null;
+
+    const updatedCards = cards.map(card => {
+      if (card.id === cardId) {
+        card.number = number;
+        card.content = content;
+
+        if (req.file) {
+          oldImagePath = card.image;
+          card.image = `/uploads/${req.file.filename}`;
+        }
+      }
+      return card;
+    });
+
+    await collection.updateOne(
+      { _id: new ObjectId(docId) },
+      { $set: { business_cards: updatedCards } }
+    );
+
+    // Delete old image if a new one was uploaded
+    if (req.file && oldImagePath) {
+      const fileToDelete = path.join(__dirname, 'public', 'dist', oldImagePath.replace(/^\/uploads\//, 'uploads/'));
+      fs.unlink(fileToDelete, err => {
+        if (err) {
+          console.warn('⚠️ Could not delete old image:', fileToDelete);
+        }
+      });
+    }
+
+    res.json({ status: 'success', message: 'Business card updated successfully.' });
+
+  } catch (err) {
+    console.error('❌ Update error:', err);
+    res.status(500).json({ status: 'error', message: 'Server error during update.' });
+  }
+});
+
+//edited part
 
   app.get('/admin/create_subcategory',(req,res)=>{
 

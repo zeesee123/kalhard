@@ -4,8 +4,34 @@
 
 <%-include('templates/header')%>
 
+<link href="
+https://cdn.jsdelivr.net/npm/filepond@4.32.7/dist/filepond.min.css
+" rel="stylesheet"/>
+
+<link href="
+https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-plugin-image-preview.min.css
+" rel="stylesheet">
 
 
+<!-- Modal -->
+  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
+          <button type="button" class="btn-close btn-bs-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="modal_content">
+          
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <!-- {{-- <button type="button" class="btn btn-primary">Understood</button> --}} -->
+        </div>
+      </div>
+      <!-- {{-- test --}} -->
+    </div>
+  </div>
 
 
 
@@ -1401,7 +1427,7 @@ var table1=$('#whatwedo_table').DataTable({
   //mapping section tables
 
   const tableMap = {
-    "section3": table1,
+    "section1": table4,//ourbusiness table
     "section4": table2,
     // "section5": table3,
     // "section6": table4,
@@ -1450,7 +1476,7 @@ function reloadTable(sectionName) {
 
   //  type in loading for loading in the resource..
 
-  let fet=await fetch(`/admin/get_resource/${type}/${id}`);
+  let fet=await fetch(`/admin/get_resource/${type}/<%=section._id%>/${id}`);
   
   let res=await fet.json();
 
@@ -1474,17 +1500,25 @@ function reloadTable(sectionName) {
 
     switch(type){
 
-case "sec2_entries":
+case "casestudy_business_cards":
   content=`<form id="dynForm">
     <div class="mb-3">
       <label for="" class="form-label">Image</label>
-      <input class="form-control filepond" type="file">
-      <input type="hidden" value="${id}" name="id">
-      <button class="btn btn-success" id="update_btnmod">Update</button>
+      <input class="form-control filepond" type="file" >
       </div>
+      <div class="mb-3">
+      <label for="" class="form-label">Title</label>
+      <input class="form-control" type="text" value="${res.card.number}" name="number">
+      </div>
+      <div class="mb-3">
+      <label for="" class="form-label">Content</label>
+      <textarea class="form-control" rows="5" name="content">${res.card.content}</textarea>
+      </div>
+      <input type="hidden" value="${res.card.id}" name="id">
+      <button class="btn btn-success" id="update_btnmod" >Update</button>
       </form>`;
       img=true;
-      imglink=`/admin/assets/dist/uploads/${res.sectionData.whatwe_doimg}`;
+      imglink=`/admin/assets/dist/${res.card.image}`;
 break;
 case "section4":
   content=`<form id="dynForm">
@@ -1709,15 +1743,16 @@ content=`utc`;
         if(pond.getFile(0)){
 
 console.log('file is there');
-
-data.append('image',pond.getFile().file);
+const file = pond.getFile().file;
+data.append('image', file, file.name || 'upload.png');
+// data.append('image',pond.getFile().file);
 }else{
 console.log('file is not there');
 }
       }
       
 
-      let fetchf=await fetch(`{{url('admin/update_homesection')}}/${type}`,{method:'POST',headers:{'X-CSRF-TOKEN':x_token},body:data})
+      let fetchf=await fetch(`/admin/edit/casestudy_business_cards/<%=section._id%>`,{method:'POST',body:data});
       
 
       let resf=await fetchf.json();
@@ -1733,7 +1768,7 @@ console.log('file is not there');
   confirmButtonText: 'OK'
 });
 
-      reloadTable(type);
+      reloadTable('section1');
 
       }else{
 
@@ -1745,7 +1780,7 @@ console.log('file is not there');
 
 
 
-        let fetchf=await fetch(`{{url('admin/remove_homesection')}}/${type}`,{method:'POST',headers:{'X-CSRF-TOKEN':x_token},body:data})
+        let fetchf=await fetch(`/admin/delete_casestudy_card/<%=section._id%>`,{method:'POST',headers:{'X-CSRF-TOKEN':x_token},body:data})
         let resf=await fetchf.json();
 
         Swal.fire({
@@ -1757,7 +1792,7 @@ console.log('file is not there');
 
 mod_close.click();
 
-reloadTable(type);
+reloadTable('section1');
 
 
 
