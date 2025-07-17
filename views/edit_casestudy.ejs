@@ -74,6 +74,24 @@ https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-
 
         <h3>Hero Section 
        </h3>
+
+
+         <div class="row">
+  <div class="mb-3 col-6">
+      <label for="" class="form-label">Featured image</label>
+      <input type="file" class="form-control img_inpp" name="featured_image">
+      
+  </div>
+  <div class="mb-3 col-2 pt-4">
+      
+      <button type="button" class="btn btn-danger clear-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="reset image"><i class="bi bi-arrow-clockwise"></i></button>
+  </div>
+  <div class="mb-3 col-4">
+      <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
+           <img class="Thumbnail" src="<%= section.featured_image ? '/admin/assets/dist' + section.featured_image : '/admin/assets/dist/defaultimages/default.jpg' %>"  width="400" alt="Default picture Thumbnail">
+      
+  </div>
+</div>
         
 
 <div class="row">
