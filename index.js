@@ -122,6 +122,14 @@ app.use(session({
   }
 }));
 
+//middleware just to prevent the user to view the pages again after logging out
+
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  next();
+});
+
+
 app.use(flash());
 
 app.use(express.json());
@@ -201,7 +209,20 @@ app.post('/admin/login', async (req, res) => {
 });
 
 
-app.get('/admin/home',async(req,res)=>{
+app.post('/admin/logout',(req,res)=>{
+  
+    req.session.destroy(err => {
+      if (err) {
+        console.log('Logout failed', err);
+        return res.redirect('/admin');
+      }
+      res.redirect('/admin/login');
+    });
+  
+})
+
+
+app.get('/admin/home',isAuthenticated,async(req,res)=>{
 
     const data = await mongoose.connection.db.collection('homepage').findOne({});
     console.log(data);
@@ -209,7 +230,7 @@ app.get('/admin/home',async(req,res)=>{
 });
 
 
-app.get('/admin/homenew',async(req,res)=>{
+app.get('/admin/homenew',isAuthenticated,async(req,res)=>{
 
     const data = await mongoose.connection.db.collection('homepage').findOne({});
     console.log(data);
@@ -316,7 +337,7 @@ res.redirect('/admin/home');
 
   //routes for loading the table data
 
-  app.get('/admin/table/:page/:entries',async(req,res)=>{
+  app.get('/admin/table/:page/:entries',isAuthenticated,async(req,res)=>{
 
 
     const { page, entries } = req.params;  // e.g., "homepage", "sec2_entries"
@@ -363,7 +384,7 @@ res.redirect('/admin/home');
   });
 
 
-  app.get('/admin/get_blogs', async (req, res) => {
+  app.get('/admin/get_blogs',isAuthenticated, async (req, res) => {
   try {
 
   //   const collection = mongoose.connection.db.collection(page);
@@ -421,7 +442,7 @@ res.redirect('/admin/home');
 
 //rendering business cards
 
-app.get('/admin/table/case_study/:id/business_cards', async (req, res) => {
+app.get('/admin/table/case_study/:id/business_cards',isAuthenticated, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -462,7 +483,7 @@ app.get('/admin/table/case_study/:id/business_cards', async (req, res) => {
 
 
 
-app.get('/admin/get_casestudies', async (req, res) => {
+app.get('/admin/get_casestudies',isAuthenticated, async (req, res) => {
   try {
     const caseStudies = await mongoose.connection.db.collection('landingpage')
       .find({ page: 'case_study' })
@@ -656,7 +677,7 @@ app.post('/admin/blog/create', upload.single('blog_image'), async (req, res) => 
 });
 
 
-  app.get('/admin/landingpage/:page',async(req,res)=>{
+  app.get('/admin/landingpage/:page',isAuthenticated,async(req,res)=>{
 
     // const data = await mongoose.connection.db.collection('landingpage').findOne({page:req.params.page});
     // console.log(data);
@@ -669,7 +690,7 @@ app.post('/admin/blog/create', upload.single('blog_image'), async (req, res) => 
 
   //case study edit
 
-  app.get('/admin/edit_case_study/:id', async (req, res) => {
+  app.get('/admin/edit_case_study/:id',isAuthenticated, async (req, res) => {
   try {
     const db = mongoose.connection.db;
     const id = new ObjectId(req.params.id);
@@ -801,7 +822,7 @@ app.post('/admin/edit_case_study/:id', upload.fields([
 
 //case study individual
 
-app.get('/admin/get_resource/casestudy_business_cards/:docId/:cardId', async (req, res) => {
+app.get('/admin/get_resource/casestudy_business_cards/:docId/:cardId',isAuthenticated, async (req, res) => {
   try {
     const { docId, cardId } = req.params;
 
@@ -830,7 +851,7 @@ app.get('/admin/get_resource/casestudy_business_cards/:docId/:cardId', async (re
 
 //add blog 
 
-  app.get('/admin/add_blog',async(req,res)=>{
+  app.get('/admin/add_blog',isAuthenticated,async(req,res)=>{
 
    try {
     const authorCollection = mongoose.connection.db.collection('authors');
@@ -857,7 +878,7 @@ app.get('/admin/get_resource/casestudy_business_cards/:docId/:cardId', async (re
   });
 
 
-  app.get('/admin/edit_blog/:id', async (req, res) => {
+  app.get('/admin/edit_blog/:id',isAuthenticated, async (req, res) => {
   try {
     const blogId = new ObjectId(req.params.id);
     const db = mongoose.connection.db;
@@ -969,40 +990,40 @@ app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) =
 });
 
 
-  app.get('/admin/view_blogs',async(req,res)=>{
+  app.get('/admin/view_blogs',isAuthenticated,async(req,res)=>{
 
 
     const blogs=mongoose.connection.db.collection('blogs');
     res.render('view_blogs',{blogs:blogs||null});
   });
 
-  app.get('/admin/create_category',(req,res)=>{
+  app.get('/admin/create_category',isAuthenticated,(req,res)=>{
 
     res.render('create_category');
 
   });
 
 
-  app.get('/admin/view_casestudies',async(req,res)=>{
+  app.get('/admin/view_casestudies',isAuthenticated,async(req,res)=>{
 
 
     // const blogs=mongoose.connection.db.collection('blogs');
     res.render('view_casestudies');
   });
 
-  app.get('/admin/create_category',(req,res)=>{
+  app.get('/admin/create_category',isAuthenticated,(req,res)=>{
 
     res.render('create_category');
 
   });
 
-  app.get('/admin/create_tags',(req,res)=>{
+  app.get('/admin/create_tags',isAuthenticated,(req,res)=>{
 
     res.render('add_tags');
 
   });
 
-  app.get('/admin/add_author',(req,res)=>{
+  app.get('/admin/add_author',isAuthenticated,(req,res)=>{
 
     res.render('add_author');
 
@@ -1070,7 +1091,7 @@ app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) =
 
 //edited part
 
-  app.get('/admin/create_subcategory',(req,res)=>{
+  app.get('/admin/create_subcategory',isAuthenticated,(req,res)=>{
 
 
     res.render('');

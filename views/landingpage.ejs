@@ -11,7 +11,7 @@
 
 <div class="d-flex justify-content-between mt-4">
     <h1><i class="bi bi-rocket-takeoff-fill mx-2"></i>Landing page (<%=ucfirst(page)%>)</h1>
-    <a href="http://localhost:3000" target="_blank"><button class="btn btn-primary"><i class="bi bi-card-list mx-2"></i>List Case studies</button></a>
+    <a href="/admin/view_casestudies" target="_blank"><button class="btn btn-primary"><i class="bi bi-card-list mx-2"></i>List Case studies</button></a>
     
 </div>
 
@@ -212,7 +212,7 @@
 
         <div class="mb-3">
           <label for="" class="form-label">Content</label>
-          <textarea name="calsoftinfocus_text" cols="30" rows="5" class="form-control"></textarea>
+          <textarea name="calsoftinfocus_text" id="blog_content" cols="30" rows="5" class="form-control"></textarea>
       </div>
 
       <!-- <div class="mb-3">
@@ -547,6 +547,21 @@
 <!-- datable -->
 
 <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
+
+
+<script src="/admin/assets/tinymce/tinymce.min.js" referrerpolicy="origin"></script>
+
+<script>
+tinymce.init({
+  selector: '#blog_content',
+  license_key: 'gpl',
+  height: 400,
+  menubar: false,
+  plugins: 'link image code lists',
+  toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image code'
+});
+</script>
+
 
 <script src="
 https://cdn.jsdelivr.net/npm/filepond@4.32.7/dist/filepond.min.js
