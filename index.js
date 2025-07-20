@@ -11,7 +11,7 @@ const routes=require('./routes/web');
 require('dotenv').config();
 console.log(process.env.PORT);
 // console.log('this is mongoose',mongoose);
-mongoose.connect(process.env.CONNECTION_STRING,{dbName:process.env.DB_NAME}).then(() => console.log('✅ MongoDB connected'))
+mongoose.connect(process.env.CONNECTION_STRING,{dbName:process.env.DB_NAME}).then(() => {console.log('✅ MongoDB connected'); console.log(process.env.FRONTEND_URL);})
 .catch(err => console.error('❌ Connection failed', err));
 
 
@@ -36,6 +36,17 @@ function isGuest(req, res, next) {
 //function for capitalizing the first letter 
 function ucfirst(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')        // Replace spaces with hyphens
+    .replace(/[^\w\-]+/g, '')    // Remove special characters
+    .replace(/\-\-+/g, '-');     // Replace multiple hyphens
 }
 
 
@@ -420,7 +431,7 @@ res.redirect('/admin/home');
         ? `<img src="/admin/assets/dist${item.image}" style="width: 100px; height: auto; object-fit: contain;">`
         : '',
       actions: `
-        <a href="/blogs/preview/${item._id}" target="_blank" class="btn btn-primary mx-1">
+        <a href="${process.env.FRONTEND_URL}/insights/blogs/blog-expand/preview/${slugify(item.title)}" target="_blank" class="btn btn-primary mx-1">
           <i class="bi bi-eye-fill"></i> Preview
         </a>
         <a href="/admin/edit_blog/${item._id}" class="btn btn-success mx-1">
