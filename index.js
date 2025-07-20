@@ -1380,14 +1380,85 @@ app.get('/api/casestudy', async (req, res) => {
 });
 
 
+// app.get('/api/blogs', async (req, res) => {
+//   try {
+//     const collection = mongoose.connection.db.collection('blogs');
+
+//     const data = await collection.aggregate([
+//       {
+//         $match: { publish: true } // Only fetch published blogs
+//       },
+//       {
+//         $lookup: {
+//           from: 'categories',
+//           localField: 'category',
+//           foreignField: '_id',
+//           as: 'categoryData'
+//         }
+//       },
+//       {
+//         $unwind: {
+//           path: '$categoryData',
+//           preserveNullAndEmptyArrays: true
+//         }
+//       },
+//       {
+//         $lookup: {
+//           from: 'authors',
+//           localField: 'author',
+//           foreignField: '_id',
+//           as: 'authorData'
+//         }
+//       },
+//       {
+//         $unwind: {
+//           path: '$authorData',
+//           preserveNullAndEmptyArrays: true
+//         }
+//       },
+//       {
+//         $lookup: {
+//           from: 'tags',
+//           localField: 'tag',
+//           foreignField: '_id',
+//           as: 'tagData'
+//         }
+//       },
+//       {
+//         $sort: { date: -1 } // optional: newest first
+//       }
+//     ]).toArray();
+
+//     res.json({ data });
+//   } catch (error) {
+//     console.error('Error fetching blogs:', error);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// });
+
 app.get('/api/blogs', async (req, res) => {
   try {
     const collection = mongoose.connection.db.collection('blogs');
 
+    const { author, tag, category } = req.query;
+
+    // Build dynamic filters
+    const matchStage = { publish: true };
+
+    if (author) {
+      matchStage.author = new mongoose.Types.ObjectId(author);
+    }
+
+    if (tag) {
+      matchStage.tag = new mongoose.Types.ObjectId(tag); // assuming tag is a single ObjectId field
+    }
+
+    if (category) {
+      matchStage.category = new mongoose.Types.ObjectId(category);
+    }
+
     const data = await collection.aggregate([
-      {
-        $match: { publish: true } // Only fetch published blogs
-      },
+      { $match: matchStage },
       {
         $lookup: {
           from: 'categories',
@@ -1425,7 +1496,7 @@ app.get('/api/blogs', async (req, res) => {
         }
       },
       {
-        $sort: { date: -1 } // optional: newest first
+        $sort: { date: -1 }
       }
     ]).toArray();
 
@@ -1437,6 +1508,18 @@ app.get('/api/blogs', async (req, res) => {
 });
 
 
+//filters for the blogs
+app.get('/api/blogs/filters',async(req,res)=>{
+
+  const authors=await mongoose.connection.db.collection('authors').find().toArray();
+  const tags=await mongoose.connection.db.collection('categories').find().toArray();
+  const categories=await mongoose.connection.db.collection('tags').find().toArray();
+
+  res.json({authors:authors,topics:tags,industries:categories});
+});
+
+
+//searching for specific blogs depending on the filters 
 
 app.get('/api/blogs/:id', async (req, res) => {
   try {
@@ -1504,6 +1587,8 @@ app.get('/api/blogs/:id', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+
 
 
 // hello
