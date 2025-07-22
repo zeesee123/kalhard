@@ -81,6 +81,13 @@ const calculateReadTime = (content) => {
     console.log('Uploads directory created:', blogDir);
   }
 
+   // ✅ Ensure whitepapers directory exists
+  const whitepaperDir = path.join(__dirname, 'public','dist', 'whitepapers');
+  if (!fs.existsSync(whitepaperDir)) {
+    fs.mkdirSync(whitepaperDir, { recursive: true });
+    console.log('Uploads directory created:', whitepaperDir);
+  }
+
 
 
 //multer for file uploads
@@ -101,6 +108,8 @@ const storage = multer.diskStorage({
       cb(null, 'public/dist/casestudies/');
     } else if (file.fieldname === 'blog_image') {
       cb(null, 'public/dist/blogs/'); // <-- blog image goes here
+    } else if (file.fieldname === 'white_paper') {
+      cb(null, 'public/dist/whitepapers/'); // <-- blog image goes here
     } else {
       cb(null, 'public/dist/uploads/');
     }
@@ -693,9 +702,10 @@ app.post('/admin/blog/create', upload.single('blog_image'), async (req, res) => 
     // const data = await mongoose.connection.db.collection('landingpage').findOne({page:req.params.page});
     // console.log(data);
     
-
+    const tagCollection = mongoose.connection.db.collection('tags');
+    const tags = await tagCollection.find({}).toArray();
     // res.render('landingpage',{section:data||{},page:req.params.page,ucfirst});
-    res.render('landingpage',{page:req.params.page,ucfirst});
+    res.render('landingpage',{page:req.params.page,ucfirst,tags});
   });
 
 
@@ -716,9 +726,14 @@ app.post('/admin/blog/create', upload.single('blog_image'), async (req, res) => 
       return res.redirect('/admin/dashboard');
     }
 
+     const tagCollection = mongoose.connection.db.collection('tags');
+
+    
+
+        const tags = await tagCollection.find({}).toArray();
     res.render('edit_casestudy', {
       section,
-      page: 'case_study',
+      page: 'case_study',tags,
       ucfirst
     });
   } catch (err) {
@@ -780,6 +795,8 @@ app.post('/admin/edit_case_study/:id', upload.fields([
       ? '/uploads/' + featuredImageFile.filename
       : existingDoc.featured_image;
 
+      const tag=req.body.tag;
+
     const updatedData = {
       page: req.body.page || "case_study",
 
@@ -801,12 +818,19 @@ app.post('/admin/edit_case_study/:id', upload.fields([
       calsoftinfocus_text: req.body.calsoftinfocus_text,
       hubspot_form: req.body.hubspot_form,
 
+        tag: Array.isArray(tag)
+    ? tag.map(t => new ObjectId(t))         // if multiple tags
+    : tag
+    ? [new ObjectId(tag)]                  // if only one tag selected
+    : [],
+
       // Know more section
       knowmore_title1: req.body.knowmore_title1,
       knowmore_text: req.body.knowmore_text,
       knowmore_btn_text: req.body.knowmore_btn_text,
       knowmore_btn_url: req.body.knowmore_btn_url,
       knowmoreimage: knowmoreImagePath,
+
 
       // SEO section
       meta: {
@@ -1115,6 +1139,7 @@ app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) =
     { name:'card_two',maxCount:1},
     { name: 'businessinvalue_img' } ,// handles all journey card images
     { name: 'case_study', maxCount: 1 },
+    { name: 'white_paper', maxCount: 1 }, 
     { name: 'featured_image', maxCount: 1 },
   ]),async(req,res)=>{
 
@@ -1126,7 +1151,8 @@ app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) =
     
       try {
         const collection = mongoose.connection.db.collection('landingpage');
-    
+        
+        const page=req.body.page;
         // 1. Find existing document
         // const existingDoc = await collection.findOne({ page: req.body.page });
     
@@ -1200,10 +1226,24 @@ const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.fi
         //calsoft case study part
 
         // Case Study PDF handling (NO existingDoc logic)
-        const caseStudyFile = req.files?.case_study?.[0];
-        const caseStudyPath = caseStudyFile
+
+        let caseStudyPath=null;
+        let whitePaperPath=null;
+        if(page=='case_study'){
+
+          const caseStudyFile = req.files?.case_study?.[0];
+        caseStudyPath = caseStudyFile
           ? '/casestudies/' + caseStudyFile.filename
           : null;
+
+        }else{
+
+          const whitePaperFile = req.files?.white_paper?.[0];
+       whitePaperPath = whitePaperFile
+          ? '/casestudies/' + whitePaperFile.filename
+          : null;
+        }
+        
 
 
           //featured image 
@@ -1234,13 +1274,17 @@ const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.fi
         //   currentCounter++;
         // }
 
-        let currentCounter = 1;
+const businessCards = [];
+
+        if(page=='case_study'){
+
+          let currentCounter = 1;
 
 const businessTitles = req.body.businessinvalue_stitle || [];
 const businessContents = req.body.businessinvalue_scontent || [];
 const businessImages = req.files?.businessinvalue_img || [];
 
-const businessCards = [];
+
 for (let i = 0; i < businessTitles.length; i++) {
   if (!businessTitles[i] && !businessContents[i] && !businessImages[i]) continue;
 
@@ -1253,6 +1297,9 @@ for (let i = 0; i < businessTitles.length; i++) {
 
   currentCounter++;
 }
+        }
+
+        const tag=req.body.tag;
     
         // 5. Construct final data
         const formData = {
@@ -1266,6 +1313,7 @@ for (let i = 0; i < businessTitles.length; i++) {
           card_one:newcardoneImagePath,
           card_two:newcardtwoImagePath,
           case_study:caseStudyPath,
+          white_paper:whitePaperPath,
           featured_image:featured_image,
           herobtn_text: req.body.herobtn_text,
           herobtn_url: req.body.herobtn_url,
@@ -1285,6 +1333,11 @@ for (let i = 0; i < businessTitles.length; i++) {
           knowmore_btn_text: req.body.knowmore_btn_text,
           knowmore_btn_url: req.body.knowmore_btn_url,
           knowmoreimage: knowmoreImagePath,
+          tag: Array.isArray(tag)
+    ? tag.map(t => new ObjectId(t))         // if multiple tags
+    : tag
+    ? [new ObjectId(tag)]                  // if only one tag selected
+    : [],
 
           // ➕ SEO Fields
           meta: {

@@ -112,6 +112,16 @@ https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-
 </div>
 
 
+ <div class="mb-3 col-6">
+  <label for="blog_author" class="form-label">Tags</label>
+  <select name="tag" class="form-control" multiple>
+    <% tags.forEach(tag => { %>
+      <option value="<%= tag._id %>"><%= ucfirst(tag.name) %></option>
+    <% }); %>
+  </select>
+</div>
+
+
 <div class="row">
   <div class="mb-3 col-6">
       <label for="" class="form-label">Card 1 (left card)</label>
