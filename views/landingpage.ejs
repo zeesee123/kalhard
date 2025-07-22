@@ -283,14 +283,14 @@
   <div class="accordion-item mb-3">
   <h2 class="accordion-header">
     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCustomers" aria-expanded="false" aria-controls="collapseCustomers">
-      <i class="bi bi-person-check-fill mx-2"></i>Business value
+      <i class="bi bi-person-check-fill mx-2"></i><%=page=='white_paper'?'Why Read this whitepaper':'Business value'%>
     </button>
   </h2>
   <div id="collapseCustomers" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
     <div class="accordion-body">
       <div class="card pt-3 p-4">
 
-        <h3>Business value
+        <h3><%=page=='white_paper'?'Why Read this whitepaper':'Business value'%>
        </h3>
         
 
@@ -310,7 +310,7 @@
           </div> -->
         </div>
        
-    
+<%if(page!='white_paper'){%>    
         <h5>Icons(Increased,faster,simplified....)</h5>
         <div class="" id="ourbusiness_cards">
           <div class="mb-3 row">
@@ -354,6 +354,13 @@
             
           </tbody>
         </table>
+        <% }else{%>
+
+            <div class="mb-3">
+          <label for="" class="form-label">Content</label>
+          <textarea name="whyread_text" id="blog_contenttwo" cols="30" rows="5" class="form-control"></textarea>
+      </div>
+      <%}%>
         
 
         
@@ -554,6 +561,15 @@
 <script>
 tinymce.init({
   selector: '#blog_content',
+  license_key: 'gpl',
+  height: 400,
+  menubar: false,
+  plugins: 'link image code lists',
+  toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image code'
+});
+
+tinymce.init({
+  selector: '#blog_contenttwo',
   license_key: 'gpl',
   height: 400,
   menubar: false,
