@@ -11,7 +11,7 @@ const routes=require('./routes/web');
 require('dotenv').config();
 console.log(process.env.PORT);
 // console.log('this is mongoose',mongoose);
-mongoose.connect(process.env.CONNECTION_STRING,{dbName:process.env.DB_NAME}).then(() => {console.log('✅ MongoDB connected'); console.log(process.env.FRONTEND_URL);})
+mongoose.connect(process.env.CONNECTION_STRING,{dbName:process.env.DB_NAME}).then(() => {console.log('✅ MongoDB connected'); console.log('frontend url',process.env.FRONTEND_URL);})
 .catch(err => console.error('❌ Connection failed', err));
 
 
@@ -538,6 +538,40 @@ app.get('/admin/get_casestudies',isAuthenticated, async (req, res) => {
 });
 
 
+app.get('/admin/get_whitepapers',isAuthenticated, async (req, res) => {
+  try {
+    const caseStudies = await mongoose.connection.db.collection('landingpage')
+      .find({ page: 'white_paper' })
+      .sort({ _id: -1 })
+      .toArray();
+
+      ///admin/case_study/:id
+    const data = caseStudies.map((item, index) => ({
+      id: index + 1,
+      title: item.hero_title1 || 'Untitled',
+      image: item.card_one
+        ? `<img src="/admin/assets/dist${item.card_one}" style="width: 100px; height: auto; object-fit: contain;">`
+        : '',
+      actions: `
+        <a href="${item.case_study}" target="_blank" class="btn btn-primary mx-1">
+          <i class="bi bi-eye-fill"></i> Preview
+        </a>
+        <a href="/admin/edit_white_paper/${item._id}" class="btn btn-success mx-1">
+          <i class="bi bi-pencil-square"></i> Edit
+        </a>
+        <button type="button" class="btn btn-danger mx-1 eradicator" data-id="${item._id}" data-type="landingpage">
+          <i class="bi bi-trash3-fill"></i> Delete
+        </button>
+      `
+    }));
+
+    res.status(200).json({ data });
+  } catch (err) {
+    console.error('Error fetching white papers:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
   app.post('/admin/add_author', async (req, res) => {
   try {
     const authorName = req.body.author?.trim();
@@ -854,6 +888,163 @@ app.post('/admin/edit_case_study/:id', upload.fields([
   }
 });
 
+//edit white paper get
+
+//edit white paper post 
+
+app.get('/admin/edit_white_paper/:id',isAuthenticated, async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const id = new ObjectId(req.params.id);
+
+    const section = await db.collection('landingpage').findOne({
+      _id: id,
+      page: 'white_paper' // hardcoded page type
+    });
+
+    if (!section) {
+      req.flash('error', 'White paper not found');
+      return res.redirect('/admin/dashboard');
+    }
+
+     const tagCollection = mongoose.connection.db.collection('tags');
+
+    
+
+        const tags = await tagCollection.find({}).toArray();
+    res.render('edit_whitepaper', {
+      section,
+      page: 'white_paper',tags,
+      ucfirst
+    });
+  } catch (err) {
+    console.error('Error loading case study:', err);
+    req.flash('error', 'Could not load case study');
+    res.redirect('/admin/dashboard');
+  }
+});
+
+
+
+app.post('/admin/edit_white_paper/:id', upload.fields([
+  { name: 'hero_image', maxCount: 1 },
+  { name: 'knowmore_image', maxCount: 1 },
+  { name: 'card_one', maxCount: 1 },
+  { name: 'card_two', maxCount: 1 },
+  { name: 'businessinvalue_img' },
+  { name: 'white_paper', maxCount: 1 },
+  { name: 'featured_image', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const collection = mongoose.connection.db.collection('landingpage');
+    const id = new ObjectId(req.params.id);
+
+    // 🛠️ Correct page name
+    const existingDoc = await collection.findOne({ _id: id, page: 'white_paper' });
+
+    if (!existingDoc) {
+      req.flash('error', 'White paper not found');
+      return res.redirect('/admin/dashboard');
+    }
+
+    // 📸 Handle all image fields
+    const heroimageFile = req.files?.hero_image?.[0];
+    const newHeroImagePath = heroimageFile ? '/uploads/' + heroimageFile.filename : existingDoc.hero_image;
+
+    const cardoneimageFile = req.files?.card_one?.[0];
+    const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.filename : existingDoc.card_one;
+
+    const cardtwoimageFile = req.files?.card_two?.[0];
+    const newcardtwoImagePath = cardtwoimageFile ? '/uploads/' + cardtwoimageFile.filename : existingDoc.card_two;
+
+    const knowmoreImageFile = req.files?.knowmore_image?.[0];
+    const knowmoreImagePath = knowmoreImageFile ? '/uploads/' + knowmoreImageFile.filename : existingDoc.knowmoreimage;
+
+    const whitePaperFile = req.files?.white_paper?.[0];
+    const whitePaperPath = whitePaperFile ? '/whitepapers/' + whitePaperFile.filename : existingDoc.white_paper;
+
+    const featuredImageFile = req.files?.featured_image?.[0];
+    const featured_image = featuredImageFile ? '/uploads/' + featuredImageFile.filename : existingDoc.featured_image;
+
+    const tag = req.body.tag;
+
+    // 🧠 Business value section
+    // let businessCards = [];
+    // const businessTitles = req.body.businessinvalue_stitle || [];
+    // const businessContents = req.body.businessinvalue_scontent || [];
+    // const businessImages = req.files?.businessinvalue_img || [];
+
+    // for (let i = 0; i < businessTitles.length; i++) {
+    //   if (!businessTitles[i] && !businessContents[i] && !businessImages[i]) continue;
+
+    //   businessCards.push({
+    //     id: (i + 1).toString(),
+    //     number: businessTitles[i],
+    //     content: businessContents[i],
+    //     image: businessImages[i] ? '/uploads/' + businessImages[i].filename : (existingDoc.business_cards?.[i]?.image || null)
+    //   });
+    // }
+
+    const updatedData = {
+      page: 'white_paper',
+
+      // Hero section
+      hero_title1: req.body.hero_title1,
+      hero_title2: req.body.hero_title2,
+      hero_content: req.body.hero_content,
+      hero_image: newHeroImagePath,
+      card_one: newcardoneImagePath,
+      card_two: newcardtwoImagePath,
+      white_paper: whitePaperPath,
+      featured_image: featured_image,
+      herobtn_text: req.body.herobtn_text,
+      herobtn_url: req.body.herobtn_url,
+
+      // Calsoft in focus
+      calsoftinfocus_title: req.body.calsoftinfocus_title,
+      calsoftinfocus_checkboxtext: req.body.calsoftinfocus_checkboxtext,
+      calsoftinfocus_text: req.body.calsoftinfocus_text,
+      hubspot_form: req.body.hubspot_form,
+
+      tag: Array.isArray(tag)
+        ? tag.map(t => new ObjectId(t))
+        : tag
+          ? [new ObjectId(tag)]
+          : [],
+
+      // Know more section
+      knowmore_title1: req.body.knowmore_title1,
+      knowmore_text: req.body.knowmore_text,
+      knowmore_btn_text: req.body.knowmore_btn_text,
+      knowmore_btn_url: req.body.knowmore_btn_url,
+      knowmoreimage: knowmoreImagePath,
+
+      // Business Value Section
+      // business_cards: businessCards,
+      whyread_text:req.body.whyread_text,
+
+      // SEO section
+      meta: {
+        title: req.body.meta_title?.trim() || '',
+        description: req.body.meta_description?.trim() || '',
+        schema: req.body.schema_markup?.trim() || ''
+      }
+    };
+
+    await collection.updateOne(
+      { _id: id },
+      { $set: updatedData }
+    );
+
+    req.flash('success', 'White Paper updated successfully.');
+    res.redirect(`/admin/landingpage/${updatedData.page}`);
+  } catch (err) {
+    console.error('Update error:', err.message);
+    req.flash('error', 'Something went wrong while updating.');
+    res.redirect(`/admin/landingpage/${req.body.page}`);
+  }
+});
+
 
 //case study individual
 
@@ -1044,6 +1235,13 @@ app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) =
 
     // const blogs=mongoose.connection.db.collection('blogs');
     res.render('view_casestudies');
+  });
+
+   app.get('/admin/view_whitepapers',isAuthenticated,async(req,res)=>{
+
+
+    // const blogs=mongoose.connection.db.collection('blogs');
+    res.render('view_whitepapers');
   });
 
   app.get('/admin/create_category',isAuthenticated,(req,res)=>{
@@ -1240,7 +1438,7 @@ const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.fi
 
           const whitePaperFile = req.files?.white_paper?.[0];
        whitePaperPath = whitePaperFile
-          ? '/casestudies/' + whitePaperFile.filename
+          ? '/whitepapers/' + whitePaperFile.filename
           : null;
         }
         
@@ -1432,6 +1630,24 @@ app.get('/api/casestudy', async (req, res) => {
   }
 });
 
+
+app.get('/api/whitepapers', async (req, res) => {
+  try {
+    const collection = mongoose.connection.db.collection('landingpage');
+
+    // Query only documents where page is 'case_study'
+    const data = await collection.find({ page: 'white_paper' }).toArray();
+
+    if (!data || data.length === 0) {
+      return res.status(404).json({ error: 'There are no white papers' });
+    }
+
+    res.json({ data });
+  } catch (error) {
+    console.error('Error fetching white papers:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 // app.get('/api/blogs', async (req, res) => {
 //   try {
