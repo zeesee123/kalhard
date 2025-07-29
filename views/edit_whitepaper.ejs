@@ -114,9 +114,12 @@ https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-
 
  <div class="mb-3 col-6">
   <label for="blog_author" class="form-label">Tags</label>
-  <select name="tag" class="form-control" multiple>
-    <% tags.forEach(tag => { %>
-      <option value="<%= tag._id %>"><%= ucfirst(tag.name) %></option>
+  <select name="tag" id="blog_tags" class="form-control" multiple>
+    <% tags.forEach(t => { %>
+      <option value="<%= t._id %>" 
+        <%= section.tag && section.tag.some(tagId => tagId.toString() === t._id.toString()) ? 'selected' : '' %>>
+        <%= ucfirst(t.name) %>
+      </option>
     <% }); %>
   </select>
 </div>
@@ -490,20 +493,20 @@ https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-
     <div class="accordion-body">
       <div class="card pt-3 p-4">
 
-        <h3>Upload Case Study
+        <h3>Upload White Paper
         </h3>
         
 
 
-<% if (section.case_study) { %>
+<% if (section.white_paper) { %>
     <div class="mb-3 col-6 d-flex align-items-end">
-      <a href="/admin/assets/<%=section.case_study%>" target="_blank" class="btn btn-primary">
+      <a href="/admin/assets/<%=section.white_paper%>" target="_blank" class="btn btn-primary">
         Preview Current PDF
       </a>
     </div>
   <% }else{ %>
 
-    <div>You haven't uploaded any case study</div>
+    <div>You haven't uploaded any white paper</div>
     <% } %>
 </div>
 
