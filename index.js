@@ -926,122 +926,182 @@ app.get('/admin/edit_white_paper/:id',isAuthenticated, async (req, res) => {
 
 
 
-app.post('/admin/edit_white_paper/:id', upload.fields([
-  { name: 'hero_image', maxCount: 1 },
-  { name: 'knowmore_image', maxCount: 1 },
-  { name: 'card_one', maxCount: 1 },
-  { name: 'card_two', maxCount: 1 },
-  { name: 'businessinvalue_img' },
-  { name: 'white_paper', maxCount: 1 },
-  { name: 'featured_image', maxCount: 1 }
+// app.post('/admin/edit_white_paper/:id', upload.fields([
+//   { name: 'hero_image', maxCount: 1 },
+//   { name: 'knowmore_image', maxCount: 1 },
+//   { name: 'card_one', maxCount: 1 },
+//   { name: 'card_two', maxCount: 1 },
+//   { name: 'businessinvalue_img' },
+//   { name: 'white_paper', maxCount: 1 },
+//   { name: 'featured_image', maxCount: 1 }
+// ]), async (req, res) => {
+//   try {
+//     const collection = mongoose.connection.db.collection('landingpage');
+//     const id = new ObjectId(req.params.id);
+
+//     // 🛠️ Correct page name
+//     const existingDoc = await collection.findOne({ _id: id, page: 'white_paper' });
+
+//     if (!existingDoc) {
+//       req.flash('error', 'White paper not found');
+//       return res.redirect('/admin/dashboard');
+//     }
+
+//     // 📸 Handle all image fields
+//     const heroimageFile = req.files?.hero_image?.[0];
+//     const newHeroImagePath = heroimageFile ? '/uploads/' + heroimageFile.filename : existingDoc.hero_image;
+
+//     const cardoneimageFile = req.files?.card_one?.[0];
+//     const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.filename : existingDoc.card_one;
+
+//     const cardtwoimageFile = req.files?.card_two?.[0];
+//     const newcardtwoImagePath = cardtwoimageFile ? '/uploads/' + cardtwoimageFile.filename : existingDoc.card_two;
+
+//     const knowmoreImageFile = req.files?.knowmore_image?.[0];
+//     const knowmoreImagePath = knowmoreImageFile ? '/uploads/' + knowmoreImageFile.filename : existingDoc.knowmoreimage;
+
+//     const whitePaperFile = req.files?.white_paper?.[0];
+//     const whitePaperPath = whitePaperFile ? '/whitepapers/' + whitePaperFile.filename : existingDoc.white_paper;
+
+//     const featuredImageFile = req.files?.featured_image?.[0];
+//     const featured_image = featuredImageFile ? '/uploads/' + featuredImageFile.filename : existingDoc.featured_image;
+
+//     const tag = req.body.tag;
+
+//     // 🧠 Business value section
+//     // let businessCards = [];
+//     // const businessTitles = req.body.businessinvalue_stitle || [];
+//     // const businessContents = req.body.businessinvalue_scontent || [];
+//     // const businessImages = req.files?.businessinvalue_img || [];
+
+//     // for (let i = 0; i < businessTitles.length; i++) {
+//     //   if (!businessTitles[i] && !businessContents[i] && !businessImages[i]) continue;
+
+//     //   businessCards.push({
+//     //     id: (i + 1).toString(),
+//     //     number: businessTitles[i],
+//     //     content: businessContents[i],
+//     //     image: businessImages[i] ? '/uploads/' + businessImages[i].filename : (existingDoc.business_cards?.[i]?.image || null)
+//     //   });
+//     // }
+
+//     const updatedData = {
+//       page: 'white_paper',
+
+//       // Hero section
+//       hero_title1: req.body.hero_title1,
+//       hero_title2: req.body.hero_title2,
+//       hero_content: req.body.hero_content,
+//       hero_image: newHeroImagePath,
+//       card_one: newcardoneImagePath,
+//       card_two: newcardtwoImagePath,
+//       white_paper: whitePaperPath,
+//       featured_image: featured_image,
+//       herobtn_text: req.body.herobtn_text,
+//       herobtn_url: req.body.herobtn_url,
+
+//       // Calsoft in focus
+//       calsoftinfocus_title: req.body.calsoftinfocus_title,
+//       calsoftinfocus_checkboxtext: req.body.calsoftinfocus_checkboxtext,
+//       calsoftinfocus_text: req.body.calsoftinfocus_text,
+//       hubspot_form: req.body.hubspot_form,
+
+//       tag: Array.isArray(tag)
+//         ? tag.map(t => new ObjectId(t))
+//         : tag
+//           ? [new ObjectId(tag)]
+//           : [],
+
+//       // Know more section
+//       knowmore_title1: req.body.knowmore_title1,
+//       knowmore_text: req.body.knowmore_text,
+//       knowmore_btn_text: req.body.knowmore_btn_text,
+//       knowmore_btn_url: req.body.knowmore_btn_url,
+//       knowmoreimage: knowmoreImagePath,
+
+//       // Business Value Section
+//       // business_cards: businessCards,
+//       whyread_text:req.body.whyread_text,
+
+//       // SEO section
+//       meta: {
+//         title: req.body.meta_title?.trim() || '',
+//         description: req.body.meta_description?.trim() || '',
+//         schema: req.body.schema_markup?.trim() || ''
+//       }
+//     };
+
+//     await collection.updateOne(
+//       { _id: id },
+//       { $set: updatedData }
+//     );
+
+//     req.flash('success', 'White Paper updated successfully.');
+//     res.redirect(`/admin/landingpage/${updatedData.page}`);
+//   } catch (err) {
+//     console.error('Update error:', err.message);
+//     req.flash('error', 'Something went wrong while updating.');
+//     res.redirect(`/admin/landingpage/${req.body.page}`);
+//   }
+// });
+app.post("/admin/edit_white_paper/:id", upload.fields([
+  { name: "hero_image", maxCount: 1 },
+  { name: "card_one", maxCount: 1 },
+  { name: "card_two", maxCount: 1 },
+  { name: "featured_image", maxCount: 1 },
+  { name: "knowmore_image", maxCount: 1 },
+  { name: "white_paper", maxCount: 1 }
 ]), async (req, res) => {
   try {
-    const collection = mongoose.connection.db.collection('landingpage');
-    const id = new ObjectId(req.params.id);
+    // const whitepaperId = req.params.id;
+    // const existingDoc = await Whitepaper.findById(whitepaperId);
 
-    // 🛠️ Correct page name
-    const existingDoc = await collection.findOne({ _id: id, page: 'white_paper' });
+    // const collection = mongoose.connection.db.collection('landingpage');
+ const id = new ObjectId(req.params.id);
+
+//     // 🛠️ Correct page name
+   const existingDoc = await collection.findOne({ _id: id, page: 'white_paper' });
 
     if (!existingDoc) {
-      req.flash('error', 'White paper not found');
-      return res.redirect('/admin/dashboard');
+      return res.status(404).json({ success: false, message: "Whitepaper not found" });
     }
 
-    // 📸 Handle all image fields
-    const heroimageFile = req.files?.hero_image?.[0];
-    const newHeroImagePath = heroimageFile ? '/uploads/' + heroimageFile.filename : existingDoc.hero_image;
-
-    const cardoneimageFile = req.files?.card_one?.[0];
-    const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.filename : existingDoc.card_one;
-
-    const cardtwoimageFile = req.files?.card_two?.[0];
-    const newcardtwoImagePath = cardtwoimageFile ? '/uploads/' + cardtwoimageFile.filename : existingDoc.card_two;
-
-    const knowmoreImageFile = req.files?.knowmore_image?.[0];
-    const knowmoreImagePath = knowmoreImageFile ? '/uploads/' + knowmoreImageFile.filename : existingDoc.knowmoreimage;
-
-    const whitePaperFile = req.files?.white_paper?.[0];
-    const whitePaperPath = whitePaperFile ? '/whitepapers/' + whitePaperFile.filename : existingDoc.white_paper;
-
-    const featuredImageFile = req.files?.featured_image?.[0];
-    const featured_image = featuredImageFile ? '/uploads/' + featuredImageFile.filename : existingDoc.featured_image;
-
-    const tag = req.body.tag;
-
-    // 🧠 Business value section
-    // let businessCards = [];
-    // const businessTitles = req.body.businessinvalue_stitle || [];
-    // const businessContents = req.body.businessinvalue_scontent || [];
-    // const businessImages = req.files?.businessinvalue_img || [];
-
-    // for (let i = 0; i < businessTitles.length; i++) {
-    //   if (!businessTitles[i] && !businessContents[i] && !businessImages[i]) continue;
-
-    //   businessCards.push({
-    //     id: (i + 1).toString(),
-    //     number: businessTitles[i],
-    //     content: businessContents[i],
-    //     image: businessImages[i] ? '/uploads/' + businessImages[i].filename : (existingDoc.business_cards?.[i]?.image || null)
-    //   });
-    // }
-
-    const updatedData = {
-      page: 'white_paper',
-
-      // Hero section
-      hero_title1: req.body.hero_title1,
-      hero_title2: req.body.hero_title2,
-      hero_content: req.body.hero_content,
-      hero_image: newHeroImagePath,
-      card_one: newcardoneImagePath,
-      card_two: newcardtwoImagePath,
-      white_paper: whitePaperPath,
-      featured_image: featured_image,
-      herobtn_text: req.body.herobtn_text,
-      herobtn_url: req.body.herobtn_url,
-
-      // Calsoft in focus
-      calsoftinfocus_title: req.body.calsoftinfocus_title,
-      calsoftinfocus_checkboxtext: req.body.calsoftinfocus_checkboxtext,
-      calsoftinfocus_text: req.body.calsoftinfocus_text,
-      hubspot_form: req.body.hubspot_form,
-
-      tag: Array.isArray(tag)
-        ? tag.map(t => new ObjectId(t))
-        : tag
-          ? [new ObjectId(tag)]
-          : [],
-
-      // Know more section
-      knowmore_title1: req.body.knowmore_title1,
-      knowmore_text: req.body.knowmore_text,
-      knowmore_btn_text: req.body.knowmore_btn_text,
-      knowmore_btn_url: req.body.knowmore_btn_url,
-      knowmoreimage: knowmoreImagePath,
-
-      // Business Value Section
-      // business_cards: businessCards,
-      whyread_text:req.body.whyread_text,
-
-      // SEO section
-      meta: {
-        title: req.body.meta_title?.trim() || '',
-        description: req.body.meta_description?.trim() || '',
-        schema: req.body.schema_markup?.trim() || ''
-      }
+    const deleteOldFile = (oldPath) => {
+      const fullPath = path.join(__dirname, '../public', oldPath);
+      if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
     };
 
-    await collection.updateOne(
-      { _id: id },
-      { $set: updatedData }
-    );
+    const fileFields = [
+      { field: "hero_image", pathPrefix: "/uploads/" },
+      { field: "card_one", pathPrefix: "/uploads/" },
+      { field: "card_two", pathPrefix: "/uploads/" },
+      { field: "featured_image", pathPrefix: "/uploads/" },
+      { field: "knowmore_image", pathPrefix: "/uploads/" },
+      { field: "white_paper", pathPrefix: "/whitepapers/" },
+    ];
 
-    req.flash('success', 'White Paper updated successfully.');
-    res.redirect(`/admin/landingpage/${updatedData.page}`);
+    const updatedData = {
+      ...req.body,
+      updated_at: new Date(),
+    };
+
+    fileFields.forEach(({ field, pathPrefix }) => {
+      const file = req.files?.[field]?.[0];
+      if (file) {
+        const oldFilePath = existingDoc[field];
+        if (oldFilePath) deleteOldFile(oldFilePath);
+        updatedData[field] = pathPrefix + file.filename;
+      } else {
+        updatedData[field] = existingDoc[field];
+      }
+    });
+
+    await Whitepaper.findByIdAndUpdate(whitepaperId, updatedData);
+
+    res.redirect("/admin/white_papers");
   } catch (err) {
-    console.error('Update error:', err.message);
-    req.flash('error', 'Something went wrong while updating.');
-    res.redirect(`/admin/landingpage/${req.body.page}`);
+    console.error(err);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
 
@@ -1523,6 +1583,7 @@ for (let i = 0; i < businessTitles.length; i++) {
           hubspot_form:req.body.hubspot_form,
     
           // Business value section
+          businessinvalue_title:req.body.businessinvalue_title,
           business_cards: businessCards,
     
           // Know more section
@@ -1861,8 +1922,8 @@ app.get('/api/blogs/:id', async (req, res) => {
 
 
 // hello
-app.listen(process.env.PORT,(er)=>{
-  if (er) {
+app.listen(process.env.PORT,(err)=>{
+  if (err) {
     console.error('❌ Failed to start server:', err.message);
     process.exit(1);
   }
