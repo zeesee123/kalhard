@@ -1053,54 +1053,110 @@ app.post("/admin/edit_white_paper/:id", upload.fields([
   { name: "white_paper", maxCount: 1 }
 ]), async (req, res) => {
   try {
-    // const whitepaperId = req.params.id;
-    // const existingDoc = await Whitepaper.findById(whitepaperId);
+    const id = new ObjectId(req.params.id);
+    const collection = mongoose.connection.db.collection('landingpage');
+    const existingDoc = await collection.findOne({ _id: id, page: 'white_paper' });
 
-    // const collection = mongoose.connection.db.collection('landingpage');
- const id = new ObjectId(req.params.id);
+    //     const collection = mongoose.connection.db.collection('landingpage');
+//     const id = new ObjectId(req.params.id);
 
 //     // 🛠️ Correct page name
-   const existingDoc = await collection.findOne({ _id: id, page: 'white_paper' });
+//     const existingDoc = await collection.findOne({ _id: id, page: 'white_paper' });
+
 
     if (!existingDoc) {
       return res.status(404).json({ success: false, message: "Whitepaper not found" });
     }
 
-    const deleteOldFile = (oldPath) => {
-      const fullPath = path.join(__dirname, '../public', oldPath);
-      if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+    // Helper to delete old files
+    const deleteOldFile = (relativePath) => {
+      const fullPath = path.join(__dirname, 'public', 'dist', relativePath);
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+      }
     };
 
-    const fileFields = [
-      { field: "hero_image", pathPrefix: "/uploads/" },
-      { field: "card_one", pathPrefix: "/uploads/" },
-      { field: "card_two", pathPrefix: "/uploads/" },
-      { field: "featured_image", pathPrefix: "/uploads/" },
-      { field: "knowmore_image", pathPrefix: "/uploads/" },
-      { field: "white_paper", pathPrefix: "/whitepapers/" },
-    ];
+    // Extract uploaded files
+    const uploaded = req.files || {};
+
+    const getUpdatedPath = (field, prefix = '/uploads/') => {
+      const file = uploaded?.[field]?.[0];
+      if (file) {
+        if (existingDoc[field]) deleteOldFile(existingDoc[field]);
+        return prefix + file.filename;
+      } else {
+        return existingDoc[field];
+      }
+    };
+
+    // Build new file paths
+    const heroImagePath = getUpdatedPath('hero_image');
+    const cardOnePath = getUpdatedPath('card_one');
+    const cardTwoPath = getUpdatedPath('card_two');
+    const featuredImagePath = getUpdatedPath('featured_image');
+    const knowMoreImagePath = getUpdatedPath('knowmore_image');
+    const whitePaperPath = getUpdatedPath('white_paper', '/whitepapers/');
+
+    // Build update data
+    const tag = req.body.tag;
 
     const updatedData = {
-      ...req.body,
-      updated_at: new Date(),
+      page: req.body.page || "homepage",
+
+      // Hero section
+      hero_title1: req.body.hero_title1,
+      hero_title2: req.body.hero_title2,
+      hero_content: req.body.hero_content,
+      hero_image: heroImagePath,
+      card_one: cardOnePath,
+      card_two: cardTwoPath,
+      white_paper: whitePaperPath,
+      featured_image: featuredImagePath,
+      herobtn_text: req.body.herobtn_text,
+      herobtn_url: req.body.herobtn_url,
+
+      // Calsoft in focus
+      calsoftinfocus_title: req.body.calsoftinfocus_title,
+      calsoftinfocus_checkboxtext: req.body.calsoftinfocus_checkboxtext,
+      calsoftinfocus_text: req.body.calsoftinfocus_text,
+      hubspot_form: req.body.hubspot_form,
+
+      // Business value section
+      businessinvalue_title: req.body.businessinvalue_title,
+      // ❌ REMOVED business_cards
+
+      // Know more section
+      knowmore_title1: req.body.knowmore_title1,
+      knowmore_text: req.body.knowmore_text,
+      knowmore_btn_text: req.body.knowmore_btn_text,
+      knowmore_btn_url: req.body.knowmore_btn_url,
+      knowmoreimage: knowMoreImagePath,
+
+      // SEO
+      meta: {
+        title: req.body.meta_title?.trim() || '',
+        description: req.body.meta_description?.trim() || '',
+        schema: req.body.schema_markup?.trim() || ''
+      },
+
+      // Tags
+      tag: Array.isArray(tag)
+        ? tag.map(t => new ObjectId(t))
+        : tag
+        ? [new ObjectId(tag)]
+        : [],
+
+      updated_at: new Date()
     };
 
-    fileFields.forEach(({ field, pathPrefix }) => {
-      const file = req.files?.[field]?.[0];
-      if (file) {
-        const oldFilePath = existingDoc[field];
-        if (oldFilePath) deleteOldFile(oldFilePath);
-        updatedData[field] = pathPrefix + file.filename;
-      } else {
-        updatedData[field] = existingDoc[field];
-      }
-    });
+    // Update document
+    await collection.updateOne({ _id: id }, { $set: updatedData });
 
-    await Whitepaper.findByIdAndUpdate(whitepaperId, updatedData);
+    req.flash('success', 'White Paper updated successfully.');
+    res.redirect(`/admin/edit_white_paper/${req.params.id}`);
 
-    res.redirect("/admin/white_papers");
   } catch (err) {
-    console.error(err);
+    console.error("Error updating white paper:", err);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
