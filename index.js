@@ -1322,7 +1322,7 @@ app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) =
     );
 
     req.flash('success', 'Blog updated successfully!');
-    res.redirect(`/edit_blog/${req.params.id}`);
+    res.redirect(`/admin/edit_blog/${req.params.id}`);
 
   } catch (err) {
     console.error('Error updating blog:', err);
