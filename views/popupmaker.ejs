@@ -10,8 +10,8 @@
 
 
 <div class="d-flex justify-content-between mt-4">
-    <h1><i class="bi bi-rocket-takeoff-fill mx-2"></i>Landing page (<%=ucfirst(page)%>)</h1>
-    <a href="/admin/view_casestudies" target="_blank"><button class="btn btn-primary"><i class="bi bi-card-list mx-2"></i>List Case studies</button></a>
+    <h1><i class="bi bi-plus-circle mx-2"></i>Create pop up form</h1>
+    <a href="/admin/view_blogs" target="_blank"><button class="btn btn-primary"><i class="bi bi-card-list mx-2"></i>View blogs</button></a>
     
 </div>
 
@@ -31,585 +31,63 @@
   </div>
 <% } %> -->
 
-<form action="/admin/landingpage" method="POST" enctype="multipart/form-data" id="main_form">
+<form action="/admin/popup_add" enctype="multipart/form-data" method="POST"  id="main_form">
 
-    <div class="accordion mt-3" id="accordionExample">
-  <div class="accordion-item mb-3">
-    <h2 class="accordion-header">
-      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-        <i class="bi bi-lightning-fill mx-2"></i>Hero Section
-      </button>
-    </h2>
-    <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
-      <div class="accordion-body">
-       <div class="card pt-3 p-4">
+    <div class="card pt-3 p-4">
 
-        <h3>Hero Section 
-       </h3>
+      <div class="row">
 
-
-
-       <div class="row">
-  <div class="mb-3 col-6">
-      <label for="" class="form-label">Featured image</label>
-      <input type="file" class="form-control img_inpp" name="featured_image">
       
-  </div>
-  <div class="mb-3 col-2 pt-4">
-      
-      <button type="button" class="btn btn-danger clear-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="reset image"><i class="bi bi-arrow-clockwise"></i></button>
-  </div>
-  <div class="mb-3 col-4">
-      <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-      <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
-      
-  </div>
-</div>
-        
 
-<div class="row">
-  <div class="mb-3 col-6">
-      <label for="" class="form-label">Banner image</label>
-      <input type="file" class="form-control img_inpp" name="hero_image">
-      
-  </div>
-  <div class="mb-3 col-2 pt-4">
-      
-      <button type="button" class="btn btn-danger clear-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="reset image"><i class="bi bi-arrow-clockwise"></i></button>
-  </div>
-  <div class="mb-3 col-4">
-      <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-      <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
-      
-  </div>
+        <div class="mb-3 col-6">
+          <label for="" class="form-label">name</label>
+          <input type="text" class="form-control" name="title">
+        </div>
 
-  <div class="mb-3 col-6">
-  <label for="blog_author" class="form-label">Tags</label>
-  <select name="tag" class="form-control" multiple>
-    <% tags.forEach(tag => { %>
-      <option value="<%= tag._id %>"><%= ucfirst(tag.name) %></option>
+        <!-- <div class="mb-3 col-6">
+  <label for="blog_category" class="form-label">Blog Category</label>
+  <select name="category" id="blog_category" class="form-control">
+    <% categories.forEach(cat => { %>
+      <option value="<%= cat._id %>"><%= ucfirst(cat.name) %></option>
     <% }); %>
   </select>
-</div>
+</div> -->
 
-</div>
-
-
-<div class="row">
-  <div class="mb-3 col-6">
-      <label for="" class="form-label">Card image</label>
-      <input type="file" class="form-control img_inpp" name="card_one">
-      
-  </div>
-  <div class="mb-3 col-2 pt-4">
-      
-      <button type="button" class="btn btn-danger clear-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="reset image"><i class="bi bi-arrow-clockwise"></i></button>
-  </div>
-  <div class="mb-3 col-4">
-      <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-      <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
-      
-  </div>
-</div>
+<!-- <div class="mb-3 col-6">
+  <label for="blog_author" class="form-label">Author Name</label>
+  <select name="author" id="blog_author" class="form-control">
+    <% authors.forEach(auth => { %>
+      <option value="<%= auth._id %>"><%= ucfirst(auth.name) %></option>
+    <% }); %>
+  </select>
+</div> -->
 
 
 
-     
-          <div class="col-12">
-             <div class="mb-3">
-            <label for="" class="form-label">Title 1 (Bold text)</label>
-            <input type="text" name="hero_title1" class="form-control" >
-        </div>
-          </div>
-          <div class="col-12">
-             <div class="mb-3">
-            <label for="" class="form-label">Title 2(normal text)</label>
-            <input type="text" name="hero_title2" class="form-control" >
-        </div>
-          </div>
-       
-       
-    
-        <div class="mb-3">
-            <label for="" class="form-label">Content</label>
-            <textarea name="hero_content" cols="30" rows="5" class="form-control"></textarea>
-        </div>
-    
-        
-    
-        <div class="mb-3 d-flex">
-            <div class="mx-2">
-                <label for="" class="form-label">Button text ( Download case study )</label>
-                <input type="text" class="form-control" name="herobtn_text" >
-            </div>
-    
-            <div class="mx-2">
-                <label for="" class="form-label">Button url</label>
-                <input type="text" class="form-control" name="herobtn_url" >
-            </div>
-    
-        </div>
 
-        
-    </div>
-
-    <!-- ------------- -->
-    
-    <!-- ------------- -->
-
-     <!-- <div class="card pt-3 p-4">
-
-        
-        
-
-
-    
-        </div>
-
-        
-    </div> -->
-
-      </div>
-    </div>
-  </div>
-  <div class="accordion-item mb-3">
-    <h2 class="accordion-header">
-      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-        <i class="bi bi-graph-up-arrow mx-2"></i>Calsoft in focus
-      </button>
-    </h2>
-    <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-      <div class="accordion-body">
-        <div class="card pt-3 p-4">
-
-        <h3>calsoft in focus
-       </h3>
-        
-
-
-        <div class="row">
-          <div class="col-6">
-             <div class="mb-3">
-            <label for="" class="form-label">Title 1 (Bold text)</label>
-            <input type="text" name="calsoftinfocus_title" class="form-control" >
-        </div>
-          </div>
-          <!-- <div class="col-6">
-             <div class="mb-3">
-            <label for="" class="form-label">Title 2</label>
+        <div class="mb-3 col-6">
+          <label for="" class="form-label">CSS Selector</label>
+          <input type="text" name="css_selector" class="form-control">
+          
           
         </div>
-          </div> -->
-        </div>
 
-        <div class="mb-3">
-          <label for="" class="form-label">Content</label>
-          <textarea name="calsoftinfocus_text" id="blog_content" cols="30" rows="5" class="form-control"></textarea>
+        
+        
+
+        <div class="mb-3 col-12">
+          <label for="" class="form-label">form code</label>
+          <textarea name="content" class="form-control"></textarea>
+          
+        </div>
+        
       </div>
 
-      <!-- <div class="mb-3">
-        <label for="" class="form-label">text next to the checkbox</label>
-        <input type="text" name="calsoftinfocus_checkboxtext" class="form-control" ">
-
-    </div> -->
-
-    <div class="mb-3">
-      <label for="" class="form-label">Form Code</label>
-      <textarea name="hubspot_form" id="" class="form-control"></textarea>
     </div>
 
-       
+
     
-        <!-- <h4>Logos with text and description(Architect,Engineer+modernize,secure Apps & data....)</h4>
-        <div class="" id="journey_cards">
-          <div class="mb-3 row">
-              
-            <div class="col-2">
-              <input type="text" placeholder="title" class="form-control" name="sec2_stitle[]">
-          </div>
-              <div class="col-3">
-                  <input type="file" placeholder="image" class="form-control img_inpp" name="sec2_simg" multiple>
-              </div>
-              
-              <div class="col-3">
-                  <textarea class="form-control" name="sec2_scontent[]" placeholder="content" cols="30" rows="5"></textarea>
-                  
-              </div>
-
-              <div class="col-1">
-                <img src="" alt="" class="Thumbnail" style="height:10vmin;width:auto;">
-              </div>
-              
-              <div class="col-3">
-                  <button class="btn btn-primary" type="button" onclick="addjourney_cards()">+</button>
-              </div>     
-          </div>
-      </div>
-
-      <table class="table" id="journey_table">
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">title</th>
-              <th scope="col">image</th>
-              
-              
-            
-              <th scope="col">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            
-          </tbody>
-        </table> -->
-        
-
-        
-    </div>
-
-
-      </div>
-    </div>
-  </div>
-  
-  <div class="accordion-item mb-3">
-  <h2 class="accordion-header">
-    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCustomers" aria-expanded="false" aria-controls="collapseCustomers">
-      <i class="bi bi-person-check-fill mx-2"></i>Our Continuing Commitment
-    </button>
-  </h2>
-  <div id="collapseCustomers" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-    <div class="accordion-body">
-      <div class="card pt-3 p-4">
-
-        <h3>Our Continuing Commitment
-       </h3>
-        
-
-
-        <div class="row mb-3">
-          <div class="col-6">
-             <div class="mb-3">
-            <label for="" class="form-label">Title(coloured text)</label>
-            <input type="text" name="businessinvalue_title" class="form-control">
-        </div>
-          </div>
-          <!-- <div class="col-6">
-             <div class="mb-3">
-            <label for="" class="form-label">Title 2(rest text)</label>
-         
-        </div>
-          </div> -->
-        </div>
-       
-  
-        <h5>Icons(Increased,faster,simplified....)</h5>
-        <div class="" id="ourbusiness_cards">
-          <div class="mb-3 row">
-            <div class="col-2">
-              <input type="text" placeholder="Title" class="form-control" name="businessinvalue_stitle[]">
-          </div>
-            <div class="col-3">
-              <input type="file" placeholder="image" class="form-control img_inpp" name="businessinvalue_img">
-              
-          </div>
-              
-              
-              <div class="col-3">
-                <textarea class="form-control" name="businessinvalue_scontent[]" placeholder="content" cols="30" rows="5"></textarea>
-                  
-              </div>
-
-              <div class="col-1">
-                <img src="" alt="" class="Thumbnail" style="height:10vmin;width:auto;">
-              </div>
-              
-              <div class="col-3">
-                  <button class="btn btn-primary" type="button" onclick="addourbusiness_cards()">+</button>
-              </div>     
-          </div>
-      </div>
-
-      <h5 class="mt-3">Edit logos</h5>
-      <table class="table" id="ourbusiness_table">
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">image</th>
-              <th scope="col">title</th>
-              
-            
-              <th scope="col">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            
-          </tbody>
-        </table>
-       
-        
-
-        
-    </div>
-    </div>
-  </div>
-</div>
-
-
-<div class="accordion-item mb-3">
-  <h2 class="accordion-header">
-    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseKnowMore" aria-expanded="false" aria-controls="collapseCaseStudies">
-      <i class="bi bi-journal-richtext mx-2"></i>Recommended For
-    </button>
-  </h2>
-  <div id="collapseKnowMore" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-    <div class="accordion-body">
-      <div class="card pt-3 p-4">
-
-        <h3>Recommended For
-        </h3>
-         
- 
- 
-         <div class="row mb-3">
-           <div class="col-6">
-              <div class="mb-3">
-             <label for="" class="form-label">Title(coloured text)</label>
-             <input type="text" name="businessinvalue_title" class="form-control">
-         </div>
-           </div>
-           <!-- <div class="col-6">
-              <div class="mb-3">
-             <label for="" class="form-label">Title 2(rest text)</label>
-          
-         </div>
-           </div> -->
-         </div>
-        
-   
-         <h5>Icons(Increased,faster,simplified....)</h5>
-         <div class="" id="ourbusiness_cards">
-           <div class="mb-3 row">
-             <div class="col-2">
-               <input type="text" placeholder="Title" class="form-control" name="businessinvalue_stitle[]">
-           </div>
-             <div class="col-3">
-               <input type="file" placeholder="image" class="form-control img_inpp" name="businessinvalue_img">
-               
-           </div>
-               
-               
-               <div class="col-3">
-                 <textarea class="form-control" name="businessinvalue_scontent[]" placeholder="content" cols="30" rows="5"></textarea>
-                   
-               </div>
- 
-               <div class="col-1">
-                 <img src="" alt="" class="Thumbnail" style="height:10vmin;width:auto;">
-               </div>
-               
-               <div class="col-3">
-                   <button class="btn btn-primary" type="button" onclick="addourbusiness_cards()">+</button>
-               </div>     
-           </div>
-       </div>
- 
-       <h5 class="mt-3">Edit logos</h5>
-       <table class="table" id="ourbusiness_table">
-           <thead>
-             <tr>
-               <th scope="col">#</th>
-               <th scope="col">image</th>
-               <th scope="col">title</th>
-               
-             
-               <th scope="col">Actions</th>
-             </tr>
-           </thead>
-           <tbody>
-             
-           </tbody>
-         </table>
-        
-    </div>
-    </div>
-  </div>
-</div>
-
-
-<div class="accordion-item mb-3">
-  <h2 class="accordion-header">
-    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCaseStudies" aria-expanded="false" aria-controls="collapseCaseStudies">
-      <i class="bi bi-cloud-upload-fill mx-2"></i>
-      Add Speakers and Host
-    </button>
-  </h2>
-  <div id="collapseCaseStudies" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-    <div class="accordion-body">
-      <div class="card pt-3 p-4">
-
-        <h3>Upload Case Study
-        </h3>
-        
-
-
-<div class="row">
-  <div class="mb-3 col-6">
-      <label for="" class="form-label">Upload file</label>
-      <input type="file" class="form-control img_inpp" name="<%=page=='white_paper'?'white_paper':'case_study'%>">
-      
-  </div>
-  
-</div>
-
-
-     
-          <!-- <div class="col-12">
-             <div class="mb-3">
-            <label for="" class="form-label">Title 1 (Bold text)</label>
-           
-        </div>
-          </div> -->
-         
-        
-
-        
-    </div>
-    </div>
-  </div>
-</div>
-
-
-<div class="accordion-item mb-3">
-    <h2 class="accordion-header">
-      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseKnowMore" aria-expanded="false" aria-controls="collapseCaseStudies">
-        <i class="bi bi-journal-richtext mx-2"></i>Reference blog section
-      </button>
-    </h2>
-    <div id="collapseKnowMore" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-      <div class="accordion-body">
-        <div class="card pt-3 p-4">
-  
-          <h3>To know more 
-          </h3>
-          
-  
-  
-  <div class="row">
-    <div class="mb-3 col-6">
-        <label for="" class="form-label">Banner image</label>
-        <input type="file" class="form-control img_inpp" name="knowmore_image">
-        
-    </div>
-    <div class="mb-3 col-2 pt-4">
-        
-        <button type="button" class="btn btn-danger clear-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="reset image"><i class="bi bi-arrow-clockwise"></i></button>
-    </div>
-    <div class="mb-3 col-4">
-        <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-        <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
-        
-    </div>
-  </div>
-  
-  
-       
-            <div class="col-12">
-               <div class="mb-3">
-              <label for="" class="form-label">Title 1 (Bold text)</label>
-              <input type="text" name="knowmore_title1" class="form-control" >
-          </div>
-            </div>
-            <!-- <div class="col-12">
-               <div class="mb-3">
-              <label for="" class="form-label">Title 2(normal text)</label>
-           
-          </div>
-            </div> -->
-         
-         
-      
-          <div class="mb-3">
-              <label for="" class="form-label">Content</label>
-              <textarea name="knowmore_text" cols="30" rows="5" class="form-control"></textarea>
-          </div>
-      
-          
-      
-          <div class="mb-3 d-flex">
-              <div class="mx-2">
-                  <label for="" class="form-label">Button text ( Download case study )</label>
-                  <input type="text" class="form-control" name="knowmore_btn_text">
-              </div>
-      
-              <div class="mx-2">
-                  <label for="" class="form-label">Button url</label>
-                  <input type="text" class="form-control" name="knowmore_btn_url">
-              </div>
-      
-          </div>
-          
-  
-          
-      </div>
-      </div>
-    </div>
-  </div>
-
-
-<div class="accordion-item mb-3">
-  <h2 class="accordion-header">
-    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSEO" aria-expanded="false" aria-controls="collapseCaseStudies">
-      <i class="bi bi-globe mx-2"></i>SEO
-    </button>
-  </h2>
-  <div id="collapseSEO" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-    <div class="accordion-body">
-      <div class="card pt-3 p-4">
-
-        <h3>SEO
-        </h3>
-        
-
-
-
-
-
-     <div class="mb-3">
-          <label for="" class="form-label">SEO Title (Meta Title)</label>
-          <input type="text" name="meta_title" class="form-control">
-        </div>
-
-        <div class="mb-3">
-          <label for="" class="form-label">Slug (URL)</label>
-          <input type="text" name="slug" class="form-control">
-        </div>
-
-        <div class="mb-3">
-          <label for="" class="form-label">Meta Description</label>
-          <textarea name="meta_description" rows="3" class="form-control"></textarea>
-        </div>
-
-
-        <div class="mb-3">
-          <label for="" class="form-label">Structured Data (Schema Markup)</label>
-          <textarea name="schema_markup" rows="5" class="form-control" placeholder='Paste JSON-LD here'></textarea>
-        </div>
-
-
-        
-
-        
-    </div>
-    </div>
-  </div>
-</div>
-
-</div>
-
-<div>
-  <input type="hidden" value="<%=page%>" name="page">
-</div>
+    
 
 <div class="text-end p-3" style="bottom:0;position:sticky;z-index: 1030;">
     <button class="btn btn-lg btn-primary p-3" id="spin_submit" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Save"><i class="bi bi-floppy2-fill mx-2" ></i></button> 
@@ -621,31 +99,9 @@
 
 <!-- datable -->
 
-<script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
-
-
 <script src="/admin/assets/tinymce/tinymce.min.js" referrerpolicy="origin"></script>
 
-<script>
-tinymce.init({
-  selector: '#blog_content',
-  license_key: 'gpl',
-  height: 400,
-  menubar: false,
-  plugins: 'link image code lists',
-  toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image code'
-});
-
-tinymce.init({
-  selector: '#blog_contenttwo',
-  license_key: 'gpl',
-  height: 400,
-  menubar: false,
-  plugins: 'link image code lists',
-  toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image code'
-});
-</script>
-
+<script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
 
 <script src="
 https://cdn.jsdelivr.net/npm/filepond@4.32.7/dist/filepond.min.js
@@ -657,6 +113,18 @@ https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-
 "></script>
 
 
+<script>
+
+  tinymce.init({
+    selector: '#blog_content',
+    license_key: 'gpl',
+    height: 400,
+    menubar: false,
+    plugins: 'link image code lists',
+    toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image code'
+  });
+
+    </script>
 
 <script>
 

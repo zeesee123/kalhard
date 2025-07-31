@@ -739,7 +739,15 @@ app.post('/admin/blog/create', upload.single('blog_image'), async (req, res) => 
     const tagCollection = mongoose.connection.db.collection('tags');
     const tags = await tagCollection.find({}).toArray();
     // res.render('landingpage',{section:data||{},page:req.params.page,ucfirst});
-    res.render('landingpage',{page:req.params.page,ucfirst,tags});
+    if(req.params.page=='webinar'){
+    
+      res.render('webinar',{page:req.params.page,ucfirst,tags});
+    
+    }else{
+
+      res.render('landingpage',{page:req.params.page,ucfirst,tags});
+    }
+    
   });
 
 
