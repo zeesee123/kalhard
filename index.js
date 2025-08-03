@@ -1978,7 +1978,7 @@ for (let i = 0; i < businessTitles3.length; i++) {
           card_one:newcardoneImagePath,
          
           
-          webinar:whitePaperPath,
+          webinar:webinarPath,
           featured_image:featured_image,
           herobtn_text: req.body.herobtn_text,
           herobtn_url: req.body.herobtn_url,
@@ -1988,9 +1988,13 @@ for (let i = 0; i < businessTitles3.length; i++) {
           calsoftinfocus_checkboxtext: req.body.calsoftinfocus_checkboxtext,
           calsoftinfocus_text: req.body.calsoftinfocus_text,
           hubspot_form:req.body.hubspot_form,
+
+          //continuing commitment
+          continuingcommitment_title:req.body.continuingcommitment_title,
+          continuingcommitment_text:req.body.continuingcommitment_text,
     
           // Business value section
-          businessinvalue_title:req.body.businessinvalue_title,
+          recommendedfor_title:req.body.recommendedfor_title,
           business_cards: businessCards,
           business_cards1: businessCards1,
           business_cards2: businessCards2,
@@ -1998,9 +2002,8 @@ for (let i = 0; i < businessTitles3.length; i++) {
     
           // Know more section
           knowmore_title1: req.body.knowmore_title1,
-          knowmore_text: req.body.knowmore_text,
-          knowmore_btn_text: req.body.knowmore_btn_text,
-          knowmore_btn_url: req.body.knowmore_btn_url,
+          knowmore_title2: req.body.knowmore_title2,
+          
           knowmoreimage: knowmoreImagePath,
           tag: Array.isArray(tag)
     ? tag.map(t => new ObjectId(t))         // if multiple tags
