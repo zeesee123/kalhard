@@ -477,6 +477,45 @@ app.get('/admin/popupmaker',(req,res)=>{
   res.render('popupmaker');
 });
 
+app.post('/admin/popup_add', upload.none(), async (req, res) => {
+  try {
+    const { title, css_selector, form_code } = req.body;
+
+    if (!title || !css_selector || !form_code) {
+      req.flash('error', 'All fields are required.');
+      return res.redirect('/admin/popupmaker');
+    }
+
+    const collection = mongoose.connection.db.collection('popups');
+
+    // Check for existing popup with same CSS selector
+    const existing = await collection.findOne({ css_selector });
+
+    if (existing) {
+      req.flash('error', 'A popup with this CSS selector already exists.');
+      return res.redirect('/admin/popupmaker');
+    }
+
+    await collection.insertOne({
+      name: title,
+      css_selector,
+      form_code,
+      createdAt: new Date()
+    });
+
+    console.log({ title, css_selector, form_code });
+
+    req.flash('success', 'Popup saved successfully.');
+    res.redirect('/admin/popupmaker');
+
+  } catch (err) {
+    console.error('Error saving popup:', err);
+    req.flash('error', 'Something went wrong.');
+    res.redirect('/admin/popupmaker');
+  }
+});
+
+
 app.get('/admin/viewpopupforms',(req,res)=>{
 
 res.render('viewpopupforms');
