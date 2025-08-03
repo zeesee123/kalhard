@@ -89,6 +89,13 @@ const calculateReadTime = (content) => {
   }
 
 
+  const webinarDir = path.join(__dirname, 'public','dist', 'webinars');
+  if (!fs.existsSync(webinarDir)) {
+    fs.mkdirSync(webinarDir, { recursive: true });
+    console.log('Uploads directory created:', webinarDir);
+  }
+
+
 
 //multer for file uploads
 // Multer setup for file uploads
@@ -110,6 +117,8 @@ const storage = multer.diskStorage({
       cb(null, 'public/dist/blogs/'); // <-- blog image goes here
     } else if (file.fieldname === 'white_paper') {
       cb(null, 'public/dist/whitepapers/'); // <-- blog image goes here
+    }else if (file.fieldname === 'webinar') {
+      cb(null, 'public/dist/webinars/'); // <-- blog image goes here
     } else {
       cb(null, 'public/dist/uploads/');
     }
@@ -617,15 +626,24 @@ app.get('/admin/get_whitepapers',isAuthenticated, async (req, res) => {
   }
 });
 
+app.get('/admin/add_speakerhost',(req,res)=>{
 
-app.post('/admin/add_speakerhost', async (req, res) => {
+  res.render('add_speakerhost');
+})
+
+app.post('/admin/add_speakerhost',upload.fields([
+  { name: 'speaker_image', maxCount: 1 }]), async (req, res) => {
   try {
     const speakerName = req.body.speaker?.trim();
 
     if (!speakerName) {
       req.flash('error', 'Author name is required.');
-      return res.redirect('/admin/add_author');
+      return res.redirect('/admin/add_speakerhost');
     }
+
+
+    const heroimageFile = req.files?.speaker_image?.[0];
+        const newHeroImagePath = heroimageFile ? '/uploads/' + heroimageFile.filename : null;
 
     const collection = mongoose.connection.db.collection('speakerhost');
 
@@ -636,7 +654,9 @@ app.post('/admin/add_speakerhost', async (req, res) => {
     }
 
     await collection.insertOne({
-      name: authorName,
+      name: speakerName,
+      designation:req.body.designation,
+      image:newHeroImagePath,
       createdAt: new Date()
     });
 
@@ -785,8 +805,11 @@ app.post('/admin/blog/create', upload.single('blog_image'), async (req, res) => 
     const tags = await tagCollection.find({}).toArray();
     // res.render('landingpage',{section:data||{},page:req.params.page,ucfirst});
     if(req.params.page=='webinar'){
+
+      const speakerCollection = mongoose.connection.db.collection('speakerhost');
+    const speakers = await speakerCollection.find({}).toArray();
     
-      res.render('webinar',{page:req.params.page,ucfirst,tags});
+      res.render('webinar',{page:req.params.page,ucfirst,tags,speakers});
     
     }else{
 
