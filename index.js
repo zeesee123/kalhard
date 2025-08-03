@@ -1812,8 +1812,7 @@ for (let i = 0; i < businessTitles.length; i++) {
     { name:'card_one',maxCount:1},
     { name:'card_two',maxCount:1},
     { name: 'businessinvalue_img' } ,// handles all journey card images
-    { name: 'case_study', maxCount: 1 },
-    { name: 'white_paper', maxCount: 1 }, 
+    { name: 'webinar', maxCount: 1 }, 
     { name: 'featured_image', maxCount: 1 },
   ]),async(req,res)=>{
 
@@ -1837,8 +1836,8 @@ const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.fi
 
 
       
-        const cardtwoimageFile = req.files?.card_two?.[0];
-        const newcardtwoImagePath = cardtwoimageFile ? '/uploads/' + cardtwoimageFile.filename : null;
+        // const cardtwoimageFile = req.files?.card_two?.[0];
+        // const newcardtwoImagePath = cardtwoimageFile ? '/uploads/' + cardtwoimageFile.filename : null;
     
   
     
@@ -1853,22 +1852,14 @@ const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.fi
 
         // Case Study PDF handling (NO existingDoc logic)
 
-        let caseStudyPath=null;
-        let whitePaperPath=null;
-        if(page=='case_study'){
-
-          const caseStudyFile = req.files?.case_study?.[0];
-        caseStudyPath = caseStudyFile
-          ? '/casestudies/' + caseStudyFile.filename
+       
+        let webinarPath=null;
+     
+          const webinarFile = req.files?.webinar?.[0];
+       webinarPath = webinarFile
+          ? '/webinars/' + webinarFile.filename
           : null;
-
-        }else{
-
-          const whitePaperFile = req.files?.white_paper?.[0];
-       whitePaperPath = whitePaperFile
-          ? '/whitepapers/' + whitePaperFile.filename
-          : null;
-        }
+     
         
 
 
@@ -1881,7 +1872,7 @@ const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.fi
 
 const businessCards = [];
 
-        if(page=='case_study'){
+      
 
           let currentCounter = 1;
 
@@ -1902,9 +1893,78 @@ for (let i = 0; i < businessTitles.length; i++) {
 
   currentCounter++;
 }
-        }
+
+//cards1
+
+const businessCards1 = [];
+
+      
+
+          let currentCounter1 = 1;
+
+const businessTitles1 = req.body.businessinvalue_stitle1 || [];
+const businessContents1 = req.body.businessinvalue_scontent1 || [];
+
+
+
+for (let i = 0; i < businessTitles.length; i++) {
+  if (!businessTitles1[i] && !businessContents1[i]) continue;
+
+  businessCards1.push({
+    id: currentCounter.toString(),
+    number: businessTitles1[i],
+    content: businessContents1[i],
+    
+  });
+
+  currentCounter1++;
+}
+//cards2
+
+const businessCards2 = [];
+let currentCounter2 = 1;
+
+const businessTitles2 = req.body.businessinvalue_stitle2 || [];
+const businessContents2 = req.body.businessinvalue_scontent2 || [];
+
+for (let i = 0; i < businessTitles2.length; i++) {
+  if (!businessTitles2[i] && !businessContents2[i]) continue;
+
+  businessCards2.push({
+    id: currentCounter2.toString(),
+    number: businessTitles2[i],
+    content: businessContents2[i],
+  });
+
+  currentCounter2++;
+}
+
+
+//cards3
+
+const businessCards3 = [];
+let currentCounter3 = 1;
+
+const businessTitles3 = req.body.businessinvalue_stitle3 || [];
+const businessContents3 = req.body.businessinvalue_scontent3 || [];
+
+for (let i = 0; i < businessTitles3.length; i++) {
+  if (!businessTitles3[i] && !businessContents3[i]) continue;
+
+  businessCards3.push({
+    id: currentCounter3.toString(),
+    number: businessTitles3[i],
+    content: businessContents3[i],
+  });
+
+  currentCounter3++;
+}
+
+        
 
         const tag=req.body.tag;
+        const speakers=req.body.speaker;
+        const hosts=req.body.host;
     
         // 5. Construct final data
         const formData = {
@@ -1916,9 +1976,9 @@ for (let i = 0; i < businessTitles.length; i++) {
           hero_content: req.body.hero_content,
           hero_image: newHeroImagePath,
           card_one:newcardoneImagePath,
-          card_two:newcardtwoImagePath,
-          case_study:caseStudyPath,
-          white_paper:whitePaperPath,
+         
+          
+          webinar:whitePaperPath,
           featured_image:featured_image,
           herobtn_text: req.body.herobtn_text,
           herobtn_url: req.body.herobtn_url,
@@ -1932,6 +1992,9 @@ for (let i = 0; i < businessTitles.length; i++) {
           // Business value section
           businessinvalue_title:req.body.businessinvalue_title,
           business_cards: businessCards,
+          business_cards1: businessCards1,
+          business_cards2: businessCards2,
+          business_cards3: businessCards3,
     
           // Know more section
           knowmore_title1: req.body.knowmore_title1,
@@ -1943,6 +2006,18 @@ for (let i = 0; i < businessTitles.length; i++) {
     ? tag.map(t => new ObjectId(t))         // if multiple tags
     : tag
     ? [new ObjectId(tag)]                  // if only one tag selected
+    : [],
+
+    speakers: Array.isArray(speakers)
+    ? speakers.map(t => new ObjectId(t))         // if multiple speakers
+    : speakers
+    ? [new ObjectId(speakers)]                  // if only one speaker selected
+    : [],
+
+    hosts: Array.isArray(hosts)
+    ? hosts.map(t => new ObjectId(t))         // if multiple hosts
+    : hosts
+    ? [new ObjectId(hosts)]                  // if only one host selected
     : [],
 
           // ➕ SEO Fields

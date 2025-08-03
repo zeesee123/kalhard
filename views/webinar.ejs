@@ -463,7 +463,7 @@
 
   <div class="mb-3 col-6">
     <label for="" class="form-label">Select Hosts</label>
-    <select name="Host" id="" multiple class="form-control">
+    <select name="host" id="" multiple class="form-control">
       <% speakers.forEach(speaker => { %>
         <option value="<%= speaker._id %>"><%= ucfirst(speaker.name) %></option>
       <% }); %>
