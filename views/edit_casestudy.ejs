@@ -549,23 +549,23 @@ https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-
 
     <div class="mb-3">
           <label for="" class="form-label">SEO Title (Meta Title)</label>
-          <input type="text" name="meta_title" class="form-control">
+          <input type="text" name="meta_title" class="form-control" value="<%=section.meta.title%>">
         </div>
 
         <div class="mb-3">
           <label for="" class="form-label">Slug (URL)</label>
-          <input type="text" name="slug" class="form-control">
+          <input type="text" name="slug" class="form-control" value="<%=section.meta.slug%>">
         </div>
 
         <div class="mb-3">
           <label for="" class="form-label">Meta Description</label>
-          <textarea name="meta_description" rows="3" class="form-control"></textarea>
+          <textarea name="meta_description" rows="3" class="form-control"><%=section.meta.description%></textarea>
         </div>
 
 
         <div class="mb-3">
           <label for="" class="form-label">Structured Data (Schema Markup)</label>
-          <textarea name="schema_markup" rows="5" class="form-control" placeholder='Paste JSON-LD here'></textarea>
+          <textarea name="schema_markup" rows="5" class="form-control" placeholder='Paste JSON-LD here'><%=section.meta.slug%></textarea>
         </div>
 
 

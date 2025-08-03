@@ -460,6 +460,20 @@ res.redirect('/admin/home');
   }
 });
 
+
+//routes for popup forms
+
+app.get('/admin/popupmaker',(req,res)=>{
+
+  res.render('popupmaker');
+});
+
+app.get('/admin/viewpopupforms',(req,res)=>{
+
+res.render('viewpopupforms');
+
+});
+
 //rendering business cards
 
 app.get('/admin/table/case_study/:id/business_cards',isAuthenticated, async (req, res) => {
@@ -603,6 +617,37 @@ app.get('/admin/get_whitepapers',isAuthenticated, async (req, res) => {
   }
 });
 
+
+app.post('/admin/add_speakerhost', async (req, res) => {
+  try {
+    const speakerName = req.body.speaker?.trim();
+
+    if (!speakerName) {
+      req.flash('error', 'Author name is required.');
+      return res.redirect('/admin/add_author');
+    }
+
+    const collection = mongoose.connection.db.collection('speakerhost');
+
+    const existing = await collection.findOne({ name: speakerName });
+    if (existing) {
+      req.flash('error', 'Speaker/Host already exists.');
+      return res.redirect('/admin/add_speakerhost');
+    }
+
+    await collection.insertOne({
+      name: authorName,
+      createdAt: new Date()
+    });
+
+    req.flash('success', 'Author added successfully!');
+    res.redirect('/admin/add_speakerhost');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Something went wrong');
+    res.redirect('/admin/add_speakerhost');
+  }
+});
 
 app.post('/admin/create_category', async (req, res) => {
   try {
@@ -1696,6 +1741,252 @@ for (let i = 0; i < businessTitles.length; i++) {
       
       
     });
+
+
+    //new landing code
+    app.post('/admin/webinar',upload.fields([
+    { name: 'hero_image', maxCount: 1 },
+    { name: 'knowmore_image', maxCount: 1 },
+    { name:'card_one',maxCount:1},
+    { name:'card_two',maxCount:1},
+    { name: 'businessinvalue_img' } ,// handles all journey card images
+    { name: 'case_study', maxCount: 1 },
+    { name: 'white_paper', maxCount: 1 }, 
+    { name: 'featured_image', maxCount: 1 },
+  ]),async(req,res)=>{
+
+    console.log('hit');
+  
+
+
+  
+    
+      try {
+        const collection = mongoose.connection.db.collection('landingpage');
+        
+        const page=req.body.page;
+        // 1. Find existing document
+        // const existingDoc = await collection.findOne({ page: req.body.page });
+    
+        // 2. Hero image handling
+        // const heroimageFile = req.files?.hero_image?.[0];
+        // if (existingDoc && existingDoc.hero_image && heroimageFile) {
+        //   const oldImagePath = path.join(__dirname, 'public', existingDoc.hero_image);
+        //   fs.unlink(oldImagePath, err => {
+        //     if (err) console.log('Old hero image delete failed:', err);
+        //     else console.log('Old hero image deleted:', oldImagePath);
+        //   });
+        // }
+        // const newHeroImagePath = heroimageFile ? '/uploads/' + heroimageFile.filename : existingDoc?.hero_image || null;
+
+        const heroimageFile = req.files?.hero_image?.[0];
+        const newHeroImagePath = heroimageFile ? '/uploads/' + heroimageFile.filename : null;
+
+        //card one
+              // 1. Find existing document
+        
+    
+        // 2. card image handling
+        // const cardoneimageFile = req.files?.card_one?.[0];
+        // if (existingDoc && existingDoc.card_one && cardoneimageFile) {
+        //   const oldImagePath = path.join(__dirname, 'public', existingDoc.card_one);
+        //   fs.unlink(oldImagePath, err => {
+        //     if (err) console.log('Old hero image delete failed:', err);
+        //     else console.log('Old hero image deleted:', oldImagePath);
+        //   });
+        // }
+        // const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.filename : existingDoc?.card_one || null;
+
+        // ✅ Card one image handling (pure insert logic)
+const cardoneimageFile = req.files?.card_one?.[0];
+const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.filename : null;
+
+
+        //card two
+
+        //card one
+              // 1. Find existing document
+        
+    
+        // 2. card image handling
+        // const cardtwoimageFile = req.files?.card_two?.[0];
+        // if (existingDoc && existingDoc.card_two && cardtwoimageFile) {
+        //   const oldImagePath = path.join(__dirname, 'public', existingDoc.card_two);
+        //   fs.unlink(oldImagePath, err => {
+        //     if (err) console.log('Old hero image delete failed:', err);
+        //     else console.log('Old hero image deleted:', oldImagePath);
+        //   });
+        // }
+        // const newcardtwoImagePath = cardtwoimageFile ? '/uploads/' + cardtwoimageFile.filename : existingDoc?.card_two || null;
+        // ✅ Card two image handling (pure insert logic)
+        const cardtwoimageFile = req.files?.card_two?.[0];
+        const newcardtwoImagePath = cardtwoimageFile ? '/uploads/' + cardtwoimageFile.filename : null;
+    
+  
+    
+        // 3. Know more image handling
+        // const knowmoreImageFile = req.files?.knowmore_image?.[0];
+        // const knowmoreImagePath = knowmoreImageFile
+        //   ? '/uploads/' + knowmoreImageFile.filename
+        //   : existingDoc?.knowmoreimage || null;
+         const knowmoreImageFile = req.files?.knowmore_image?.[0];
+        const knowmoreImagePath = knowmoreImageFile
+  ? '/uploads/' + knowmoreImageFile.filename
+  : null;
+
+
+        //calsoft case study part
+
+        // Case Study PDF handling (NO existingDoc logic)
+
+        let caseStudyPath=null;
+        let whitePaperPath=null;
+        if(page=='case_study'){
+
+          const caseStudyFile = req.files?.case_study?.[0];
+        caseStudyPath = caseStudyFile
+          ? '/casestudies/' + caseStudyFile.filename
+          : null;
+
+        }else{
+
+          const whitePaperFile = req.files?.white_paper?.[0];
+       whitePaperPath = whitePaperFile
+          ? '/whitepapers/' + whitePaperFile.filename
+          : null;
+        }
+        
+
+
+          //featured image 
+
+          const featuredImageFile = req.files?.featured_image?.[0];
+          const featured_image = featuredImageFile ? '/uploads/' + featuredImageFile.filename : null;
+    
+        // 4. Business value cards handling (previously sec2_entries)
+        // const existingBusinessCards = existingDoc?.business_cards || [];
+        // let usedIds = existingBusinessCards.map(e => parseInt(e.id)).filter(id => !isNaN(id));
+        // let currentCounter = usedIds.length > 0 ? Math.max(...usedIds) + 1 : 1;
+    
+        // const businessTitles = req.body.businessinvalue_stitle || [];
+        // const businessContents = req.body.businessinvalue_scontent || [];
+        // const businessImages = req.files?.businessinvalue_img || [];
+    
+        // const businessCards = [...existingBusinessCards];
+        // for (let i = 0; i < businessTitles.length; i++) {
+        //   if (!businessTitles[i] && !businessContents[i] && !businessImages[i]) continue;
+    
+        //   businessCards.push({
+        //     id: currentCounter.toString(),
+        //     number: businessTitles[i],
+        //     content: businessContents[i],
+        //     image: businessImages[i] ? '/uploads/' + businessImages[i].filename : null
+        //   });
+    
+        //   currentCounter++;
+        // }
+
+const businessCards = [];
+
+        if(page=='case_study'){
+
+          let currentCounter = 1;
+
+const businessTitles = req.body.businessinvalue_stitle || [];
+const businessContents = req.body.businessinvalue_scontent || [];
+const businessImages = req.files?.businessinvalue_img || [];
+
+
+for (let i = 0; i < businessTitles.length; i++) {
+  if (!businessTitles[i] && !businessContents[i] && !businessImages[i]) continue;
+
+  businessCards.push({
+    id: currentCounter.toString(),
+    number: businessTitles[i],
+    content: businessContents[i],
+    image: businessImages[i] ? '/uploads/' + businessImages[i].filename : null
+  });
+
+  currentCounter++;
+}
+        }
+
+        const tag=req.body.tag;
+    
+        // 5. Construct final data
+        const formData = {
+          page: req.body.page || "homepage",
+    
+          // Hero section
+          hero_title1: req.body.hero_title1,
+          hero_title2: req.body.hero_title2,
+          hero_content: req.body.hero_content,
+          hero_image: newHeroImagePath,
+          card_one:newcardoneImagePath,
+          card_two:newcardtwoImagePath,
+          case_study:caseStudyPath,
+          white_paper:whitePaperPath,
+          featured_image:featured_image,
+          herobtn_text: req.body.herobtn_text,
+          herobtn_url: req.body.herobtn_url,
+    
+          // Calsoft in focus
+          calsoftinfocus_title: req.body.calsoftinfocus_title,
+          calsoftinfocus_checkboxtext: req.body.calsoftinfocus_checkboxtext,
+          calsoftinfocus_text: req.body.calsoftinfocus_text,
+          hubspot_form:req.body.hubspot_form,
+    
+          // Business value section
+          businessinvalue_title:req.body.businessinvalue_title,
+          business_cards: businessCards,
+    
+          // Know more section
+          knowmore_title1: req.body.knowmore_title1,
+          knowmore_text: req.body.knowmore_text,
+          knowmore_btn_text: req.body.knowmore_btn_text,
+          knowmore_btn_url: req.body.knowmore_btn_url,
+          knowmoreimage: knowmoreImagePath,
+          tag: Array.isArray(tag)
+    ? tag.map(t => new ObjectId(t))         // if multiple tags
+    : tag
+    ? [new ObjectId(tag)]                  // if only one tag selected
+    : [],
+
+          // ➕ SEO Fields
+          meta: {
+    title: req.body.meta_title?.trim() || '',
+    
+    description: req.body.meta_description?.trim() || '',
+    schema: req.body.schema_markup?.trim() || ''
+  },
+          // meta_title: req.body.meta_title,
+          // slug: req.body.slug,
+          // meta_description: req.body.meta_description,
+          // schema_markup: req.body.schema_markup,
+        };
+    
+        // 6. Save to DB
+        // await collection.findOneAndUpdate(
+        //   {},
+        //   { $set: formData },
+        //   { upsert: true }
+        // );
+        await collection.insertOne(formData);
+    
+       
+        req.flash('success', 'All changes have been applied.');
+        res.redirect(`/admin/landingpage/${req.body.page}`);
+    
+      } catch (er) {
+        console.log(er.message);
+       
+        req.flash('error', 'Something went wrong');
+        res.redirect(`/admin/landingpage/${req.body.page}`);
+      }
+      
+      
+    });
+
 
 
   //api routes come in here 

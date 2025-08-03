@@ -10,8 +10,8 @@
 
 
 <div class="d-flex justify-content-between mt-4">
-    <h1><i class="bi bi-rocket-takeoff-fill mx-2"></i>Add Author</h1>
-    <a href="http://localhost:3000" target="_blank"><button class="btn btn-primary"><i class="bi bi-eye-fill mx-1"></i>Preview</button></a>
+    <h1><i class="bi bi-plus-circle mx-2"></i>Create pop up form</h1>
+    <a href="/admin/view_blogs" target="_blank"><button class="btn btn-primary"><i class="bi bi-card-list mx-2"></i>View blogs</button></a>
     
 </div>
 
@@ -31,46 +31,62 @@
   </div>
 <% } %> -->
 
-<form action="/admin/add_author" method="POST" id="main_form">
+<form action="/admin/popup_add" enctype="multipart/form-data" method="POST"  id="main_form">
 
     <div class="card pt-3 p-4">
 
       <div class="row">
 
+      
+
         <div class="mb-3 col-6">
-      <label for="" class="form-label">Add in author name</label>
-      <input type="text" class="form-control img_inpp" name="author">
-      
-  </div>
+          <label for="" class="form-label">name</label>
+          <input type="text" class="form-control" name="title">
+        </div>
 
+        <!-- <div class="mb-3 col-6">
+  <label for="blog_category" class="form-label">Blog Category</label>
+  <select name="category" id="blog_category" class="form-control">
+    <% categories.forEach(cat => { %>
+      <option value="<%= cat._id %>"><%= ucfirst(cat.name) %></option>
+    <% }); %>
+  </select>
+</div> -->
+
+<!-- <div class="mb-3 col-6">
+  <label for="blog_author" class="form-label">Author Name</label>
+  <select name="author" id="blog_author" class="form-control">
+    <% authors.forEach(auth => { %>
+      <option value="<%= auth._id %>"><%= ucfirst(auth.name) %></option>
+    <% }); %>
+  </select>
+</div> -->
+
+
+
+
+        <div class="mb-3 col-6">
+          <label for="" class="form-label">CSS Selector</label>
+          <input type="text" name="css_selector" class="form-control">
+          
+          
+        </div>
+
+        
+        
+
+        <div class="mb-3 col-12">
+          <label for="" class="form-label">form code</label>
+          <textarea name="content" class="form-control"></textarea>
+          
+        </div>
+        
+      </div>
 
     </div>
 
 
-    <div class="row">
-      <div class="mb-3 col-6">
-          <label for="" class="form-label">Author profile pic</label>
-          <input type="file" class="form-control img_inpp" name="featured_image">
-          
-      </div>
-      <div class="mb-3 col-2 pt-4">
-          
-          <button type="button" class="btn btn-danger clear-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="reset image"><i class="bi bi-arrow-clockwise"></i></button>
-      </div>
-      <div class="mb-3 col-4">
-          <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-               <img class="Thumbnail" src="<%= section.featured_image ? '/admin/assets/dist' + section.featured_image : '/admin/assets/dist/defaultimages/default.jpg' %>"  width="400" alt="Default picture Thumbnail">
-          
-      </div>
-    </div>
-
-
-    <div class="mb-3 col-12">
-      <label for="" class="form-label">About Author</label>
-      <textarea name="about_author" id="blog_content" class="form-control"></textarea>
-      
-    </div>
-
+    
     
 
 <div class="text-end p-3" style="bottom:0;position:sticky;z-index: 1030;">
@@ -82,6 +98,8 @@
 
 
 <!-- datable -->
+
+<script src="/admin/assets/tinymce/tinymce.min.js" referrerpolicy="origin"></script>
 
 <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
 
@@ -96,10 +114,16 @@ https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-
 
 
 <script>
-      tinymce.init({
-        selector: '#mytextarea',
-        license_key: 'gpl'
-      });
+
+  tinymce.init({
+    selector: '#blog_content',
+    license_key: 'gpl',
+    height: 400,
+    menubar: false,
+    plugins: 'link image code lists',
+    toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image code'
+  });
+
     </script>
 
 <script>
