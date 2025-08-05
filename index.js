@@ -985,7 +985,8 @@ app.post('/admin/edit_case_study/:id', upload.fields([
       meta: {
         title: req.body.meta_title?.trim() || '',
         description: req.body.meta_description?.trim() || '',
-        schema: req.body.schema_markup?.trim() || ''
+        schema: req.body.schema_markup?.trim() || '',
+        slug:req.body.slug?.trim()||'',
       }
     };
 
@@ -1774,7 +1775,8 @@ for (let i = 0; i < businessTitles.length; i++) {
     title: req.body.meta_title?.trim() || '',
     
     description: req.body.meta_description?.trim() || '',
-    schema: req.body.schema_markup?.trim() || ''
+    schema: req.body.schema_markup?.trim() || '',
+    slug:req.bogy.slug?.trim()||'',
   },
           // meta_title: req.body.meta_title,
           // slug: req.body.slug,
