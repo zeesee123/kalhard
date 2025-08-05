@@ -2183,25 +2183,110 @@ app.get('/api/whitepapers', async (req, res) => {
 //   }
 // });
 
+// app.get('/api/blogs', async (req, res) => {
+//   try {
+//     const collection = mongoose.connection.db.collection('blogs');
+
+//     const { author, tag, category } = req.query;
+
+//     // Build dynamic filters
+//     const matchStage = { publish: true };
+
+//     if (author) {
+//       matchStage.author = new mongoose.Types.ObjectId(author);
+//     }
+
+//     if (tag) {
+//       matchStage.tag = new mongoose.Types.ObjectId(tag); // assuming tag is a single ObjectId field
+//     }
+
+//     if (category) {
+//       matchStage.category = new mongoose.Types.ObjectId(category);
+//     }
+
+//     const data = await collection.aggregate([
+//       { $match: matchStage },
+//       {
+//         $lookup: {
+//           from: 'categories',
+//           localField: 'category',
+//           foreignField: '_id',
+//           as: 'categoryData'
+//         }
+//       },
+//       {
+//         $unwind: {
+//           path: '$categoryData',
+//           preserveNullAndEmptyArrays: true
+//         }
+//       },
+//       {
+//         $lookup: {
+//           from: 'authors',
+//           localField: 'author',
+//           foreignField: '_id',
+//           as: 'authorData'
+//         }
+//       },
+//       {
+//         $unwind: {
+//           path: '$authorData',
+//           preserveNullAndEmptyArrays: true
+//         }
+//       },
+//       {
+//         $lookup: {
+//           from: 'tags',
+//           localField: 'tag',
+//           foreignField: '_id',
+//           as: 'tagData'
+//         }
+//       },
+//       {
+//         $sort: { date: -1 }
+//       }
+//     ]).toArray();
+
+//     res.json({ data });
+//   } catch (error) {
+//     console.error('Error fetching blogs:', error);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// });
+
 app.get('/api/blogs', async (req, res) => {
   try {
     const collection = mongoose.connection.db.collection('blogs');
 
-    const { author, tag, category } = req.query;
+    const { author, industry, topic } = req.query;
 
-    // Build dynamic filters
+    // Dynamic match object
     const matchStage = { publish: true };
 
+    // Add author filter (if provided)
     if (author) {
       matchStage.author = new mongoose.Types.ObjectId(author);
     }
 
-    if (tag) {
-      matchStage.tag = new mongoose.Types.ObjectId(tag); // assuming tag is a single ObjectId field
+    // Add industry filter (if provided)
+    if (industry) {
+      matchStage.tag = new mongoose.Types.ObjectId(industry); // assuming 1 industry
     }
 
-    if (category) {
-      matchStage.category = new mongoose.Types.ObjectId(category);
+    // Add topic filter (can be max 3 topics)
+    if (topic) {
+      let topicArray = topic;
+
+      if (!Array.isArray(topic)) {
+        topicArray = [topic];
+      }
+
+      // Limit to 3 topics only
+      topicArray = topicArray.slice(0, 3);
+
+      // Convert to ObjectIds
+      const topicObjectIds = topicArray.map(id => new mongoose.Types.ObjectId(id));
+      matchStage.category = { $in: topicObjectIds };
     }
 
     const data = await collection.aggregate([
@@ -2214,12 +2299,7 @@ app.get('/api/blogs', async (req, res) => {
           as: 'categoryData'
         }
       },
-      {
-        $unwind: {
-          path: '$categoryData',
-          preserveNullAndEmptyArrays: true
-        }
-      },
+      { $unwind: { path: '$categoryData', preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: 'authors',
@@ -2228,12 +2308,7 @@ app.get('/api/blogs', async (req, res) => {
           as: 'authorData'
         }
       },
-      {
-        $unwind: {
-          path: '$authorData',
-          preserveNullAndEmptyArrays: true
-        }
-      },
+      { $unwind: { path: '$authorData', preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: 'tags',
@@ -2242,9 +2317,8 @@ app.get('/api/blogs', async (req, res) => {
           as: 'tagData'
         }
       },
-      {
-        $sort: { date: -1 }
-      }
+      { $unwind: { path: '$tagData', preserveNullAndEmptyArrays: true } },
+      { $sort: { date: -1 } }
     ]).toArray();
 
     res.json({ data });
@@ -2253,6 +2327,7 @@ app.get('/api/blogs', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
 
 
 //filters for the blogs
