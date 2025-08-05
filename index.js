@@ -2101,12 +2101,42 @@ for (let i = 0; i < businessTitles3.length; i++) {
   }
 });
 
+// app.get('/api/casestudy', async (req, res) => {
+//   try {
+//     const collection = mongoose.connection.db.collection('landingpage');
+
+//     // Query only documents where page is 'case_study'
+//     const data = await collection.find({ page: 'case_study' }).toArray();
+
+//     if (!data || data.length === 0) {
+//       return res.status(404).json({ error: 'There are no case studies' });
+//     }
+
+//     res.json({ data });
+//   } catch (error) {
+//     console.error('Error fetching case study:', error);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// });
+
 app.get('/api/casestudy', async (req, res) => {
   try {
     const collection = mongoose.connection.db.collection('landingpage');
 
-    // Query only documents where page is 'case_study'
-    const data = await collection.find({ page: 'case_study' }).toArray();
+    const { limit } = req.query;
+    const numericLimit = parseInt(limit, 10); // Convert to integer
+
+    const query = { page: 'case_study' };
+
+    // Sort by _id descending (latest first)
+    let cursor = collection.find(query).sort({ _id: -1 });
+
+    // If valid limit is given, apply it
+    if (!isNaN(numericLimit) && numericLimit > 0) {
+      cursor = cursor.limit(numericLimit);
+    }
+
+    const data = await cursor.toArray();
 
     if (!data || data.length === 0) {
       return res.status(404).json({ error: 'There are no case studies' });
@@ -2118,6 +2148,7 @@ app.get('/api/casestudy', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
 
 
 app.get('/api/whitepapers', async (req, res) => {
