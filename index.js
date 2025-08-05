@@ -96,6 +96,13 @@ const calculateReadTime = (content) => {
   }
 
 
+  const datasheetDir = path.join(__dirname, 'public','dist', 'datasheets');
+  if (!fs.existsSync(datasheetDir)) {
+    fs.mkdirSync(datasheetDir, { recursive: true });
+    console.log('Uploads directory created:', datasheetDir);
+  }
+
+
 
 //multer for file uploads
 // Multer setup for file uploads
@@ -119,6 +126,8 @@ const storage = multer.diskStorage({
       cb(null, 'public/dist/whitepapers/'); // <-- blog image goes here
     }else if (file.fieldname === 'webinar') {
       cb(null, 'public/dist/webinars/'); // <-- blog image goes here
+    }else if (file.fieldname === 'datasheet') {
+      cb(null, 'public/dist/datasheets/'); // <-- blog image goes here
     } else {
       cb(null, 'public/dist/uploads/');
     }
@@ -1776,7 +1785,7 @@ for (let i = 0; i < businessTitles.length; i++) {
     
     description: req.body.meta_description?.trim() || '',
     schema: req.body.schema_markup?.trim() || '',
-    slug:req.bogy.slug?.trim()||'',
+    slug:req.body.slug?.trim()||'',
   },
           // meta_title: req.body.meta_title,
           // slug: req.body.slug,
