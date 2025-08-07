@@ -608,12 +608,12 @@ var table1=$('#whatwedo_table').DataTable({
   // });
 
   var table4=$('#journey_table').DataTable({
-              ajax:"/admin/get_casestudies",
+              ajax:"/admin/popup_list",
               processing:true,
               columns:[
                 {"data":"id"},
-                {"data":"title"},
-                {"data":"image"},
+                {"data":"name"},
+                {"data":"selector"},
                 // {"data":"description"},
                 {"data":"actions"}],
               order:[],

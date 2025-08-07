@@ -486,6 +486,70 @@ app.get('/admin/popupmaker',(req,res)=>{
   res.render('popupmaker');
 });
 
+app.get('/admin/view_popupforms',(req,res)=>{
+
+  res.render('view_popups');
+})
+
+app.get('/admin/popup_list',async(req,res)=>{
+
+  try {
+    const caseStudies = await mongoose.connection.db.collection('popups')
+    .find({}).sort({ _id: -1 })
+      .toArray();
+
+      ///admin/case_study/:id
+    const data = caseStudies.map((item, index) => ({
+      id: index + 1,
+      name: item.name || 'Untitled',
+      selector: item.css_selector,
+      actions: `
+      
+        <a href="/admin/edit_popup/${item._id}" class="btn btn-success mx-1">
+          <i class="bi bi-pencil-square"></i> Edit
+        </a>
+        <button type="button" class="btn btn-danger mx-1 eradicator" data-id="${item._id}" data-type="landingpage">
+          <i class="bi bi-trash3-fill"></i> Delete
+        </button>
+      `
+    }));
+
+    res.status(200).json({ data });
+  } catch (err) {
+    console.error('Error fetching popups:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+
+});
+
+app.post('/admin/edit_popup/:id',(req,res)=>{
+
+
+});
+
+app.get('/admin/edit_popup/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const popup = await mongoose.connection.db.collection('popups').findOne({
+      _id: new mongoose.Types.ObjectId(id),
+    });
+
+    if (!popup) {
+      return res.status(404).send('Popup not found');
+    }
+
+    // Render your HTML form here (assuming you're using a view engine like EJS/Pug)
+    // But since you're doing HTML manually, let's send a basic HTML form directly:
+
+    res.render('edit_popup',{popup});
+   
+  } catch (err) {
+    console.error('Error fetching popup:', err);
+    res.status(500).send('Server error');
+  }
+});
+
 app.post('/admin/popup_add', upload.none(), async (req, res) => {
   try {
     const { title, css_selector, form_code } = req.body;
