@@ -859,6 +859,10 @@ app.post('/admin/blog/create', upload.single('blog_image'), async (req, res) => 
     
       res.render('webinar',{page:req.params.page,ucfirst,tags,speakers});
     
+    }else if(req.params.page=='datasheet'){
+
+      res.render('datasheet',{page:req.params.page,ucfirst,tags});
+
     }else{
 
       res.render('landingpage',{page:req.params.page,ucfirst,tags});
@@ -1579,6 +1583,7 @@ app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) =
     { name: 'businessinvalue_img' } ,// handles all journey card images
     { name: 'case_study', maxCount: 1 },
     { name: 'white_paper', maxCount: 1 }, 
+    {name:'datasheet',maxCount:1},
     { name: 'featured_image', maxCount: 1 },
   ]),async(req,res)=>{
 
@@ -1668,11 +1673,19 @@ const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.fi
 
         let caseStudyPath=null;
         let whitePaperPath=null;
+        let datasheetPath=null;
         if(page=='case_study'){
 
           const caseStudyFile = req.files?.case_study?.[0];
         caseStudyPath = caseStudyFile
           ? '/casestudies/' + caseStudyFile.filename
+          : null;
+
+        }else if(page=='datasheet'){
+
+          const datasheetFile = req.files?.datasheet?.[0];
+        datasheetPath = datasheetFile
+          ? '/datasheets/' + datasheetFile.filename
           : null;
 
         }else{
@@ -1753,6 +1766,7 @@ for (let i = 0; i < businessTitles.length; i++) {
           card_two:newcardtwoImagePath,
           case_study:caseStudyPath,
           white_paper:whitePaperPath,
+          datasheet:datasheetPath,
           featured_image:featured_image,
           herobtn_text: req.body.herobtn_text,
           herobtn_url: req.body.herobtn_url,
