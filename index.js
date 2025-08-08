@@ -489,7 +489,7 @@ app.get('/admin/popupmaker',(req,res)=>{
 app.get('/admin/view_popupforms',(req,res)=>{
 
   res.render('view_popups');
-})
+});
 
 app.get('/admin/popup_list',async(req,res)=>{
 
@@ -522,8 +522,54 @@ app.get('/admin/popup_list',async(req,res)=>{
 
 });
 
-app.post('/admin/edit_popup/:id',(req,res)=>{
+app.post('/admin/edit_popup/:id',async(req,res)=>{
+try {
+    const { id } = req.params;
+    const { title, css_selector, form_code } = req.body;
 
+    if (!title || !css_selector || !form_code) {
+      req.flash('error', 'All fields are required.');
+      return res.redirect(`/admin/edit_popup/${id}`);
+    }
+
+    const collection = mongoose.connection.db.collection('popups');
+
+    // Optional: Ensure CSS selector is unique except for the current popup
+    const existing = await collection.findOne({ 
+      css_selector, 
+      _id: { $ne: new mongoose.Types.ObjectId(id) }
+    });
+    if (existing) {
+      req.flash('error', 'A popup with this CSS selector already exists.');
+      return res.redirect(`/admin/edit_popup/${id}`);
+    }
+
+    // Perform the update
+    const result = await collection.updateOne(
+      { _id: new mongoose.Types.ObjectId(id) },
+      {
+        $set: {
+          name: title,
+          css_selector,
+          form_code,
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      req.flash('error', 'Popup not found.');
+      return res.redirect('/admin/popupmaker');
+    }
+
+    req.flash('success', 'Popup updated successfully.');
+    res.redirect('/admin/edit_popup/:id');
+
+  } catch (err) {
+    console.error('Error updating popup:', err);
+    req.flash('error', 'Something went wrong.');
+    res.redirect('/admin/popupmaker');
+  }
 
 });
 
@@ -594,6 +640,9 @@ app.get('/admin/viewpopupforms',(req,res)=>{
 res.render('viewpopupforms');
 
 });
+
+
+
 
 //rendering business cards
 
@@ -2394,11 +2443,85 @@ app.get('/api/webinars', async (req, res) => {
 //   }
 // });
 
+// app.get('/api/blogs', async (req, res) => {
+//   try {
+//     const collection = mongoose.connection.db.collection('blogs');
+
+//     const { author, industry, topic } = req.query;
+
+//     // Dynamic match object
+//     const matchStage = { publish: true };
+
+//     // Add author filter (if provided)
+//     if (author) {
+//       matchStage.author = new mongoose.Types.ObjectId(author);
+//     }
+
+//     // Add industry filter (if provided)
+//     if (industry) {
+//       matchStage.tag = new mongoose.Types.ObjectId(industry); // assuming 1 industry
+//     }
+
+//     // Add topic filter (can be max 3 topics)
+//     if (topic) {
+//       let topicArray = topic;
+
+//       if (!Array.isArray(topic)) {
+//         topicArray = [topic];
+//       }
+
+//       // Limit to 3 topics only
+//       topicArray = topicArray.slice(0, 3);
+
+//       // Convert to ObjectIds
+//       const topicObjectIds = topicArray.map(id => new mongoose.Types.ObjectId(id));
+//       matchStage.category = { $in: topicObjectIds };
+//     }
+
+//     const data = await collection.aggregate([
+//       { $match: matchStage },
+//       {
+//         $lookup: {
+//           from: 'categories',
+//           localField: 'category',
+//           foreignField: '_id',
+//           as: 'categoryData'
+//         }
+//       },
+//       { $unwind: { path: '$categoryData', preserveNullAndEmptyArrays: true } },
+//       {
+//         $lookup: {
+//           from: 'authors',
+//           localField: 'author',
+//           foreignField: '_id',
+//           as: 'authorData'
+//         }
+//       },
+//       { $unwind: { path: '$authorData', preserveNullAndEmptyArrays: true } },
+//       {
+//         $lookup: {
+//           from: 'tags',
+//           localField: 'tag',
+//           foreignField: '_id',
+//           as: 'tagData'
+//         }
+//       },
+//       { $unwind: { path: '$tagData', preserveNullAndEmptyArrays: true } },
+//       { $sort: { date: -1 } }
+//     ]).toArray();
+
+//     res.json({ data });
+//   } catch (error) {
+//     console.error('Error fetching blogs:', error);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// });
 app.get('/api/blogs', async (req, res) => {
   try {
     const collection = mongoose.connection.db.collection('blogs');
 
-    const { author, industry, topic } = req.query;
+    const { author, industry, topic, limit } = req.query;
+    const numericLimit = parseInt(limit, 10); // Convert limit to integer
 
     // Dynamic match object
     const matchStage = { publish: true };
@@ -2410,26 +2533,19 @@ app.get('/api/blogs', async (req, res) => {
 
     // Add industry filter (if provided)
     if (industry) {
-      matchStage.tag = new mongoose.Types.ObjectId(industry); // assuming 1 industry
+      matchStage.tag = new mongoose.Types.ObjectId(industry);
     }
 
-    // Add topic filter (can be max 3 topics)
+    // Add topic filter (max 3 topics)
     if (topic) {
-      let topicArray = topic;
-
-      if (!Array.isArray(topic)) {
-        topicArray = [topic];
-      }
-
-      // Limit to 3 topics only
+      let topicArray = Array.isArray(topic) ? topic : [topic];
       topicArray = topicArray.slice(0, 3);
-
-      // Convert to ObjectIds
       const topicObjectIds = topicArray.map(id => new mongoose.Types.ObjectId(id));
       matchStage.category = { $in: topicObjectIds };
     }
 
-    const data = await collection.aggregate([
+    // Build aggregation pipeline
+    const pipeline = [
       { $match: matchStage },
       {
         $lookup: {
@@ -2459,7 +2575,14 @@ app.get('/api/blogs', async (req, res) => {
       },
       { $unwind: { path: '$tagData', preserveNullAndEmptyArrays: true } },
       { $sort: { date: -1 } }
-    ]).toArray();
+    ];
+
+    // Apply limit if provided
+    if (!isNaN(numericLimit) && numericLimit > 0) {
+      pipeline.push({ $limit: numericLimit });
+    }
+
+    const data = await collection.aggregate(pipeline).toArray();
 
     res.json({ data });
   } catch (error) {
