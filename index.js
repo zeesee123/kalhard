@@ -822,6 +822,7 @@ app.post('/admin/add_speakerhost',upload.fields([
       name: speakerName,
       designation:req.body.designation,
       image:newHeroImagePath,
+      linkedin:req.body.linkedin,
       createdAt: new Date()
     });
 
@@ -2124,6 +2125,8 @@ for (let i = 0; i < businessTitles3.length; i++) {
           featured_image:featured_image,
           herobtn_text: req.body.herobtn_text,
           herobtn_url: req.body.herobtn_url,
+          
+          embedurl:req.body.embed_url,
     
           // Calsoft in focus
           calsoftinfocus_title: req.body.calsoftinfocus_title,
