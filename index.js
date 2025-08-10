@@ -523,10 +523,13 @@ app.get('/admin/popup_list',async(req,res)=>{
 });
 
 app.post('/admin/edit_popup/:id',async(req,res)=>{
+  // console.log('hitttt');
 try {
     const { id } = req.params;
     const { title, css_selector, form_code } = req.body;
 
+    // console.log(title,css_selector,form_code);
+    // process.exit();
     if (!title || !css_selector || !form_code) {
       req.flash('error', 'All fields are required.');
       return res.redirect(`/admin/edit_popup/${id}`);
@@ -563,7 +566,7 @@ try {
     }
 
     req.flash('success', 'Popup updated successfully.');
-    res.redirect('/admin/edit_popup/:id');
+    res.redirect('/admin/edit_popup/'+id);
 
   } catch (err) {
     console.error('Error updating popup:', err);
@@ -574,6 +577,7 @@ try {
 });
 
 app.get('/admin/edit_popup/:id', async (req, res) => {
+  
   const { id } = req.params;
 
   try {
