@@ -2304,6 +2304,25 @@ app.get('/api/whitepapers', async (req, res) => {
 });
 
 
+app.get('/api/datasheets', async (req, res) => {
+  try {
+    const collection = mongoose.connection.db.collection('landingpage');
+
+    // Query only documents where page is 'case_study'
+    const data = await collection.find({ page: 'datasheet' }).toArray();
+
+    if (!data || data.length === 0) {
+      return res.status(404).json({ error: 'There are no datasheets' });
+    }
+
+    res.json({ data });
+  } catch (error) {
+    console.error('Error fetching datasheets:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
 app.get('/api/webinars', async (req, res) => {
   try {
     const collection = mongoose.connection.db.collection('landingpage');
