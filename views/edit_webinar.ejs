@@ -61,7 +61,7 @@
   </div>
   <div class="mb-3 col-4">
       <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-      <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
+      <img class="Thumbnail" src="<%= section.featured_image ? '/admin/assets/dist' + section.featured_image : '/admin/assets/dist/defaultimages/default.jpg' %>"  width="400" alt="Default picture Thumbnail">
       
   </div>
 </div>
