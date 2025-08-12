@@ -760,6 +760,42 @@ app.get('/admin/get_whitepapers',isAuthenticated, async (req, res) => {
   }
 });
 
+
+app.get('/admin/get_webinars',isAuthenticated, async (req, res) => {
+  try {
+    const caseStudies = await mongoose.connection.db.collection('landingpage')
+      .find({ page: 'webinar' })
+      .sort({ _id: -1 })
+      .toArray();
+
+      ///admin/case_study/:id
+    const data = caseStudies.map((item, index) => ({
+      id: index + 1,
+      title: item.hero_title1 || 'Untitled',
+      image: item.card_one
+        ? `<img src="/admin/assets/dist${item.card_one}" style="width: 100px; height: auto; object-fit: contain;">`
+        : '',
+      actions: `
+        <a href="${item.case_study}" target="_blank" class="btn btn-primary mx-1">
+          <i class="bi bi-eye-fill"></i> Preview
+        </a>
+        <a href="/admin/edit_case_study/${item._id}" class="btn btn-success mx-1">
+          <i class="bi bi-pencil-square"></i> Edit
+        </a>
+        <button type="button" class="btn btn-danger mx-1 eradicator" data-id="${item._id}" data-type="landingpage">
+          <i class="bi bi-trash3-fill"></i> Delete
+        </button>
+      `
+    }));
+
+    res.status(200).json({ data });
+  } catch (err) {
+    console.error('Error fetching webinars:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
   app.post('/admin/add_author', async (req, res) => {
   try {
     const authorName = req.body.author?.trim();
@@ -1605,6 +1641,13 @@ app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) =
 
     // const blogs=mongoose.connection.db.collection('blogs');
     res.render('view_whitepapers');
+  });
+
+  app.get('/admin/view_webinars',isAuthenticated,async(req,res)=>{
+
+
+    // const blogs=mongoose.connection.db.collection('blogs');
+    res.render('view_webinars');
   });
 
   app.get('/admin/create_category',isAuthenticated,(req,res)=>{
