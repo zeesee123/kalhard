@@ -252,7 +252,7 @@ https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-
 
         <div class="mb-3">
           <label for="" class="form-label">Content</label>
-          <textarea name="calsoftinfocus_text" cols="30" rows="5" class="form-control"><%=section.calsoftinfocus_text%></textarea>
+          <textarea name="calsoftinfocus_text" id="blog_content" cols="30" rows="5" class="form-control"><%=section.calsoftinfocus_text%></textarea>
       </div>
 
       <!-- <div class="mb-3">
@@ -556,25 +556,24 @@ https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-
 
     <div class="mb-3">
           <label for="" class="form-label">SEO Title (Meta Title)</label>
-          <input type="text" name="meta_title" class="form-control">
+          <input type="text" name="meta_title" class="form-control" value="<%=section.meta?.title%>">
         </div>
 
         <div class="mb-3">
           <label for="" class="form-label">Slug (URL)</label>
-          <input type="text" name="slug" class="form-control">
+          <input type="text" name="slug" class="form-control" value="<%=section.meta?.slug%>">
         </div>
 
         <div class="mb-3">
           <label for="" class="form-label">Meta Description</label>
-          <textarea name="meta_description" rows="3" class="form-control"></textarea>
+          <textarea name="meta_description" rows="3" class="form-control"><%=section.meta?.description%></textarea>
         </div>
 
 
         <div class="mb-3">
           <label for="" class="form-label">Structured Data (Schema Markup)</label>
-          <textarea name="schema_markup" rows="5" class="form-control" placeholder='Paste JSON-LD here'></textarea>
+          <textarea name="schema_markup" rows="5" class="form-control" placeholder='Paste JSON-LD here'><%=section.meta?.schema%></textarea>
         </div>
-
 
         
 
@@ -606,6 +605,30 @@ https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-
 <!-- datable -->
 
 <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
+
+
+
+<script src="/admin/assets/tinymce/tinymce.min.js" referrerpolicy="origin"></script>
+
+<script>
+tinymce.init({
+  selector: '#blog_content',
+  license_key: 'gpl',
+  height: 400,
+  menubar: false,
+  plugins: 'link image code lists',
+  toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image code'
+});
+
+tinymce.init({
+  selector: '#blog_contenttwo',
+  license_key: 'gpl',
+  height: 400,
+  menubar: false,
+  plugins: 'link image code lists',
+  toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image code'
+});
+</script>
 
 <script src="
 https://cdn.jsdelivr.net/npm/filepond@4.32.7/dist/filepond.min.js
