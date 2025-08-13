@@ -2751,7 +2751,7 @@ app.get('/api/blogs/filters',async(req,res)=>{
 
 app.get('/api/tags',async(req,res)=>{
 
-  const tags=await mongoose.connection.db.collection('authors').find().toArray();
+  const tags=await mongoose.connection.db.collection('tags').find().toArray();
   // const tags=await mongoose.connection.db.collection('categories').find().toArray();
   // const categories=await mongoose.connection.db.collection('tags').find().toArray();
 
