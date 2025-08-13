@@ -2585,6 +2585,85 @@ app.get('/api/webinars', async (req, res) => {
 //     res.status(500).json({ error: 'Server error' });
 //   }
 // });
+
+// this one is wrong dude the blogs are getting duplicated because of unwind and other crap
+// app.get('/api/blogs', async (req, res) => {
+//   try {
+//     const collection = mongoose.connection.db.collection('blogs');
+
+//     const { author, industry, topic, limit } = req.query;
+//     const numericLimit = parseInt(limit, 10); // Convert limit to integer
+
+//     // Dynamic match object
+//     const matchStage = { publish: true };
+
+//     // Add author filter (if provided)
+//     if (author) {
+//       matchStage.author = new mongoose.Types.ObjectId(author);
+//     }
+
+//     // Add industry filter (if provided)
+//     if (industry) {
+//       matchStage.tag = new mongoose.Types.ObjectId(industry);
+//     }
+
+//     // Add topic filter (max 3 topics)
+//     if (topic) {
+//       let topicArray = Array.isArray(topic) ? topic : [topic];
+//       topicArray = topicArray.slice(0, 3);
+//       const topicObjectIds = topicArray.map(id => new mongoose.Types.ObjectId(id));
+//       matchStage.category = { $in: topicObjectIds };
+//     }
+
+//     // Build aggregation pipeline
+//     const pipeline = [
+//       { $match: matchStage },
+//       {
+//         $lookup: {
+//           from: 'categories',
+//           localField: 'category',
+//           foreignField: '_id',
+//           as: 'categoryData'
+//         }
+//       },
+//       { $unwind: { path: '$categoryData', preserveNullAndEmptyArrays: true } },
+//       {
+//         $lookup: {
+//           from: 'authors',
+//           localField: 'author',
+//           foreignField: '_id',
+//           as: 'authorData'
+//         }
+//       },
+//       { $unwind: { path: '$authorData', preserveNullAndEmptyArrays: true } },
+//       {
+//         $lookup: {
+//           from: 'tags',
+//           localField: 'tag',
+//           foreignField: '_id',
+//           as: 'tagData'
+//         }
+//       },
+//       { $unwind: { path: '$tagData', preserveNullAndEmptyArrays: true } },
+//       { $sort: { date: -1 } }
+//     ];
+
+//     // Apply limit if provided
+//     if (!isNaN(numericLimit) && numericLimit > 0) {
+//       pipeline.push({ $limit: numericLimit });
+//     }
+
+//     const data = await collection.aggregate(pipeline).toArray();
+
+//     res.json({ data });
+//   } catch (error) {
+//     console.error('Error fetching blogs:', error);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// });
+
+
+//the api which should work fine 
 app.get('/api/blogs', async (req, res) => {
   try {
     const collection = mongoose.connection.db.collection('blogs');
@@ -2624,7 +2703,6 @@ app.get('/api/blogs', async (req, res) => {
           as: 'categoryData'
         }
       },
-      { $unwind: { path: '$categoryData', preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: 'authors',
@@ -2633,7 +2711,6 @@ app.get('/api/blogs', async (req, res) => {
           as: 'authorData'
         }
       },
-      { $unwind: { path: '$authorData', preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: 'tags',
@@ -2642,7 +2719,6 @@ app.get('/api/blogs', async (req, res) => {
           as: 'tagData'
         }
       },
-      { $unwind: { path: '$tagData', preserveNullAndEmptyArrays: true } },
       { $sort: { date: -1 } }
     ];
 
@@ -2659,6 +2735,7 @@ app.get('/api/blogs', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
 
 
 
