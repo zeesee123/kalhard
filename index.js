@@ -634,6 +634,43 @@ app.get('/api/landing-pages/by-tag/:tagId', async (req, res) => {
 });
 
 
+//landingpage tag filter pagewise
+
+app.get('/api/landing-pages/by-tag/:tagId/:pageType', async (req, res) => {
+  try {
+    const { tagId, pageType } = req.params;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(tagId)) {
+      return res.status(400).json({ error: 'Invalid tag ID' });
+    }
+
+    // Build query
+    const query = {
+      tag: new mongoose.Types.ObjectId(tagId),
+      page: pageType // match landing page type
+    };
+
+    const landingPages = await mongoose.connection.db
+      .collection('landingpage')
+      .find(query, {
+        projection: {
+          _id: 1,
+          featured_image: 1,
+          hero_title1: 1,
+          card_one: 1
+        }
+      })
+      .toArray();
+
+    res.json({ landingPages });
+  } catch (err) {
+    console.error('Error fetching landing pages by tag & type:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 app.post('/admin/popup_add', upload.none(), async (req, res) => {
   try {
     const { title, css_selector, form_code } = req.body;
