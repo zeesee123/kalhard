@@ -601,6 +601,8 @@ app.get('/admin/edit_popup/:id', async (req, res) => {
 });
 
 
+
+
 app.get('/api/landing-pages/by-tag/:tagId', async (req, res) => {
   try {
     const { tagId } = req.params;
@@ -612,7 +614,7 @@ app.get('/api/landing-pages/by-tag/:tagId', async (req, res) => {
     const landingPages = await mongoose.connection.db
       .collection('landingpage')
       .find(
-        { tag: mongoose.Types.ObjectId(tagId) },
+        { tag: new mongoose.Types.ObjectId(tagId) }, // <-- add `new` here
         {
           projection: {
             _id: 1,
@@ -630,6 +632,7 @@ app.get('/api/landing-pages/by-tag/:tagId', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 app.post('/admin/popup_add', upload.none(), async (req, res) => {
   try {
