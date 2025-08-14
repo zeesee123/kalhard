@@ -458,7 +458,7 @@ res.redirect('/admin/home');
         ? `<img src="/admin/assets/dist${item.image}" style="width: 100px; height: auto; object-fit: contain;">`
         : '',
       actions: `
-        <a href="${process.env.FRONTEND_URL}/insights/blogs/blog-expand/${slugify(item.title)}" target="_blank" class="btn btn-primary mx-1">
+        <a href="${process.env.FRONTEND_URL}/insights/blogs/${slugify(item.title)}" target="_blank" class="btn btn-primary mx-1">
           <i class="bi bi-eye-fill"></i> Preview
         </a>
         <a href="/admin/edit_blog/${item._id}" class="btn btn-success mx-1">
