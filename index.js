@@ -681,6 +681,8 @@ app.get('/api/landing-pages/by-tag/:tagId/:pageType', async (req, res) => {
 });
 
 
+
+
 app.post('/admin/popup_add', upload.none(), async (req, res) => {
   try {
     const { title, css_selector, form_code } = req.body;
@@ -2398,6 +2400,25 @@ for (let i = 0; i < businessTitles3.length; i++) {
     const data = await mongoose.connection.db.collection('homepage').findOne({});
     console.log(data);
     res.json({data:data});
+  });
+
+  app.get('/api/popupform/:class', async (req, res) => {
+    try {
+      const className = req.params.class;
+  
+      const data = await mongoose.connection.db
+        .collection('popups')
+        .findOne({ css_selector: className });
+  
+      if (!data) {
+        return res.status(404).json({ message: 'No popup form found for this class' });
+      }
+  
+      res.json(data);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Server error' });
+    }
   });
 
 
