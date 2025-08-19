@@ -1009,6 +1009,8 @@ app.post('/admin/add_usecase', upload.fields([
         : [],
       usecase_image: usecaseImagePath,
       usecase_file: usecasePath,
+      hubspot_form:req.body.hubspot_form,
+
       createdAt: new Date()
     });
 
