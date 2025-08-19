@@ -103,6 +103,14 @@ const calculateReadTime = (content) => {
   }
 
 
+  // ✅ Ensure uploads directory exists
+  const usecaseDir = path.join(__dirname, 'public','dist', 'usecases');
+  if (!fs.existsSync(usecaseDir)) {
+    fs.mkdirSync(usecaseDir, { recursive: true });
+    console.log('Uploads directory created:', usecaseDir);
+  }
+
+
 
 //multer for file uploads
 // Multer setup for file uploads
@@ -128,6 +136,8 @@ const storage = multer.diskStorage({
       cb(null, 'public/dist/webinars/'); // <-- blog image goes here
     }else if (file.fieldname === 'datasheet') {
       cb(null, 'public/dist/datasheets/'); // <-- blog image goes here
+    }else if (file.fieldname === 'usecase') {
+      cb(null, 'public/dist/usecases/'); // <-- blog image goes here
     } else {
       cb(null, 'public/dist/uploads/');
     }
@@ -939,6 +949,75 @@ app.post('/admin/add_speakerhost',upload.fields([
     console.error(err);
     req.flash('error', 'Something went wrong');
     res.redirect('/admin/add_speakerhost');
+  }
+});
+
+//route for the use case
+
+app.get('/admin/add_usecase',async(req,res)=>{
+
+  try{
+
+    
+    const tagCollection = mongoose.connection.db.collection('tags');
+    const tags = await tagCollection.find({}).toArray();
+    res.render('add_usecases',{tags,ucfirst});
+
+  }catch(er){
+    console.log(er);
+  }
+});
+
+
+//use case post path
+
+app.post('/admin/add_usecase', upload.fields([
+  { name: 'usecase_image', maxCount: 1 },
+  { name: 'usecase', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const title = req.body.title?.trim();
+
+    if (!title) {
+      req.flash('error', 'Title is required.');
+      return res.redirect('/admin/add_usecase');
+    }
+
+    // Featured image for usecase
+    const usecaseImageFile = req.files?.usecase_image?.[0];
+    const usecaseImagePath = usecaseImageFile ? '/uploads/' + usecaseImageFile.filename : null;
+
+    // UseCase file
+    const usecaseFile = req.files?.usecase?.[0];
+    const usecasePath = usecaseFile ? '/usecases/' + usecaseFile.filename : null;
+
+    const collection = mongoose.connection.db.collection('usecases');
+
+    // Optional: check if a usecase with same title exists
+    const existing = await collection.findOne({ title });
+    if (existing) {
+      req.flash('error', 'UseCase with this title already exists.');
+      return res.redirect('/admin/add_usecase');
+    }
+
+    await collection.insertOne({
+      title,
+      tags: Array.isArray(req.body.tag)
+        ? req.body.tag.map(t => new ObjectId(t))
+        : req.body.tag
+        ? [new ObjectId(req.body.tag)]
+        : [],
+      usecase_image: usecaseImagePath,
+      usecase_file: usecasePath,
+      createdAt: new Date()
+    });
+
+    req.flash('success', 'UseCase added successfully!');
+    res.redirect('/admin/add_usecase');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Something went wrong');
+    res.redirect('/admin/add_usecase');
   }
 });
 
