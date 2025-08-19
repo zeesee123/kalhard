@@ -3000,6 +3000,61 @@ app.get('/api/blogs/:id', async (req, res) => {
   }
 });
 
+//usecases
+
+// 🔹 Get all usecases
+app.get('/api/usecases', async (req, res) => {
+  try {
+    const collection = mongoose.connection.db.collection('usecases');
+
+    const { limit } = req.query;
+    const numericLimit = parseInt(limit, 10);
+
+    let cursor = collection.find({}).sort({ _id: -1 }); // latest first
+
+    if (!isNaN(numericLimit) && numericLimit > 0) {
+      cursor = cursor.limit(numericLimit);
+    }
+
+    const data = await cursor.toArray();
+
+    if (!data || data.length === 0) {
+      return res.status(404).json({ error: 'There are no usecases' });
+    }
+
+    res.json({ data });
+  } catch (error) {
+    console.error('Error fetching usecases:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
+// 🔹 Get specific usecase by ID
+app.get('/api/usecase/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid usecase ID' });
+    }
+
+    const objectId = new ObjectId(id);
+
+    const collection = mongoose.connection.db.collection('usecases');
+    const data = await collection.findOne({ _id: objectId });
+
+    if (!data) {
+      return res.status(404).json({ error: 'Usecase not found' });
+    }
+
+    res.json({ data });
+  } catch (error) {
+    console.error('Error fetching usecase:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 
 
 
