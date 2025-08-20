@@ -3005,24 +3005,49 @@ app.get('/api/blogs/:id', async (req, res) => {
 // 🔹 Get all usecases
 app.get('/api/usecases', async (req, res) => {
   try {
-    const collection = mongoose.connection.db.collection('usecases');
+    const usecasesCollection = mongoose.connection.db.collection('usecases');
+    const tagsCollection = mongoose.connection.db.collection('tags');
 
     const { limit } = req.query;
     const numericLimit = parseInt(limit, 10);
 
-    let cursor = collection.find({}).sort({ _id: -1 }); // latest first
+    let cursor = usecasesCollection.find({}).sort({ _id: -1 }); // latest first
 
     if (!isNaN(numericLimit) && numericLimit > 0) {
       cursor = cursor.limit(numericLimit);
     }
 
-    const data = await cursor.toArray();
+    const usecases = await cursor.toArray();
 
-    if (!data || data.length === 0) {
+    if (!usecases || usecases.length === 0) {
       return res.status(404).json({ error: 'There are no usecases' });
     }
 
-    res.json({ data });
+    // Fetch all tag IDs used across usecases
+    const allTagIds = usecases
+      .flatMap(uc => uc.tags || [])
+      .map(tagId => new ObjectId(tagId));
+
+    // Fetch tag names
+    const tagsData = await tagsCollection
+      .find({ _id: { $in: allTagIds } })
+      .toArray();
+
+    // Map tags to usecases
+    const usecasesWithTagNames = usecases.map(uc => {
+      const tagsWithNames = (uc.tags || []).map(tagId => {
+        const tagObj = tagsData.find(t => t._id.equals(tagId));
+        return tagObj ? { _id: tagObj._id, name: tagObj.name } : null;
+      }).filter(Boolean);
+
+      return {
+        ...uc,
+        originalTagIds: uc.tags, // optional: keep original IDs
+        tags: tagsWithNames
+      };
+    });
+
+    res.json({ data: usecasesWithTagNames });
   } catch (error) {
     console.error('Error fetching usecases:', error);
     res.status(500).json({ error: 'Server error' });
@@ -3030,7 +3055,9 @@ app.get('/api/usecases', async (req, res) => {
 });
 
 
+
 // 🔹 Get specific usecase by ID
+// 🔹 Get specific usecase by ID with tag names
 app.get('/api/usecase/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -3041,21 +3068,39 @@ app.get('/api/usecase/:id', async (req, res) => {
 
     const objectId = new ObjectId(id);
 
-    const collection = mongoose.connection.db.collection('usecases');
-    const data = await collection.findOne({ _id: objectId });
+    const usecasesCollection = mongoose.connection.db.collection('usecases');
+    const tagsCollection = mongoose.connection.db.collection('tags');
 
-    if (!data) {
+    // Fetch the usecase
+    const usecase = await usecasesCollection.findOne({ _id: objectId });
+
+    if (!usecase) {
       return res.status(404).json({ error: 'Usecase not found' });
     }
 
-    res.json({ data });
+    // If usecase has tags, fetch tag names
+    let tagsWithNames = [];
+    if (usecase.tags && usecase.tags.length > 0) {
+      const tagObjectIds = usecase.tags.map(tagId => new ObjectId(tagId));
+      const tagsData = await tagsCollection
+        .find({ _id: { $in: tagObjectIds } })
+        .toArray();
+
+      tagsWithNames = tagsData.map(tag => ({ _id: tag._id, name: tag.name }));
+    }
+
+    // Return the usecase with tags replaced by tag objects
+    res.json({
+      data: {
+        ...usecase,
+        tags: tagsWithNames
+      }
+    });
   } catch (error) {
     console.error('Error fetching usecase:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
-
-
 
 
 // hello
