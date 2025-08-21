@@ -809,6 +809,43 @@ app.get('/admin/get_casestudies',isAuthenticated, async (req, res) => {
 });
 
 
+
+app.get('/admin/get_datasheets',isAuthenticated, async (req, res) => {
+  try {
+    const caseStudies = await mongoose.connection.db.collection('landingpage')
+      .find({ page: 'datasheet' })
+      .sort({ _id: -1 })
+      .toArray();
+
+      ///admin/case_study/:id
+    const data = caseStudies.map((item, index) => ({
+      id: index + 1,
+      title: item.hero_title1 || 'Untitled',
+      image: item.card_one
+        ? `<img src="/admin/assets/dist${item.card_one}" style="width: 100px; height: auto; object-fit: contain;">`
+        : '',
+      actions: `
+        <a href="${item.case_study}" target="_blank" class="btn btn-primary mx-1">
+          <i class="bi bi-eye-fill"></i> Preview
+        </a>
+        <a href="/admin/edit_datasheet/${item._id}" class="btn btn-success mx-1">
+          <i class="bi bi-pencil-square"></i> Edit
+        </a>
+        <button type="button" class="btn btn-danger mx-1 eradicator" data-id="${item._id}" data-type="landingpage">
+          <i class="bi bi-trash3-fill"></i> Delete
+        </button>
+      `
+    }));
+
+    res.status(200).json({ data });
+  } catch (err) {
+    console.error('Error fetching case studies:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
 app.get('/admin/get_whitepapers',isAuthenticated, async (req, res) => {
   try {
     const caseStudies = await mongoose.connection.db.collection('landingpage')
@@ -1361,6 +1398,150 @@ app.get('/admin/edit_white_paper/:id',isAuthenticated, async (req, res) => {
   }
 });
 
+//edit datasheet
+
+app.get('/admin/edit_datasheet/:id',isAuthenticated, async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const id = new ObjectId(req.params.id);
+
+    const section = await db.collection('landingpage').findOne({
+      _id: id,
+      page: 'datasheet' // hardcoded page type
+    });
+
+    if (!section) {
+      req.flash('error', 'Case Study not found');
+      return res.redirect('/admin/dashboard');
+    }
+
+     const tagCollection = mongoose.connection.db.collection('tags');
+
+    
+
+        const tags = await tagCollection.find({}).toArray();
+    res.render('edit_datasheet', {
+      section,
+      page: 'datasheet',tags,
+      ucfirst
+    });
+  } catch (err) {
+    console.error('Error loading case study:', err);
+    req.flash('error', 'Could not load case study');
+    res.redirect('/admin/dashboard');
+  }
+});
+
+
+
+app.post('/admin/edit_datasheet/:id', upload.fields([
+  { name: 'hero_image', maxCount: 1 },
+  { name: 'knowmore_image', maxCount: 1 },
+  { name: 'card_one', maxCount: 1 },
+  { name: 'card_two', maxCount: 1 },
+  { name: 'businessinvalue_img' },
+  { name: 'datasheet', maxCount: 1 },
+  { name: 'featured_image', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const collection = mongoose.connection.db.collection('landingpage');
+    const id = new ObjectId(req.params.id);
+    const existingDoc = await collection.findOne({ _id: id, page: 'datasheet' });
+
+    if (!existingDoc) {
+      req.flash('error', 'Case Study not found');
+      return res.redirect('/admin/dashboard');
+    }
+
+    const heroimageFile = req.files?.hero_image?.[0];
+    const newHeroImagePath = heroimageFile
+      ? '/uploads/' + heroimageFile.filename
+      : existingDoc.hero_image;
+
+    const cardoneimageFile = req.files?.card_one?.[0];
+    const newcardoneImagePath = cardoneimageFile
+      ? '/uploads/' + cardoneimageFile.filename
+      : existingDoc.card_one;
+
+    const cardtwoimageFile = req.files?.card_two?.[0];
+    const newcardtwoImagePath = cardtwoimageFile
+      ? '/uploads/' + cardtwoimageFile.filename
+      : existingDoc.card_two;
+
+    const knowmoreImageFile = req.files?.knowmore_image?.[0];
+    const knowmoreImagePath = knowmoreImageFile
+      ? '/uploads/' + knowmoreImageFile.filename
+      : existingDoc.knowmoreimage;
+
+    const caseStudyFile = req.files?.datasheet?.[0];
+    const caseStudyPath = caseStudyFile
+      ? '/datasheets/' + caseStudyFile.filename
+      : existingDoc.case_study;
+
+    const featuredImageFile = req.files?.featured_image?.[0];
+    const featured_image = featuredImageFile
+      ? '/uploads/' + featuredImageFile.filename
+      : existingDoc.featured_image;
+
+      const tag=req.body.tag;
+
+    const updatedData = {
+      page: req.body.page || "datasheet",
+
+      // Hero section
+      hero_title1: req.body.hero_title1,
+      hero_title2: req.body.hero_title2,
+      hero_content: req.body.hero_content,
+      hero_image: newHeroImagePath,
+      card_one: newcardoneImagePath,
+      card_two: newcardtwoImagePath,
+      datasheet: caseStudyPath,
+      featured_image: featured_image,
+      herobtn_text: req.body.herobtn_text,
+      herobtn_url: req.body.herobtn_url,
+
+      // Calsoft in focus
+      calsoftinfocus_title: req.body.calsoftinfocus_title,
+      calsoftinfocus_checkboxtext: req.body.calsoftinfocus_checkboxtext,
+      calsoftinfocus_text: req.body.calsoftinfocus_text,
+      hubspot_form: req.body.hubspot_form,
+
+        tag: Array.isArray(tag)
+    ? tag.map(t => new ObjectId(t))         // if multiple tags
+    : tag
+    ? [new ObjectId(tag)]                  // if only one tag selected
+    : [],
+
+      // Know more section
+      knowmore_title1: req.body.knowmore_title1,
+      knowmore_text: req.body.knowmore_text,
+      knowmore_btn_text: req.body.knowmore_btn_text,
+      knowmore_btn_url: req.body.knowmore_btn_url,
+      knowmoreimage: knowmoreImagePath,
+
+
+      // SEO section
+      meta: {
+        title: req.body.meta_title?.trim() || '',
+        description: req.body.meta_description?.trim() || '',
+        schema: req.body.schema_markup?.trim() || '',
+        slug:req.body.slug?.trim()||'',
+      }
+    };
+
+    await collection.updateOne(
+      { _id: id },
+      { $set: updatedData }
+    );
+
+    req.flash('success', 'Case Study updated successfully.');
+    res.redirect(`/admin/landingpage/${req.body.page}`);
+  } catch (err) {
+    console.error('Update error:', err.message);
+    req.flash('error', 'Something went wrong while updating.');
+    res.redirect(`/admin/landingpage/${req.body.page}`);
+  }
+});
 
 
 // app.post('/admin/edit_white_paper/:id', upload.fields([
@@ -1605,9 +1786,14 @@ app.get('/admin/get_resource/casestudy_business_cards/:docId/:cardId',isAuthenti
   try {
     const { docId, cardId } = req.params;
 
+    // const doc = await mongoose.connection.db.collection('landingpage').findOne({
+    //   _id: new mongoose.Types.ObjectId(docId),
+    //   page: 'case_study',
+    // });
+
     const doc = await mongoose.connection.db.collection('landingpage').findOne({
       _id: new mongoose.Types.ObjectId(docId),
-      page: 'case_study',
+    
     });
 
     if (!doc) {
@@ -1804,6 +1990,13 @@ app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) =
     res.render('view_webinars');
   });
 
+  app.get('/admin/view_datasheets',isAuthenticated,async(req,res)=>{
+
+
+    // const blogs=mongoose.connection.db.collection('blogs');
+    res.render('view_datasheets');
+  });
+
   app.get('/admin/create_category',isAuthenticated,(req,res)=>{
 
     res.render('create_category');
@@ -1912,70 +2105,22 @@ app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) =
         const collection = mongoose.connection.db.collection('landingpage');
         
         const page=req.body.page;
-        // 1. Find existing document
-        // const existingDoc = await collection.findOne({ page: req.body.page });
-    
-        // 2. Hero image handling
-        // const heroimageFile = req.files?.hero_image?.[0];
-        // if (existingDoc && existingDoc.hero_image && heroimageFile) {
-        //   const oldImagePath = path.join(__dirname, 'public', existingDoc.hero_image);
-        //   fs.unlink(oldImagePath, err => {
-        //     if (err) console.log('Old hero image delete failed:', err);
-        //     else console.log('Old hero image deleted:', oldImagePath);
-        //   });
-        // }
-        // const newHeroImagePath = heroimageFile ? '/uploads/' + heroimageFile.filename : existingDoc?.hero_image || null;
+      
 
         const heroimageFile = req.files?.hero_image?.[0];
         const newHeroImagePath = heroimageFile ? '/uploads/' + heroimageFile.filename : null;
 
-        //card one
-              // 1. Find existing document
         
-    
-        // 2. card image handling
-        // const cardoneimageFile = req.files?.card_one?.[0];
-        // if (existingDoc && existingDoc.card_one && cardoneimageFile) {
-        //   const oldImagePath = path.join(__dirname, 'public', existingDoc.card_one);
-        //   fs.unlink(oldImagePath, err => {
-        //     if (err) console.log('Old hero image delete failed:', err);
-        //     else console.log('Old hero image deleted:', oldImagePath);
-        //   });
-        // }
-        // const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.filename : existingDoc?.card_one || null;
-
-        // ✅ Card one image handling (pure insert logic)
 const cardoneimageFile = req.files?.card_one?.[0];
 const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.filename : null;
 
 
-        //card two
-
-        //card one
-              // 1. Find existing document
-        
-    
-        // 2. card image handling
-        // const cardtwoimageFile = req.files?.card_two?.[0];
-        // if (existingDoc && existingDoc.card_two && cardtwoimageFile) {
-        //   const oldImagePath = path.join(__dirname, 'public', existingDoc.card_two);
-        //   fs.unlink(oldImagePath, err => {
-        //     if (err) console.log('Old hero image delete failed:', err);
-        //     else console.log('Old hero image deleted:', oldImagePath);
-        //   });
-        // }
-        // const newcardtwoImagePath = cardtwoimageFile ? '/uploads/' + cardtwoimageFile.filename : existingDoc?.card_two || null;
-        // ✅ Card two image handling (pure insert logic)
         const cardtwoimageFile = req.files?.card_two?.[0];
         const newcardtwoImagePath = cardtwoimageFile ? '/uploads/' + cardtwoimageFile.filename : null;
     
   
     
-        // 3. Know more image handling
-        // const knowmoreImageFile = req.files?.knowmore_image?.[0];
-        // const knowmoreImagePath = knowmoreImageFile
-        //   ? '/uploads/' + knowmoreImageFile.filename
-        //   : existingDoc?.knowmoreimage || null;
+      
          const knowmoreImageFile = req.files?.knowmore_image?.[0];
         const knowmoreImagePath = knowmoreImageFile
   ? '/uploads/' + knowmoreImageFile.filename
@@ -2043,7 +2188,7 @@ const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.fi
 
 const businessCards = [];
 
-        if(page=='case_study'){
+        if(page=='case_study' || page=='datasheet'){
 
           let currentCounter = 1;
 
