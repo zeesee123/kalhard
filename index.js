@@ -1428,7 +1428,7 @@ app.get('/admin/edit_datasheet/:id',isAuthenticated, async (req, res) => {
   } catch (err) {
     console.error('Error loading case study:', err);
     req.flash('error', 'Could not load case study');
-    res.redirect('/admin/dashboard');
+    res.redirect('/admin');
   }
 });
 
