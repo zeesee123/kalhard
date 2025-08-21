@@ -1449,9 +1449,38 @@ app.post('/admin/edit_datasheet/:id', upload.fields([
     const existingDoc = await collection.findOne({ _id: id, page: 'datasheet' });
 
     if (!existingDoc) {
-      req.flash('error', 'Case Study not found');
+      req.flash('error', 'Datasheet not found');
       return res.redirect('/admin/dashboard');
     }
+
+
+    //business cards start
+
+    const businessCards = [...(existingDoc.business_cards || [])]; // start with existing cards
+
+const businessTitles = req.body.businessinvalue_stitle || [];
+const businessContents = req.body.businessinvalue_scontent || [];
+const businessImages = req.files?.businessinvalue_img || [];
+
+let currentCounter = businessCards.length > 0 
+    ? Math.max(...businessCards.map(c => parseInt(c.id))) + 1 
+    : 1;
+
+for (let i = 0; i < businessTitles.length; i++) {
+  if (!businessTitles[i] && !businessContents[i] && !businessImages[i]) continue;
+
+  businessCards.push({
+    id: currentCounter.toString(),
+    number: businessTitles[i],
+    content: businessContents[i],
+    image: businessImages[i] ? '/uploads/' + businessImages[i].filename : null
+  });
+
+  currentCounter++;
+}
+
+
+    //business cards end
 
     const heroimageFile = req.files?.hero_image?.[0];
     const newHeroImagePath = heroimageFile
@@ -1499,6 +1528,9 @@ app.post('/admin/edit_datasheet/:id', upload.fields([
       featured_image: featured_image,
       herobtn_text: req.body.herobtn_text,
       herobtn_url: req.body.herobtn_url,
+      businessinvalue_title:req.body.businessinvalue_title,
+
+      business_cards: businessCards,
 
       // Calsoft in focus
       calsoftinfocus_title: req.body.calsoftinfocus_title,
@@ -1534,12 +1566,12 @@ app.post('/admin/edit_datasheet/:id', upload.fields([
       { $set: updatedData }
     );
 
-    req.flash('success', 'Case Study updated successfully.');
-    res.redirect(`/admin/landingpage/${req.body.page}`);
+    req.flash('success', 'Datasheet updated successfully.');
+    res.redirect(`/admin/edit_datasheet/${req.params.id}`);
   } catch (err) {
     console.error('Update error:', err.message);
     req.flash('error', 'Something went wrong while updating.');
-    res.redirect(`/admin/landingpage/${req.body.page}`);
+    res.redirect(`/admin/landingpage/${req.params.id}`);
   }
 });
 
