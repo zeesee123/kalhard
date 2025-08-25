@@ -501,6 +501,11 @@ app.get('/admin/view_popupforms',(req,res)=>{
   res.render('view_popups');
 });
 
+app.get('/admin/view_usecases',(req,res)=>{
+
+  res.render('view_usecases');
+});
+
 app.get('/admin/popup_list',async(req,res)=>{
 
   try {
@@ -809,6 +814,41 @@ app.get('/admin/get_casestudies',isAuthenticated, async (req, res) => {
 });
 
 
+app.get('/admin/get_usecases',isAuthenticated, async (req, res) => {
+  try {
+    const caseStudies = await mongoose.connection.db.collection('usecases')
+      .find({}).toArray(); //always use find in here dude 
+
+      console.log(caseStudies);
+
+      ///admin/case_study/:id
+    const data = caseStudies.map((item, index) => ({
+      id: index + 1,
+      title: item.title || 'Untitled',
+      image: item.usecase_image
+        ? `<img src="/admin/assets/dist${item.usecase_image}" style="width: 100px; height: auto; object-fit: contain;">`
+        : '',
+      actions: `
+        <a href="${item.case_study}" target="_blank" class="btn btn-primary mx-1">
+          <i class="bi bi-eye-fill"></i> Preview
+        </a>
+        <a href="/admin/edit_usecase/${item._id}" class="btn btn-success mx-1">
+          <i class="bi bi-pencil-square"></i> Edit
+        </a>
+        <button type="button" class="btn btn-danger mx-1 eradicator" data-id="${item._id}" data-type="landingpage">
+          <i class="bi bi-trash3-fill"></i> Delete
+        </button>
+      `
+    }));
+
+    res.status(200).json({ data });
+  } catch (err) {
+    console.error('Error fetching case studies:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
 
 app.get('/admin/get_datasheets',isAuthenticated, async (req, res) => {
   try {
@@ -1008,6 +1048,41 @@ app.get('/admin/add_usecase',async(req,res)=>{
 });
 
 
+// app.get('/admin/edit_usecase',(req,res)=>{
+//   res.render('edit_usecase');
+// });
+
+app.get('/admin/edit_usecase/:id', isAuthenticated, async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const id = new ObjectId(req.params.id);
+
+    // Fetch the usecase document
+    const usecase = await db.collection('usecases').findOne({ _id: id });
+
+    if (!usecase) {
+      req.flash('error', 'Usecase not found');
+      return res.redirect('/admin/dashboard');
+    }
+
+    // Fetch all tags to populate the select dropdown
+    const tagCollection = db.collection('tags');
+    const tags = await tagCollection.find({}).toArray();
+
+    res.render('edit_usecase', {
+      section: usecase,  // we'll use `section` in the template like your form
+      tags,
+      ucfirst
+    });
+
+  } catch (err) {
+    console.error('Error loading usecase:', err);
+    req.flash('error', 'Could not load usecase');
+    res.redirect('/admin/dashboard');
+  }
+});
+
+
 //use case post path
 
 app.post('/admin/add_usecase', upload.fields([
@@ -1059,6 +1134,85 @@ app.post('/admin/add_usecase', upload.fields([
     console.error(err);
     req.flash('error', 'Something went wrong');
     res.redirect('/admin/add_usecase');
+  }
+});
+
+
+//use case post thing 
+
+app.post('/admin/edit_usecase/:id', upload.fields([
+  { name: 'usecase_image', maxCount: 1 },
+  { name: 'usecase', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const id = new ObjectId(req.params.id);
+    const collection = mongoose.connection.db.collection('usecases');
+
+    const existing = await collection.findOne({ _id: id });
+    if (!existing) {
+      req.flash('error', 'UseCase not found.');
+      return res.redirect('/admin/dashboard');
+    }
+
+    const title = req.body.title?.trim();
+    if (!title) {
+      req.flash('error', 'Title is required.');
+      return res.redirect(`/admin/edit_usecase/${id}`);
+    }
+
+    // ========== File handling ==========
+    // Featured Image
+    let usecaseImagePath = existing.usecase_image;
+    const usecaseImageFile = req.files?.usecase_image?.[0];
+    if (usecaseImageFile) {
+      // delete old image if it exists
+      if (existing.usecase_image) {
+        const oldImgPath = path.join(__dirname, 'public', existing.usecase_image);
+        if (fs.existsSync(oldImgPath)) {
+          fs.unlinkSync(oldImgPath);
+        }
+      }
+      usecaseImagePath = '/uploads/' + usecaseImageFile.filename;
+    }
+
+    // UseCase File (PDF)
+    let usecasePath = existing.usecase_file;
+    const usecaseFile = req.files?.usecase?.[0];
+    if (usecaseFile) {
+      // delete old file if it exists
+      if (existing.usecase_file) {
+        const oldFilePath = path.join(__dirname, 'public', existing.usecase_file);
+        if (fs.existsSync(oldFilePath)) {
+          fs.unlinkSync(oldFilePath);
+        }
+      }
+      usecasePath = '/usecases/' + usecaseFile.filename;
+    }
+
+    // ========== Update DB ==========
+    await collection.updateOne(
+      { _id: id },
+      {
+        $set: {
+          title,
+          tags: Array.isArray(req.body.tag)
+            ? req.body.tag.map(t => new ObjectId(t))
+            : req.body.tag
+            ? [new ObjectId(req.body.tag)]
+            : [],
+          usecase_image: usecaseImagePath,
+          usecase_file: usecasePath,
+          hubspot_form: req.body.hubspot_form
+        }
+      }
+    );
+
+    req.flash('success', 'UseCase updated successfully!');
+    res.redirect(`/admin/edit_usecase/${id}`);
+  } catch (err) {
+    console.error('Error editing usecase:', err);
+    req.flash('error', 'Something went wrong while updating.');
+    res.redirect('/admin/dashboard');
   }
 });
 
