@@ -10,8 +10,8 @@
 
 
 <div class="d-flex justify-content-between mt-4">
-    <h1><i class="bi bi-plus-circle mx-2"></i>Add Usecase</h1>
-    <a href="/admin/view_blogs" target="_blank"><button class="btn btn-primary"><i class="bi bi-card-list mx-2"></i>View blogs</button></a>
+    <h1><i class="bi bi-eye-fill mx-2"></i>View Authors</h1>
+    <a href="/admin/add_blog" target="_blank"><button class="btn btn-primary"><i class="bi bi-plus-circle mx-1"></i>Create Blog</button></a>
     
 </div>
 
@@ -31,58 +31,39 @@
   </div>
 <% } %> -->
 
-<form action="/admin/add_author" method="POST" id="main_form" enctype="multipart/form-data">
+
 
     <div class="card pt-3 p-4">
 
       <div class="row">
 
-        <div class="mb-3 col-6">
-      <label for="" class="form-label">Add in author name</label>
-      <input type="text" class="form-control" name="author">
-      
-  </div>
+         <table class="table" id="journey_table">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">name</th>
+              <!-- <th scope="col">image</th> -->
+              
+            
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+          </tbody>
+        </table>
 
 
     </div>
 
+ 
 
-    <div class="row">
-      <div class="mb-3 col-6">
-          <label for="" class="form-label">Author profile pic</label>
-          <input type="file" class="form-control img_inpp" name="author_image">
-          
-      </div>
-      <div class="mb-3 col-2 pt-4">
-          
-          <button type="button" class="btn btn-danger clear-btn" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="reset image"><i class="bi bi-arrow-clockwise"></i></button>
-      </div>
-      <div class="mb-3 col-4">
-   
-               <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
-          
-      </div>
-    </div>
-
-
-    <div class="mb-3 col-12">
-      <label for="" class="form-label">About Author</label>
-      <textarea name="about_author" id="blog_content" class="form-control"></textarea>
-      
-    </div>
-
-    
-
-<div class="text-end p-3" style="bottom:0;position:sticky;z-index: 1030;">
-    <button class="btn btn-lg btn-primary p-3" id="spin_submit" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Save"><i class="bi bi-floppy2-fill mx-2" ></i></button> 
-     
 </div>
 
-</form>
+
+
 
 <!-- datable -->
-
-<script src="/admin/assets/tinymce/tinymce.min.js" referrerpolicy="origin"></script>
 
 <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
 
@@ -97,16 +78,10 @@ https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-
 
 
 <script>
-
-  tinymce.init({
-    selector: '#blog_content',
-    license_key: 'gpl',
-    height: 400,
-    menubar: false,
-    plugins: 'link image code lists',
-    toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image code'
-  });
-
+      tinymce.init({
+        selector: '#mytextarea',
+        license_key: 'gpl'
+      });
     </script>
 
 <script>
@@ -633,12 +608,12 @@ var table1=$('#whatwedo_table').DataTable({
   // });
 
   var table4=$('#journey_table').DataTable({
-              ajax:"/admin/table/homepage/sec2_entries",
+              ajax:"/admin/get_authors",
               processing:true,
               columns:[
                 {"data":"id"},
-                {"data":"title"},
-                {"data":"image"},
+                {"data":"name"},
+                // {"data":"image"},
                 // {"data":"description"},
                 {"data":"actions"}],
               order:[],

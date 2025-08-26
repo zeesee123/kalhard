@@ -3,6 +3,7 @@ node_modules/
 public/dist/uploads/
 public/dist/casestudies/
 public/dist/blogs/
+public/dist/usecases/
 astro
 scraper
 frontend

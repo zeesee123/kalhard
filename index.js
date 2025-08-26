@@ -111,7 +111,11 @@ const calculateReadTime = (content) => {
   }
 
 
-
+  const authorDir=path.join(__dirname, 'public','dist', 'authors');
+  if (!fs.existsSync(authorDir)) {
+    fs.mkdirSync(authorDir, { recursive: true });
+    console.log('Uploads directory created:', authorDir);
+  }
 //multer for file uploads
 // Multer setup for file uploads
 // const storage = multer.diskStorage({
@@ -138,7 +142,9 @@ const storage = multer.diskStorage({
       cb(null, 'public/dist/datasheets/'); // <-- blog image goes here
     }else if (file.fieldname === 'usecase') {
       cb(null, 'public/dist/usecases/'); // <-- blog image goes here
-    } else {
+    }else if (file.fieldname === 'author_image') {
+      cb(null, 'public/dist/authors/'); 
+    }else{// <-- blog image goes here else {
       cb(null, 'public/dist/uploads/');
     }
   },
@@ -506,6 +512,12 @@ app.get('/admin/view_usecases',(req,res)=>{
   res.render('view_usecases');
 });
 
+
+app.get('/admin/view_authors',(req,res)=>{
+
+  res.render('view_authors');
+});
+
 app.get('/admin/popup_list',async(req,res)=>{
 
   try {
@@ -813,6 +825,37 @@ app.get('/admin/get_casestudies',isAuthenticated, async (req, res) => {
   }
 });
 
+app.get('/admin/get_authors',isAuthenticated,async(req,res)=>{
+
+  try {
+    const caseStudies = await mongoose.connection.db.collection('authors')
+      .find({}).toArray(); //always use find in here dude 
+
+      console.log(caseStudies);
+
+      ///admin/case_study/:id
+    const data = caseStudies.map((item, index) => ({
+      id: index + 1,
+      name: item.name || 'Untitled',
+      // image: item.author_image
+      //   ? `<img src="/admin/assets/dist${item.author_image}" style="width: 100px; height: auto; object-fit: contain;">`
+      //   : '',
+      actions: `
+        <a href="/admin/edit_author/${item._id}" class="btn btn-success mx-1">
+          <i class="bi bi-pencil-square"></i> Edit
+        </a>
+        <button type="button" class="btn btn-danger mx-1 eradicator" data-id="${item._id}" data-type="landingpage">
+          <i class="bi bi-trash3-fill"></i> Delete
+        </button>
+      `
+    }));
+
+    res.status(200).json({ data });
+  } catch (err) {
+    console.error('Error fetching case studies:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 app.get('/admin/get_usecases',isAuthenticated, async (req, res) => {
   try {
@@ -956,9 +999,13 @@ app.get('/admin/get_webinars',isAuthenticated, async (req, res) => {
 });
 
 
-  app.post('/admin/add_author', async (req, res) => {
+  app.post('/admin/add_author',upload.fields([
+    { name: 'author_image', maxCount: 1 }]), async (req, res) => {
   try {
     const authorName = req.body.author?.trim();
+
+    const cardoneimageFile = req.files?.author_image?.[0];
+const newcardoneImagePath = cardoneimageFile ? '/authors/' + cardoneimageFile.filename : null;
 
     if (!authorName) {
       req.flash('error', 'Author name is required.');
@@ -975,6 +1022,8 @@ app.get('/admin/get_webinars',isAuthenticated, async (req, res) => {
 
     await collection.insertOne({
       name: authorName,
+      image:newcardoneImagePath,
+      about:req.body.about_author,
       createdAt: new Date()
     });
 
@@ -986,6 +1035,71 @@ app.get('/admin/get_webinars',isAuthenticated, async (req, res) => {
     res.redirect('/admin/add_author');
   }
 });
+
+
+app.post('/admin/edit_author/:id', upload.fields([
+  { name: 'author_image', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const authorId = req.params.id;
+    const authorName = req.body.author?.trim();
+
+    if (!authorId) {
+      req.flash('error', 'Invalid author ID.');
+      return res.redirect(`/admin/edit_author/${req.params.id}`);
+    }
+
+    if (!authorName) {
+      req.flash('error', 'Author name is required.');
+      return res.redirect(`/admin/edit_author/${req.params.id}`);
+    }
+
+    const collection = mongoose.connection.db.collection('authors');
+
+    // check if author exists
+    const existing = await collection.findOne({ _id: new mongoose.Types.ObjectId(authorId) });
+    if (!existing) {
+      req.flash('error', 'Author not found.');
+      return res.redirect(`/admin/edit_author/${req.params.id}`);
+    }
+
+    // handle new image upload
+    const cardoneimageFile = req.files?.author_image?.[0];
+    let newcardoneImagePath = existing.image; // keep old one by default
+
+    if (cardoneimageFile) {
+      // delete old image if it exists
+      if (existing.image) {
+        const oldPath = path.join(__dirname, 'public', existing.image);
+        if (fs.existsSync(oldPath)) {
+          fs.unlinkSync(oldPath);
+        }
+      }
+      newcardoneImagePath = '/authors/' + cardoneimageFile.filename;
+    }
+
+    // update document
+    await collection.updateOne(
+      { _id: new mongoose.Types.ObjectId(authorId) },
+      {
+        $set: {
+          name: authorName,
+          image: newcardoneImagePath,
+          about: req.body.about_author,
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    req.flash('success', 'Author updated successfully!');
+    res.redirect(`/admin/edit_author/${req.params.id}`);
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Something went wrong');
+    res.redirect(`/admin/edit_author/${req.params.id}`);
+  }
+});
+
 
 app.get('/admin/add_speakerhost',(req,res)=>{
 
@@ -1081,6 +1195,40 @@ app.get('/admin/edit_usecase/:id', isAuthenticated, async (req, res) => {
     res.redirect('/admin/dashboard');
   }
 });
+
+
+//edit author
+
+app.get('/admin/edit_author/:id', isAuthenticated, async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const id = new ObjectId(req.params.id);
+
+    // Fetch the usecase document
+    const usecase = await db.collection('authors').findOne({ _id: id });
+
+    if (!usecase) {
+      req.flash('error', 'Author not found');
+      return res.redirect('/admin/dashboard');
+    }
+
+    // Fetch all tags to populate the select dropdown
+    const tagCollection = db.collection('tags');
+    const tags = await tagCollection.find({}).toArray();
+
+    res.render('edit_author', {
+      section: usecase,  // we'll use `section` in the template like your form
+      tags,
+      ucfirst
+    });
+
+  } catch (err) {
+    console.error('Error loading usecase:', err);
+    req.flash('error', 'Could not load usecase');
+    res.redirect('/admin/dashboard');
+  }
+});
+
 
 
 //use case post path
