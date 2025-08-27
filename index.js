@@ -2114,6 +2114,74 @@ app.post("/admin/edit_white_paper/:id", upload.fields([
 });
 
 
+//routes for podcasts
+
+app.get('/admin/add_podcast', async (req, res) => {
+  try {
+    const speakerCollection = mongoose.connection.db.collection('speakerhost');
+    const speakers = await speakerCollection.find({}).toArray();
+
+    res.render('add_podcast', { speakers, ucfirst });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Could not load podcast form');
+    res.redirect('/admin');
+  }
+});
+
+
+app.post('/admin/add_podcast', upload.fields([
+  { name: 'podcast_image', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const title = req.body.title?.trim();
+    const url = req.body.url?.trim();
+    const content = req.body.content?.trim();
+
+    if (!title || !url) {
+      req.flash('error', 'Title and URL are required.');
+      return res.redirect('/admin/add_podcast');
+    }
+
+    // Featured image
+    const podcastImageFile = req.files?.podcast_image?.[0];
+    const podcastImagePath = podcastImageFile ? '/uploads/' + podcastImageFile.filename : null;
+
+    const collection = mongoose.connection.db.collection('podcasts');
+
+    // Check duplicates
+    const existing = await collection.findOne({ title });
+    if (existing) {
+      req.flash('error', 'Podcast with this title already exists.');
+      return res.redirect('/admin/add_podcast');
+    }
+
+    // Handle speakers (same style as webinars)
+    const speakers = req.body.speakers;
+    const speakersArr = Array.isArray(speakers)
+      ? speakers.map(t => new ObjectId(t))
+      : speakers
+      ? [new ObjectId(speakers)]
+      : [];
+
+    await collection.insertOne({
+      title,
+      url,
+      content,
+      podcast_image: podcastImagePath,
+      speakers: speakersArr,
+      createdAt: new Date()
+    });
+
+    req.flash('success', 'Podcast added successfully!');
+    res.redirect('/admin/add_podcast');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Something went wrong');
+    res.redirect('/admin/add_podcast');
+  }
+});
+
 //case study individual
 
 app.get('/admin/get_resource/casestudy_business_cards/:docId/:cardId',isAuthenticated, async (req, res) => {
