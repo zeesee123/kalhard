@@ -2182,6 +2182,146 @@ app.post('/admin/add_podcast', upload.fields([
   }
 });
 
+//podcast edit routes
+
+app.get('/admin/edit_podcast/:id', isAuthenticated, async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const id = new ObjectId(req.params.id);
+
+    // Fetch the podcast document
+    const podcast = await db.collection('podcasts').findOne({ _id: id });
+    if (!podcast) {
+      req.flash('error', 'Podcast not found');
+      return res.redirect('/admin/dashboard');
+    }
+
+    // Fetch all speakers for the select dropdown
+    const speakerCollection = db.collection('speakers');
+    const speakers = await speakerCollection.find({}).toArray();
+
+    res.render('edit_podcast', {
+      podcast,   // use `podcast` in template like your form
+      speakers,
+      ucfirst
+    });
+
+  } catch (err) {
+    console.error('Error loading podcast:', err);
+    req.flash('error', 'Could not load podcast');
+    res.redirect('/admin/dashboard');
+  }
+});
+
+app.post('/admin/edit_podcast/:id', upload.fields([
+  { name: 'podcast_image', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const id = new ObjectId(req.params.id);
+    const collection = mongoose.connection.db.collection('podcasts');
+
+    const existing = await collection.findOne({ _id: id });
+    if (!existing) {
+      req.flash('error', 'Podcast not found.');
+      return res.redirect('/admin/dashboard');
+    }
+
+    const title = req.body.title?.trim();
+    const url = req.body.url?.trim();
+    const content = req.body.content?.trim();
+
+    if (!title || !url) {
+      req.flash('error', 'Title and URL are required.');
+      return res.redirect(`/admin/edit_podcast/${id}`);
+    }
+
+    // ========== File handling ==========
+    // Podcast Image
+    let podcastImagePath = existing.podcast_image;
+    const podcastImageFile = req.files?.podcast_image?.[0];
+    if (podcastImageFile) {
+      // delete old image if exists
+      if (existing.podcast_image) {
+        const oldImgPath = path.join(__dirname, 'public', existing.podcast_image);
+        if (fs.existsSync(oldImgPath)) fs.unlinkSync(oldImgPath);
+      }
+      podcastImagePath = '/uploads/' + podcastImageFile.filename;
+    }
+
+    // ========== Speakers Handling ==========
+    const speakers = req.body.speakers;
+    const speakersArr = Array.isArray(speakers)
+      ? speakers.map(t => new ObjectId(t))
+      : speakers
+      ? [new ObjectId(speakers)]
+      : [];
+
+    // ========== Update DB ==========
+    await collection.updateOne(
+      { _id: id },
+      {
+        $set: {
+          title,
+          url,
+          content,
+          podcast_image: podcastImagePath,
+          speakers: speakersArr
+        }
+      }
+    );
+
+    req.flash('success', 'Podcast updated successfully!');
+    res.redirect(`/admin/edit_podcast/${id}`);
+  } catch (err) {
+    console.error('Error editing podcast:', err);
+    req.flash('error', 'Something went wrong while updating.');
+    res.redirect('/admin/dashboard');
+  }
+});
+
+app.get('/admin/view_podcasts',(req,res)=>{
+
+  res.render('view_podcasts');
+});
+
+app.get('/admin/get_podcasts',async(req,res)=>{
+  try {
+    const caseStudies = await mongoose.connection.db.collection('podcasts')
+      .find({}).toArray(); //always use find in here dude 
+
+      console.log(caseStudies);
+
+      ///admin/case_study/:id
+    const data = caseStudies.map((item, index) => ({
+      id: index + 1,
+      title: item.title || 'Untitled',
+      image: item.usecase_image
+        ? `<img src="/admin/assets/dist${item.usecase_image}" style="width: 100px; height: auto; object-fit: contain;">`
+        : '',
+      actions: `
+        <a href="${item.case_study}" target="_blank" class="btn btn-primary mx-1">
+          <i class="bi bi-eye-fill"></i> Preview
+        </a>
+        <a href="/admin/edit_usecase/${item._id}" class="btn btn-success mx-1">
+          <i class="bi bi-pencil-square"></i> Edit
+        </a>
+        <button type="button" class="btn btn-danger mx-1 eradicator" data-id="${item._id}" data-type="landingpage">
+          <i class="bi bi-trash3-fill"></i> Delete
+        </button>
+      `
+    }));
+
+    res.status(200).json({ data });
+  } catch (err) {
+    console.error('Error fetching case studies:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+//workshop page
+
 //case study individual
 
 app.get('/admin/get_resource/casestudy_business_cards/:docId/:cardId',isAuthenticated, async (req, res) => {
