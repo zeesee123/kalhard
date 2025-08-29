@@ -4,6 +4,7 @@ public/dist/uploads/
 public/dist/casestudies/
 public/dist/blogs/
 public/dist/usecases/
+public/dist/authors/
 astro
 scraper
 frontend

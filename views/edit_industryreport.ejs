@@ -4,14 +4,40 @@
 
 <%-include('templates/header')%>
 
+<link href="
+https://cdn.jsdelivr.net/npm/filepond@4.32.7/dist/filepond.min.css
+" rel="stylesheet"/>
+
+<link href="
+https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-plugin-image-preview.min.css
+" rel="stylesheet">
 
 
+<!-- Modal -->
+  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
+          <button type="button" class="btn-close btn-bs-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="modal_content">
+          
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <!-- {{-- <button type="button" class="btn btn-primary">Understood</button> --}} -->
+        </div>
+      </div>
+      <!-- {{-- test --}} -->
+    </div>
+  </div>
 
 
 
 <div class="d-flex justify-content-between mt-4">
-    <h1><i class="bi bi-rocket-takeoff-fill mx-2"></i>Landing page (<%=ucfirst(page)%>)</h1>
-    <a href="/admin/view_casestudies" target="_blank"><button class="btn btn-primary"><i class="bi bi-card-list mx-2"></i>List Case studies</button></a>
+    <h1><i class="bi  bi-pencil-square mx-2"></i>Edit White Paper (<%=ucfirst(page)%>)</h1>
+    <a href="link for casestudy" target="_blank"><button class="btn btn-primary"><i class="bi bi-card-list mx-2"></i>List Case studies</button></a>
     
 </div>
 
@@ -31,7 +57,9 @@
   </div>
 <% } %> -->
 
-<form action="/admin/landingpage" method="POST" enctype="multipart/form-data" id="main_form">
+
+
+<form action="/admin/edit_white_paper/<%=section._id%>" method="POST" enctype="multipart/form-data" id="main_form">
 
     <div class="accordion mt-3" id="accordionExample">
   <div class="accordion-item mb-3">
@@ -48,8 +76,7 @@
        </h3>
 
 
-
-       <div class="row">
+         <div class="row">
   <div class="mb-3 col-6">
       <label for="" class="form-label">Featured image</label>
       <input type="file" class="form-control img_inpp" name="featured_image">
@@ -61,7 +88,7 @@
   </div>
   <div class="mb-3 col-4">
       <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-      <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
+           <img class="Thumbnail" src="<%= section.featured_image ? '/admin/assets/dist' + section.featured_image : '/admin/assets/dist/defaultimages/default.jpg' %>"  width="400" alt="Default picture Thumbnail">
       
   </div>
 </div>
@@ -79,19 +106,22 @@
   </div>
   <div class="mb-3 col-4">
       <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-      <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
+      <img class="Thumbnail" src="<%= section.hero_image ? '/admin/assets/dist' + section.hero_image : '/admin/assets/dist/defaultimages/default.jpg' %>"  width="400" alt="Default picture Thumbnail">
       
   </div>
-
-  <div class="mb-3 col-6">
-  <label for="blog_author" class="form-label">Tags</label>
-  <select name="tag" class="form-control" multiple>
-    <% tags.forEach(tag => { %>
-      <option value="<%= tag._id %>"><%= ucfirst(tag.name) %></option>
-    <% }); %>
-  </select>
 </div>
 
+
+ <div class="mb-3 col-6">
+  <label for="blog_author" class="form-label">Tags</label>
+  <select name="tag" id="blog_tags" class="form-control" multiple>
+    <% tags.forEach(t => { %>
+      <option value="<%= t._id %>" 
+        <%= section.tag && section.tag.some(tagId => tagId.toString() === t._id.toString()) ? 'selected' : '' %>>
+        <%= ucfirst(t.name) %>
+      </option>
+    <% }); %>
+  </select>
 </div>
 
 
@@ -107,7 +137,7 @@
   </div>
   <div class="mb-3 col-4">
       <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-      <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
+      <img class="Thumbnail" src="<%= section.card_one ? '/admin/assets/dist' + section.card_one : '/admin/assets/dist/defaultimages/default.jpg' %>"  width="400" alt="Default picture Thumbnail">
       
   </div>
 </div>
@@ -125,7 +155,7 @@
   </div>
   <div class="mb-3 col-4">
       <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-      <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
+      <img class="Thumbnail" src="<%= section.card_two ? '/admin/assets/dist' + section.card_two : '/admin/assets/dist/defaultimages/default.jpg' %>"  width="400" alt="Default picture Thumbnail">
       
   </div>
 </div>
@@ -136,13 +166,13 @@
           <div class="col-12">
              <div class="mb-3">
             <label for="" class="form-label">Title 1 (Bold text)</label>
-            <input type="text" name="hero_title1" class="form-control" >
+            <input type="text" name="hero_title1" class="form-control" value="<%=section.hero_title1%>">
         </div>
           </div>
           <div class="col-12">
              <div class="mb-3">
             <label for="" class="form-label">Title 2(normal text)</label>
-            <input type="text" name="hero_title2" class="form-control" >
+            <input type="text" name="hero_title2" class="form-control" value="<%=section.hero_title2%>">
         </div>
           </div>
        
@@ -150,7 +180,7 @@
     
         <div class="mb-3">
             <label for="" class="form-label">Content</label>
-            <textarea name="hero_content" cols="30" rows="5" class="form-control"></textarea>
+            <textarea name="hero_content" cols="30" rows="5" class="form-control"><%=section.hero_content%></textarea>
         </div>
     
         
@@ -158,12 +188,12 @@
         <div class="mb-3 d-flex">
             <div class="mx-2">
                 <label for="" class="form-label">Button text ( Download case study )</label>
-                <input type="text" class="form-control" name="herobtn_text" >
+                <input type="text" class="form-control" name="herobtn_text" value="<%=section.herobtn_text%>">
             </div>
     
             <div class="mx-2">
                 <label for="" class="form-label">Button url</label>
-                <input type="text" class="form-control" name="herobtn_url" >
+                <input type="text" class="form-control" name="herobtn_url" value="<%=section.herobtn_url%>">
             </div>
     
         </div>
@@ -209,7 +239,7 @@
           <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title 1 (Bold text)</label>
-            <input type="text" name="calsoftinfocus_title" class="form-control" >
+            <input type="text" name="calsoftinfocus_title" class="form-control" value="<%=section.calsoftinfocus_title%>">
         </div>
           </div>
           <!-- <div class="col-6">
@@ -222,7 +252,7 @@
 
         <div class="mb-3">
           <label for="" class="form-label">Content</label>
-          <textarea name="calsoftinfocus_text" id="blog_content" cols="30" rows="5" class="form-control"></textarea>
+          <textarea name="calsoftinfocus_text" id="blog_content" cols="30" rows="5" class="form-control"><%=section.calsoftinfocus_text%></textarea>
       </div>
 
       <!-- <div class="mb-3">
@@ -233,7 +263,7 @@
 
     <div class="mb-3">
       <label for="" class="form-label">Form Code</label>
-      <textarea name="hubspot_form" id="" class="form-control"></textarea>
+      <textarea name="hubspot_form" id="" class="form-control"><%=section.hubspot_form%></textarea>
     </div>
 
        
@@ -293,14 +323,14 @@
   <div class="accordion-item mb-3">
   <h2 class="accordion-header">
     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCustomers" aria-expanded="false" aria-controls="collapseCustomers">
-      <i class="bi bi-person-check-fill mx-2"></i><%=page=='white_paper'||page=='industry_report'?'Why Read this whitepaper':'Business value'%>
+      <i class="bi bi-person-check-fill mx-2"></i>Why Read this whitepaper
     </button>
   </h2>
   <div id="collapseCustomers" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
     <div class="accordion-body">
       <div class="card pt-3 p-4">
 
-        <h3><%=page=='white_paper'||page=='industry_report'?'Why Read this whitepaper':'Business value'%>
+        <h3>Why Read this whitepaper
        </h3>
         
 
@@ -309,7 +339,8 @@
           <div class="col-6">
              <div class="mb-3">
             <label for="" class="form-label">Title(coloured text)</label>
-            <input type="text" name="businessinvalue_title" class="form-control">
+            <input type="text" name="businessinvalue_title" class="form-control" value="
+            <%=section.businessinvalue_title%>">
         </div>
           </div>
           <!-- <div class="col-6">
@@ -320,8 +351,8 @@
           </div> -->
         </div>
        
-<%if(page!='white_paper' && page!='industry_report'){%>    
-        <h5>Icons(Increased,faster,simplified....)</h5>
+    
+        <!-- <h5>Icons(Increased,faster,simplified....)</h5>
         <div class="" id="ourbusiness_cards">
           <div class="mb-3 row">
             <div class="col-2">
@@ -363,15 +394,11 @@
           <tbody>
             
           </tbody>
-        </table>
-        <% }else{%>
-
-            <div class="mb-3">
+        </table> -->
+        <div class="mb-3">
           <label for="" class="form-label">Content</label>
-          <textarea name="whyread_text" id="blog_contenttwo" cols="30" rows="5" class="form-control"></textarea>
+          <textarea name="whyread_text" id="blog_contenttwo" cols="30" rows="5" class="form-control"><%=section.whyread_text%></textarea>
       </div>
-      <%}%>
-        
 
         
     </div>
@@ -407,7 +434,7 @@
   </div>
   <div class="mb-3 col-4">
       <!-- <img class="Thumbnail" src="{{ optional($section)->sec2image ? asset_env('aboutpage/'.$section->sec2image) : asset_env('images/default.jpg') }}"  width="400" alt="Default picture Thumbnail"> -->
-      <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg"  width="400" alt="Default picture Thumbnail">
+      <img class="Thumbnail" src="<%= section.knowmore_image ? '/admin/assets/dist' + section.knowmore_image : '/admin/assets/dist/defaultimages/default.jpg' %>"  width="400" alt="Default picture Thumbnail">
       
   </div>
 </div>
@@ -417,7 +444,7 @@
           <div class="col-12">
              <div class="mb-3">
             <label for="" class="form-label">Title 1 (Bold text)</label>
-            <input type="text" name="knowmore_title1" class="form-control" >
+            <input type="text" name="knowmore_title1" class="form-control" value="<%=section.knowmore_title1%>">
         </div>
           </div>
           <!-- <div class="col-12">
@@ -431,7 +458,7 @@
     
         <div class="mb-3">
             <label for="" class="form-label">Content</label>
-            <textarea name="knowmore_text" cols="30" rows="5" class="form-control"></textarea>
+            <textarea name="knowmore_text" cols="30" rows="5" class="form-control"><%=section.knowmore_text%></textarea>
         </div>
     
         
@@ -439,7 +466,7 @@
         <div class="mb-3 d-flex">
             <div class="mx-2">
                 <label for="" class="form-label">Button text ( Download case study )</label>
-                <input type="text" class="form-control" name="knowmore_btn_text">
+                <input type="text" class="form-control" name="knowmore_btn_text" value="<%=section.knowmore_btn_text%>">
             </div>
     
             <div class="mx-2">
@@ -460,30 +487,36 @@
 <div class="accordion-item mb-3">
   <h2 class="accordion-header">
     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCaseStudies" aria-expanded="false" aria-controls="collapseCaseStudies">
-      <i class="bi bi-cloud-upload-fill mx-2"></i>
-      <%=page=='white_paper'||page=='industry_report'?'Upload White Paper':'Upload Case Study'%>   
+      <i class="bi bi-cloud-upload-fill mx-2"></i>Upload White Paper
     </button>
   </h2>
   <div id="collapseCaseStudies" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
     <div class="accordion-body">
       <div class="card pt-3 p-4">
 
-        <h3>Upload Case Study
+        <h3>Upload White Paper
         </h3>
         
 
-
-<div class="row">
+        <div class="row">
   <div class="mb-3 col-6">
       <label for="" class="form-label">Upload file</label>
-      <input type="file" class="form-control img_inpp" name="<%= page === 'white_paper' 
-            ? 'white_paper' 
-            : page === 'industry_report' 
-              ? 'industry_report' 
-              : 'case_study' %>">
+      <input type="file" class="form-control img_inpp" name="white_paper">
       
   </div>
   
+</div>
+
+<% if (section.white_paper) { %>
+    <div class="mb-3 col-6 d-flex align-items-end">
+      <a href="/admin/assets/dist<%=section.white_paper%>" target="_blank" class="btn btn-primary">
+        Preview Current PDF
+      </a>
+    </div>
+  <% }else{ %>
+
+    <div>You haven't uploaded any white paper</div>
+    <% } %>
 </div>
 
 
@@ -501,10 +534,9 @@
     </div>
     </div>
   </div>
-</div>
 
 
-<div class="accordion-item mb-3">
+  <div class="accordion-item mb-3">
   <h2 class="accordion-header">
     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSEO" aria-expanded="false" aria-controls="collapseCaseStudies">
       <i class="bi bi-globe mx-2"></i>SEO
@@ -522,27 +554,26 @@
 
 
 
-     <div class="mb-3">
+    <div class="mb-3">
           <label for="" class="form-label">SEO Title (Meta Title)</label>
-          <input type="text" name="meta_title" class="form-control">
+          <input type="text" name="meta_title" class="form-control" value="<%=section.meta?.title%>">
         </div>
 
         <div class="mb-3">
           <label for="" class="form-label">Slug (URL)</label>
-          <input type="text" name="slug" class="form-control">
+          <input type="text" name="slug" class="form-control" value="<%=section.meta?.slug%>">
         </div>
 
         <div class="mb-3">
           <label for="" class="form-label">Meta Description</label>
-          <textarea name="meta_description" rows="3" class="form-control"></textarea>
+          <textarea name="meta_description" rows="3" class="form-control"><%=section.meta?.description%></textarea>
         </div>
 
 
         <div class="mb-3">
           <label for="" class="form-label">Structured Data (Schema Markup)</label>
-          <textarea name="schema_markup" rows="5" class="form-control" placeholder='Paste JSON-LD here'></textarea>
+          <textarea name="schema_markup" rows="5" class="form-control" placeholder='Paste JSON-LD here'><%=section.meta?.schema%></textarea>
         </div>
-
 
         
 
@@ -551,6 +582,11 @@
     </div>
   </div>
 </div>
+
+</div>
+
+
+
 
 </div>
 
@@ -569,6 +605,7 @@
 <!-- datable -->
 
 <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
+
 
 
 <script src="/admin/assets/tinymce/tinymce.min.js" referrerpolicy="origin"></script>
@@ -592,7 +629,6 @@ tinymce.init({
   toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image code'
 });
 </script>
-
 
 <script src="
 https://cdn.jsdelivr.net/npm/filepond@4.32.7/dist/filepond.min.js
@@ -1128,8 +1164,8 @@ var table1=$('#whatwedo_table').DataTable({
   //             }]
   // });
 
-  var table4=$('#journey_table').DataTable({
-              ajax:"/admin/table/homepage/sec2_entries",
+  var table4=$('#ourbusiness_table').DataTable({
+              ajax:"/admin/table/case_study/<%=section._id%>/business_cards",
               processing:true,
               columns:[
                 {"data":"id"},
@@ -1466,7 +1502,7 @@ var table1=$('#whatwedo_table').DataTable({
   //mapping section tables
 
   const tableMap = {
-    "section3": table1,
+    "section1": table4,//ourbusiness table
     "section4": table2,
     // "section5": table3,
     // "section6": table4,
@@ -1515,7 +1551,7 @@ function reloadTable(sectionName) {
 
   //  type in loading for loading in the resource..
 
-  let fet=await fetch(`/admin/get_resource/${type}/${id}`);
+  let fet=await fetch(`/admin/get_resource/${type}/<%=section._id%>/${id}`);
   
   let res=await fet.json();
 
@@ -1539,17 +1575,25 @@ function reloadTable(sectionName) {
 
     switch(type){
 
-case "sec2_entries":
+case "casestudy_business_cards":
   content=`<form id="dynForm">
     <div class="mb-3">
       <label for="" class="form-label">Image</label>
-      <input class="form-control filepond" type="file">
-      <input type="hidden" value="${id}" name="id">
-      <button class="btn btn-success" id="update_btnmod">Update</button>
+      <input class="form-control filepond" type="file" >
       </div>
+      <div class="mb-3">
+      <label for="" class="form-label">Title</label>
+      <input class="form-control" type="text" value="${res.card.number}" name="number">
+      </div>
+      <div class="mb-3">
+      <label for="" class="form-label">Content</label>
+      <textarea class="form-control" rows="5" name="content">${res.card.content}</textarea>
+      </div>
+      <input type="hidden" value="${res.card.id}" name="id">
+      <button class="btn btn-success" id="update_btnmod" >Update</button>
       </form>`;
       img=true;
-      imglink=`/admin/assets/dist/uploads/${res.sectionData.whatwe_doimg}`;
+      imglink=`/admin/assets/dist/${res.card.image}`;
 break;
 case "section4":
   content=`<form id="dynForm">
@@ -1774,15 +1818,16 @@ content=`utc`;
         if(pond.getFile(0)){
 
 console.log('file is there');
-
-data.append('image',pond.getFile().file);
+const file = pond.getFile().file;
+data.append('image', file, file.name || 'upload.png');
+// data.append('image',pond.getFile().file);
 }else{
 console.log('file is not there');
 }
       }
       
 
-      let fetchf=await fetch(`{{url('admin/update_homesection')}}/${type}`,{method:'POST',headers:{'X-CSRF-TOKEN':x_token},body:data})
+      let fetchf=await fetch(`/admin/edit/casestudy_business_cards/<%=section._id%>`,{method:'POST',body:data});
       
 
       let resf=await fetchf.json();
@@ -1798,7 +1843,7 @@ console.log('file is not there');
   confirmButtonText: 'OK'
 });
 
-      reloadTable(type);
+      reloadTable('section1');
 
       }else{
 
@@ -1810,7 +1855,7 @@ console.log('file is not there');
 
 
 
-        let fetchf=await fetch(`{{url('admin/remove_homesection')}}/${type}`,{method:'POST',headers:{'X-CSRF-TOKEN':x_token},body:data})
+        let fetchf=await fetch(`/admin/delete_casestudy_card/<%=section._id%>`,{method:'POST',headers:{'X-CSRF-TOKEN':x_token},body:data})
         let resf=await fetchf.json();
 
         Swal.fire({
@@ -1822,7 +1867,7 @@ console.log('file is not there');
 
 mod_close.click();
 
-reloadTable(type);
+reloadTable('section1');
 
 
 

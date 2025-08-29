@@ -74,6 +74,16 @@ const calculateReadTime = (content) => {
     console.log('Uploads directory created:', casestudyDir);
   }
 
+
+    // ✅ Ensure uploads directory exists
+  const industryDir = path.join(__dirname, 'public','dist', 'industry_reports');
+  
+  if (!fs.existsSync(industryDir)) {
+    fs.mkdirSync(industryDir, { recursive: true });
+    console.log('Uploads directory created:', industryDir);
+  }
+
+
   // ✅ Ensure uploads directory exists
   const blogDir = path.join(__dirname, 'public','dist', 'blogs');
   if (!fs.existsSync(blogDir)) {
@@ -144,6 +154,8 @@ const storage = multer.diskStorage({
       cb(null, 'public/dist/usecases/'); // <-- blog image goes here
     }else if (file.fieldname === 'author_image') {
       cb(null, 'public/dist/authors/'); 
+    }else if (file.fieldname === 'industry_report') {
+      cb(null, 'public/dist/industry_reports/'); 
     }else{// <-- blog image goes here else {
       cb(null, 'public/dist/uploads/');
     }
@@ -2630,6 +2642,7 @@ app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) =
     { name: 'knowmore_image', maxCount: 1 },
     { name:'card_one',maxCount:1},
     { name:'card_two',maxCount:1},
+    {name:'industry_report',maxCount:1},
     { name: 'businessinvalue_img' } ,// handles all journey card images
     { name: 'case_study', maxCount: 1 },
     { name: 'white_paper', maxCount: 1 }, 
@@ -2676,6 +2689,7 @@ const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.fi
         let caseStudyPath=null;
         let whitePaperPath=null;
         let datasheetPath=null;
+        let industryPath =null;
         if(page=='case_study'){
 
           const caseStudyFile = req.files?.case_study?.[0];
@@ -2688,6 +2702,13 @@ const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.fi
           const datasheetFile = req.files?.datasheet?.[0];
         datasheetPath = datasheetFile
           ? '/datasheets/' + datasheetFile.filename
+          : null;
+
+        }else if(page=='industry_report'){
+
+          const industryFile = req.files?.industry_report?.[0];
+        industryPath = industryFile
+          ? '/industry_reports/' + industryFile.filename
           : null;
 
         }else{
@@ -2768,6 +2789,7 @@ for (let i = 0; i < businessTitles.length; i++) {
           card_two:newcardtwoImagePath,
           case_study:caseStudyPath,
           white_paper:whitePaperPath,
+          industry_report:industryPath,
           datasheet:datasheetPath,
           featured_image:featured_image,
           herobtn_text: req.body.herobtn_text,
