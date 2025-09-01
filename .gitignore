@@ -6,6 +6,7 @@ public/dist/blogs/
 public/dist/usecases/
 public/dist/authors/
 public/dist/industry_reports/
+public/dist/media/
 astro
 scraper
 frontend

@@ -8,6 +8,8 @@ const ObjectId = mongoose.Types.ObjectId;
 
 const routes=require('./routes/web');
 
+const Media=require('./models/Media');
+
 require('dotenv').config();
 console.log(process.env.PORT);
 // console.log('this is mongoose',mongoose);
@@ -168,6 +170,39 @@ const storage = multer.diskStorage({
 
 
   const upload = multer({ storage });
+
+
+  //stuff for media upload goes in here
+  
+  // ----------------- MEDIA LIBRARY SETUP -----------------
+const mediaBaseDir = path.join(__dirname, 'public','dist','media'); // <-- main media folder
+const mediaFolders = ['images', 'pdfs', 'docs', 'others'];
+
+// Ensure media folders exist
+mediaFolders.forEach(folder => {
+  const dir = path.join(mediaBaseDir, folder);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+});
+
+// Multer storage for media library
+const mediaStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    let folder = 'others';
+    const ext = file.originalname.split('.').pop().toLowerCase();
+    if (['png','jpg','jpeg','gif','webp'].includes(ext)) folder = 'images';
+    else if (['pdf'].includes(ext)) folder = 'pdfs';
+    else if (['doc','docx','txt'].includes(ext)) folder = 'docs';
+    cb(null, path.join(mediaBaseDir, folder));
+  },
+  filename: function (req, file, cb) {
+    const uniqueName = Date.now() + '-' + file.originalname.replace(/\s+/g, '_');
+    cb(null, uniqueName);
+  }
+});
+
+const mediaUpload = multer({ storage: mediaStorage });
+
+  //media upload ends here
 
 
   const session = require('express-session');
@@ -641,38 +676,6 @@ app.get('/admin/edit_popup/:id', async (req, res) => {
 
 
 
-
-app.get('/api/landing-pages/by-tag/:tagId', async (req, res) => {
-  try {
-    const { tagId } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(tagId)) {
-      return res.status(400).json({ error: 'Invalid tag ID' });
-    }
-
-    const landingPages = await mongoose.connection.db
-      .collection('landingpage')
-      .find(
-        { tag: new mongoose.Types.ObjectId(tagId) }, // <-- add `new` here
-        {
-          projection: {
-            _id: 1,
-            featured_image: 1,
-            hero_title1: 1,
-            card_one: 1
-          }
-        }
-      )
-      .toArray();
-
-    res.json({ landingPages });
-  } catch (err) {
-    console.error('Error fetching landing pages by tag:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-
 //landingpage tag filter pagewise
 
 app.get('/api/landing-pages/by-tag/:tagId/:pageType', async (req, res) => {
@@ -938,6 +941,143 @@ app.get('/admin/get_datasheets',isAuthenticated, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+//media upload
+app.get('/admin/media',(req,res)=>{
+  res.render('add_media');
+});
+
+//routes for media part come in here dude 
+
+app.post('/admin/media/upload', isAuthenticated, mediaUpload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      req.flash('error', 'No file uploaded');
+      return res.redirect('/admin/media');
+    }
+
+    // Save metadata in MongoDB (assuming you have a Media model)
+    // const Media = mongoose.model('Media', new mongoose.Schema({
+    //   filename: String,
+    //   originalName: String,
+    //   folder: String,
+    //   path: String,
+    //   mimetype: String,
+    //   size: Number,
+    //   createdAt: { type: Date, default: Date.now }
+    // }));
+
+    // const ext = req.file.originalname.split('.').pop().toLowerCase();
+    // let folder = 'others';
+    // if (['png','jpg','jpeg','gif','webp'].includes(ext)) folder = 'images';
+    // else if (['pdf'].includes(ext)) folder = 'pdfs';
+    // else if (['doc','docx','txt'].includes(ext)) folder = 'docs';
+
+    // const media = await Media.create({
+    //   filename: req.file.filename,
+    //   originalName: req.file.originalname,
+    //   folder,
+    //   path: `/media/${folder}/${req.file.filename}`,
+    //   mimetype: req.file.mimetype,
+    //   size: req.file.size
+    // });
+
+    const ext = req.file.originalname.split('.').pop().toLowerCase();
+let folder = 'others';
+let type = 'other';
+if (['png','jpg','jpeg','gif','webp'].includes(ext)) { folder = 'images'; type='image'; }
+else if (['pdf'].includes(ext)) { folder='pdfs'; type='pdf'; }
+else if (['doc','docx','txt'].includes(ext)) { folder='docs'; type='doc'; }
+
+const media = await Media.create({
+  filename: req.file.filename,
+  originalName: req.file.originalname,
+  folder,
+  path: `/media/${folder}/${req.file.filename}`,
+  url: `/media/${folder}/${req.file.filename}`,
+  mimetype: req.file.mimetype,
+  size: req.file.size,
+  type
+});
+
+    req.flash('success', 'File uploaded successfully');
+    res.redirect('/admin/media');
+  } catch (err) {
+    console.error(err);
+
+    req.flash('error', 'Something went wrong');
+    res.redirect('/admin/media');
+  }
+});
+
+// Get all media files
+app.get('/admin/media_all', isAuthenticated, async (req, res) => {
+  try {
+    const Media = mongoose.model('Media');
+    const files = await Media.find().sort({ createdAt: -1 });
+    res.render('admin/media_library', { files, success: req.flash('success'), error: req.flash('error') });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Failed to fetch media');
+    res.redirect('/admin');
+  }
+});
+
+// Delete a media file
+app.post('/admin/media/delete/:id', isAuthenticated, async (req, res) => {
+  try {
+    const Media = mongoose.model('Media');
+    const file = await Media.findById(req.params.id);
+    if (!file) {
+      req.flash('error', 'File not found');
+      return res.redirect('/admin/media');
+    }
+
+    const filePath = path.join(__dirname, 'public', file.path);
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath); // delete from disk
+
+    await Media.findByIdAndDelete(req.params.id); // delete from db
+
+    req.flash('success', 'File deleted successfully');
+    res.redirect('/admin/media');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Failed to delete file');
+    res.redirect('/admin/media');
+  }
+});
+
+app.get('/api/landing-pages/by-tag/:tagId', async (req, res) => {
+  try {
+    const { tagId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(tagId)) {
+      return res.status(400).json({ error: 'Invalid tag ID' });
+    }
+
+    const landingPages = await mongoose.connection.db
+      .collection('landingpage')
+      .find(
+        { tag: new mongoose.Types.ObjectId(tagId) }, // <-- add `new` here
+        {
+          projection: {
+            _id: 1,
+            featured_image: 1,
+            hero_title1: 1,
+            card_one: 1
+          }
+        }
+      )
+      .toArray();
+
+    res.json({ landingPages });
+  } catch (err) {
+    console.error('Error fetching landing pages by tag:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 
 
 

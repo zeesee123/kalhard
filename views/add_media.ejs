@@ -1,0 +1,164 @@
+
+
+
+
+<%-include('templates/header')%>
+
+<link href="
+https://cdn.jsdelivr.net/npm/filepond@4.32.7/dist/filepond.min.css
+" rel="stylesheet"/>
+
+<link href="
+https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-plugin-image-preview.min.css
+" rel="stylesheet">
+
+
+
+
+
+
+<div class="d-flex justify-content-between mt-4">
+    <h1><i class="bi bi-plus-circle mx-2"></i>Add Usecase</h1>
+    <a href="/admin/view_blogs" target="_blank"><button class="btn btn-primary"><i class="bi bi-card-list mx-2"></i>View blogs</button></a>
+    
+</div>
+
+
+<!-- <% if (success && success.length > 0) { %>
+  <div class="alert alert-important alert-success alert-dismissible">
+    <div class="d-flex"><i class="bi bi-check-circle-fill mx-1"></i><%= success[0] %></div>
+    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    
+  </div>
+<% } %>
+
+<% if (error && error.length > 0) { %>
+  <div class="alert alert-danger alert-important alert-dismissible">
+    <div class="d-flex"><i class="bi bi-exclamation-triangle-fill mx-1"></i><%= error[0] %></div>
+    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+  </div>
+<% } %> -->
+
+<form action="/admin/media/upload" method="POST" id="main_form" enctype="multipart/form-data">
+
+    <div class="card pt-3 p-4">
+
+      <div class="row">
+
+        <div class="mb-3 col-6">
+      <label for="" class="form-label">Upload file</label>
+      
+      
+  </div>
+
+  <div class="mb-3 col-6">
+    <input type="file" class="form-control" id="imageInput" name="file">
+  </div>
+
+
+    </div>
+
+
+   
+
+
+
+    
+
+<div class="text-end p-3" style="bottom:0;position:sticky;z-index: 1030;">
+    <button class="btn btn-lg btn-primary p-3" id="spin_submit" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Save"><i class="bi bi-floppy2-fill mx-2" ></i></button> 
+     
+</div>
+</div>
+
+</form>
+
+<!-- datable -->
+
+<script src="/admin/assets/tinymce/tinymce.min.js" referrerpolicy="origin"></script>
+
+<script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
+
+<script src="
+https://cdn.jsdelivr.net/npm/filepond@4.32.7/dist/filepond.min.js
+"></script>
+
+
+<script src="
+https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-plugin-image-preview.min.js
+"></script>
+
+
+<script>
+
+  tinymce.init({
+    selector: '#blog_content',
+    license_key: 'gpl',
+    height: 400,
+    menubar: false,
+    plugins: 'link image code lists',
+    toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image code'
+  });
+
+    </script>
+    <script>
+FilePond.registerPlugin(FilePondPluginImagePreview);
+
+const inputElement = document.getElementById('imageInput');
+
+// Create FilePond instance
+const pond = FilePond.create(inputElement, {
+    allowMultiple: false,
+    allowImagePreview: true,
+    instantUpload: false,
+    server: null, // since you are submitting via normal form
+    storeAsFile: true,
+});
+</script>
+
+<script>
+    let main_form=document.getElementById('main_form');
+
+    let spin_submit=document.getElementById('spin_submit');
+
+    main_form.addEventListener('submit',(e)=>{
+
+        e.preventDefault();
+
+        spin_submit.innerHTML=`<div class="spinner-border mx-2" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>`;
+        
+        console.log('submit event');
+
+        main_form.submit();
+    });
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  <% if (success && success.length > 0) { %>
+    Swal.fire({
+      icon: 'success',
+      title: 'Saved!',
+      text: '<%= success[0] %>',
+      confirmButtonColor: '#3085d6',
+    });
+  <% } %>
+
+  <% if (error && error.length > 0) { %>
+    Swal.fire({
+      icon: 'error',
+      title: 'Error!',
+      text: '<%= error[0] %>',
+      confirmButtonColor: '#d33',
+    });
+  <% } %>
+</script>
+
+
+
+
+<%-include('templates/footer')%>
