@@ -33,71 +33,54 @@
 
 <form action="/admin/add_podcast" enctype="multipart/form-data" method="POST" id="main_form">
 
-    <div class="card pt-3 p-4">
-      <div class="row">
-  
-        <!-- Image field -->
-        <div class="mb-3 col-6">
-          <label for="podcast_image" class="form-label">Featured Image</label>
-          <input type="file" class="form-control img_inpp" name="podcast_image">
-        </div>
-        <div class="mb-3 col-6">
-          <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg" width="300" alt="Default Thumbnail">
-        </div>
-  
-        <!-- Title -->
-        <div class="mb-3 col-12">
-          <label for="podcast_title" class="form-label">Title</label>
-          <input type="text" class="form-control" name="title" id="podcast_title">
-        </div>
-  
-        <!-- URL -->
-        <div class="mb-3 col-12">
-          <label for="podcast_url" class="form-label">Podcast URL</label>
-          <input type="url" class="form-control" name="url" id="podcast_url" placeholder="https://example.com/podcast">
-        </div>
-  
-        <!-- Content -->
-        <div class="mb-3 col-12">
-          <label for="podcast_content" class="form-label">Content</label>
-          <textarea name="content" id="podcast_content" rows="5" class="form-control"></textarea>
-        </div>
-  
-        <!-- Accordion for speakers -->
-        <div class="accordion my-3" id="accordionPodcast">
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="headingSpeakers">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpeakers" aria-expanded="false" aria-controls="collapseSpeakers">
-                <i class="bi bi-megaphone mx-2"></i>
-                Select Speakers
-              </button>
-            </h2>
-            <div id="collapseSpeakers" class="accordion-collapse collapse" data-bs-parent="#accordionPodcast">
-              <div class="accordion-body">
-                <div class="mb-3 col-12">
-                  <label for="speakers" class="form-label">Speakers</label>
-                  <select name="speakers" id="speakers" class="form-control" multiple>
-                    <% speakers.forEach(speaker => { %>
-                      <option value="<%= speaker._id %>"><%= ucfirst(speaker.name) %></option>
-                    <% }); %>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-  
+  <div class="card pt-3 p-4">
+    <div class="row">
+
+      <!-- Image field -->
+      <div class="mb-3 col-6">
+        <label for="podcast_image" class="form-label">Featured Image</label>
+        <input type="file" class="form-control img_inpp" name="podcast_image">
       </div>
+      <div class="mb-3 col-6">
+        <img class="Thumbnail" src="/admin/assets/dist/defaultimages/default.jpg" width="300" alt="Default Thumbnail">
+      </div>
+
+      <!-- Title -->
+      <div class="mb-3 col-12">
+        <label for="podcast_title" class="form-label">Title</label>
+        <input type="text" class="form-control" name="title" id="podcast_title">
+      </div>
+
+      <!-- Tags (replacing speakers) -->
+      <div class="mb-3 col-12">
+        <label for="tags" class="form-label">Tags</label>
+        <select name="tags" id="tags" class="form-control" multiple>
+          <% tags.forEach(tag => { %>
+            <option value="<%= tag._id %>"><%= ucfirst(tag.name) %></option>
+          <% }); %>
+        </select>
+      </div>
+
+      <!-- Content -->
+      
+
+      <!-- Embedded URL -->
+      <div class="mb-3 col-12">
+        <label for="embedded_url" class="form-label">Embedded URL</label>
+        <input type="url" class="form-control" name="embedded_url" id="embedded_url" placeholder="https://example.com/embed">
+      </div>
+
     </div>
-  
-    <!-- Submit -->
-    <div class="text-end p-3" style="bottom:0;position:sticky;z-index:1030;">
-      <button class="btn btn-lg btn-primary p-3" id="spin_submit" data-bs-toggle="tooltip" data-bs-placement="top" title="Save">
-        <i class="bi bi-floppy2-fill mx-2"></i> Save
-      </button>
-    </div>
-  
-  </form>
+  </div>
+
+  <!-- Submit -->
+  <div class="text-end p-3" style="bottom:0;position:sticky;z-index:1030;">
+    <button class="btn btn-lg btn-primary p-3" id="spin_submit" data-bs-toggle="tooltip" data-bs-placement="top" title="Save">
+      <i class="bi bi-floppy2-fill mx-2"></i> Save
+    </button>
+  </div>
+
+</form>
   
 <!-- datable -->
 

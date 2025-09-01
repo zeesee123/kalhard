@@ -1208,6 +1208,53 @@ app.get('/admin/edit_usecase/:id', isAuthenticated, async (req, res) => {
   }
 });
 
+//routes for press release
+
+// GET: render add_pressrelease form
+app.get('/admin/add_pressrelease', isAuthenticated, async (req, res) => {
+  try {
+    const tagCollection = mongoose.connection.db.collection('tags');
+    const tags = await tagCollection.find({}).toArray();
+
+    res.render('add_pressrelease', { tags, ucfirst });
+  } catch (err) {
+    console.error('Error loading add_pressrelease form:', err);
+    req.flash('error', 'Unable to load form');
+    res.redirect('/admin/dashboard');
+  }
+});
+
+// POST: save new press release
+app.post('/admin/add_pressrelease', isAuthenticated, async (req, res) => {
+  try {
+    const pressReleaseCollection = mongoose.connection.db.collection('press_releases');
+
+    // If you’re using multer for file upload
+    const featured_image = req.file ? req.file.filename : null;
+
+    // Grab submitted fields
+    const { title, tags, content, embedded_url } = req.body;
+
+    const newPressRelease = {
+      title,
+      content,
+      embedded_url,
+      tags: tags ? (Array.isArray(tags) ? tags : tags.split(',')) : [],
+      featured_image,
+      createdAt: new Date()
+    };
+
+    await pressReleaseCollection.insertOne(newPressRelease);
+
+    req.flash('success', 'Press Release added successfully');
+    res.redirect('/admin/press_releases');
+  } catch (err) {
+    console.error('Error saving press release:', err);
+    req.flash('error', 'Could not add press release');
+    res.redirect('/admin/add_pressrelease');
+  }
+});
+
 
 //edit author
 
@@ -1443,7 +1490,44 @@ app.post('/admin/create_tags', async (req, res) => {
   }
 });
 
+app.get('/admin/add_industry',(req,res)=>{
 
+
+       res.render('add_industries');
+})
+
+app.post('/admin/add_industry', async (req, res) => {
+  try {
+    console.log(req.body);
+    console.log('hatt');
+    const authorName = req.body.industry?.trim();
+
+    if (!authorName) {
+      req.flash('error', 'Industry name is required.');
+      return res.redirect('/admin/add_industry');
+    }
+
+    const collection = mongoose.connection.db.collection('industries');
+
+    const existing = await collection.findOne({ name: authorName });
+    if (existing) {
+      req.flash('error', 'Tag already exists.');
+      return res.redirect('/admin/add_industry');
+    }
+
+    await collection.insertOne({
+      name: authorName,
+      createdAt: new Date()
+    });
+
+    req.flash('success', 'Industry added successfully!');
+    res.redirect('/admin/add_industry');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Something went wrong');
+    res.redirect('/admin/add_industry');
+  }
+});
 
 app.post('/admin/blog/create', upload.single('blog_image'), async (req, res) => {
   try {
@@ -3229,6 +3313,26 @@ app.get('/api/whitepapers', async (req, res) => {
 });
 
 
+app.get('/api/industry_reports', async (req, res) => {
+  try {
+    const collection = mongoose.connection.db.collection('landingpage');
+
+    // Query only documents where page is 'case_study'
+    const data = await collection.find({ page: 'industry_report' }).toArray();
+
+    if (!data || data.length === 0) {
+      return res.status(404).json({ error: 'There are no reports' });
+    }
+
+    res.json({ data });
+  } catch (error) {
+    console.error('Error fetching reports:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
+
 app.get('/api/datasheets', async (req, res) => {
   try {
     const collection = mongoose.connection.db.collection('landingpage');
@@ -3759,6 +3863,118 @@ app.get('/api/usecases', async (req, res) => {
     res.json({ data: usecasesWithTagNames });
   } catch (error) {
     console.error('Error fetching usecases:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+//route for all podcasts
+app.get('/api/podcasts', async (req, res) => {
+  try {
+    const podcastsCollection = mongoose.connection.db.collection('podcasts');
+    const speakersCollection = mongoose.connection.db.collection('speakerhost');
+
+    const { limit } = req.query;
+    const numericLimit = parseInt(limit, 10);
+
+    let cursor = podcastsCollection.find({}).sort({ _id: -1 }); // latest first
+
+    if (!isNaN(numericLimit) && numericLimit > 0) {
+      cursor = cursor.limit(numericLimit);
+    }
+
+    const podcasts = await cursor.toArray();
+
+    if (!podcasts || podcasts.length === 0) {
+      return res.status(404).json({ error: 'There are no podcasts' });
+    }
+
+    // 🔹 Collect all unique speaker IDs across podcasts
+    const allSpeakerIds = podcasts
+      .flatMap(p => p.speakers || [])
+      .map(id => new ObjectId(id));
+
+    // 🔹 Fetch all speaker details in one query
+    const speakersData = await speakersCollection
+      .find({ _id: { $in: allSpeakerIds } })
+      .toArray();
+
+    // 🔹 Attach speaker details to each podcast
+    const podcastsWithSpeakers = podcasts.map(podcast => {
+      const speakersWithDetails = (podcast.speakers || []).map(speakerId => {
+        const sp = speakersData.find(s => s._id.equals(speakerId));
+        return sp ? { 
+          _id: sp._id, 
+          name: sp.name, 
+          designation: sp.designation, 
+          image: sp.image 
+        } : null;
+      }).filter(Boolean);
+
+      return {
+        ...podcast,
+        originalSpeakerIds: podcast.speakers, // keep original IDs if you want
+        speakers: speakersWithDetails
+      };
+    });
+
+    res.json({ data: podcastsWithSpeakers });
+  } catch (error) {
+    console.error('Error fetching podcasts:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+//route for individual podcast
+// 🔹 Get single podcast (with speaker details)
+app.get('/api/podcasts/:id', async (req, res) => {
+  try {
+    const podcastsCollection = mongoose.connection.db.collection('podcasts');
+    const speakersCollection = mongoose.connection.db.collection('speakerhost');
+
+    const podcastId = req.params.id;
+
+    // Validate ObjectId
+    if (!ObjectId.isValid(podcastId)) {
+      return res.status(400).json({ error: 'Invalid podcast ID' });
+    }
+
+    // Fetch the podcast
+    const podcast = await podcastsCollection.findOne({ _id: new ObjectId(podcastId) });
+
+    if (!podcast) {
+      return res.status(404).json({ error: 'Podcast not found' });
+    }
+
+    // Fetch speakers
+    const speakerIds = (podcast.speakers || []).map(id => new ObjectId(id));
+    let speakersWithDetails = [];
+
+    if (speakerIds.length > 0) {
+      const speakersData = await speakersCollection
+        .find({ _id: { $in: speakerIds } })
+        .toArray();
+
+      speakersWithDetails = speakerIds.map(sid => {
+        const sp = speakersData.find(s => s._id.equals(sid));
+        return sp ? {
+          _id: sp._id,
+          name: sp.name,
+          designation: sp.designation,
+          image: sp.image
+        } : null;
+      }).filter(Boolean);
+    }
+
+    // Build response
+    const podcastWithSpeakers = {
+      ...podcast,
+      originalSpeakerIds: podcast.speakers, // optional
+      speakers: speakersWithDetails
+    };
+
+    res.json({ data: podcastWithSpeakers });
+  } catch (error) {
+    console.error('Error fetching podcast:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
