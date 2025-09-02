@@ -186,17 +186,199 @@ https://cdn.jsdelivr.net/npm/filepond@4.32.7/dist/filepond.min.js
 https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-plugin-image-preview.min.js
 "></script>
 
+<script>
+    //script for photo clear button
 
+let clearBtns=document.querySelectorAll('.clear-btn');
+
+clearBtns.forEach((v,i)=>{
+  v.addEventListener('click',function(){
+
+    const img = document.querySelectorAll('.Thumbnail')[i];
+
+  
+    img.src=`/admin/assets/dist/defaultimages/default.jpg`;
+    
+console.log(document.querySelectorAll('.img_inpp'));
+    document.querySelectorAll('.img_inpp')[i].value='';
+
+  });
+})
+
+
+//script for the image inputs preview
+
+// Loop through each file input
+
+let imageInputs=document.querySelectorAll('.img_inpp');
+let thumb=document.querySelectorAll('.Thumbnail');
+
+imageInputs.forEach((input, index) => {
+  console.log('this isthe index first',index);
+    input.addEventListener('change', function(event) {
+      console.log('this the index real',index);
+        const file = event.target.files[0]; // Get the selected file
+
+        if (file) {
+            const reader = new FileReader(); // Create a FileReader object
+
+            reader.onload = function(e) {
+                // Get the corresponding image preview element
+                const img = thumb[index];
+                console.log('this is the index',index,img);
+                img.src = e.target.result; // Set the image source to the file's data URL
+                img.style.display = 'block'; // Show the image
+            }
+
+            reader.readAsDataURL(file); // Read the file as a data URL
+        }
+    });
+
+   
+});
+
+
+//dynamic inputs thumbnail
+</script>
 <script>
 
-  tinymce.init({
-    selector: '#blog_content',
-    license_key: 'gpl',
-    height: 400,
-    menubar: false,
-    plugins: 'link image code lists',
-    toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image code'
-  });
+    
+
+tinymce.init({
+  selector: '#blog_content',
+  plugins: 'link image code lists',
+  toolbar: 'undo redo | bold italic | link image | insertMedia',
+  relative_urls: false,          // ← force absolute URLs
+  remove_script_host: false,     // ← include full host
+  document_base_url: window.location.origin + '/admin/assets/dist/',  // base URL for relative paths
+  setup: function(editor) {
+    editor.ui.registry.addButton('insertMedia', {
+      text: 'Insert Media',
+      onAction: function() {
+
+        const basePath = window.location.origin + '/admin/assets/dist';
+
+        // Fetch media list
+        fetch('/admin/media/list')
+          .then(res => res.json())
+          .then(files => {
+
+            const validFiles = files.filter(f => f.url);
+
+            // Prepare HTML for tabs
+            const tabs = `
+              <div style="display:flex;gap:5px;margin-bottom:10px;">
+                <button class="tab-btn active" data-tab="images">Images</button>
+                <button class="tab-btn" data-tab="docs">Docs</button>
+                <button class="tab-btn" data-tab="videos">Videos</button>
+                <button class="tab-btn" data-tab="others">Others</button>
+                <button class="tab-btn" data-tab="upload">Upload</button>
+              </div>
+              <div class="tab-content" style="max-height:300px;overflow-y:auto;">
+                <div class="tab-panel" data-panel="images" style="display:flex;flex-wrap:wrap;">
+                  ${validFiles.filter(f => f.type === 'image').map(f => {
+                    const url = basePath + f.url;
+                    return `<img src="${url}" data-url="${url}" class="swal-media-thumb" 
+                             style="width:100px;height:100px;object-fit:cover;margin:5px;cursor:pointer;">`;
+                  }).join('')}
+                </div>
+                <div class="tab-panel" data-panel="docs" style="display:none;flex-wrap:wrap;">
+                  ${validFiles.filter(f => f.type === 'doc' || f.type==='pdf').map(f => {
+                    const url = basePath + f.url;
+                    const name = f.url.split('/').pop();
+                    return `<a href="#" data-url="${url}" class="swal-media-thumb" style="display:block;margin:5px;cursor:pointer;">${name}</a>`;
+                  }).join('')}
+                </div>
+                <div class="tab-panel" data-panel="videos" style="display:none;flex-wrap:wrap;">
+                  ${validFiles.filter(f => f.type === 'video').map(f => {
+                    const url = basePath + f.url;
+                    return `<video src="${url}" width="150" style="margin:5px;cursor:pointer;" controls></video>`;
+                  }).join('')}
+                </div>
+                <div class="tab-panel" data-panel="others" style="display:none;flex-wrap:wrap;">
+                  ${validFiles.filter(f => !['image','doc','pdf','video'].includes(f.type)).map(f => {
+                    const url = basePath + f.url;
+                    const name = f.url.split('/').pop();
+                    return `<a href="#" data-url="${url}" class="swal-media-thumb" style="display:block;margin:5px;cursor:pointer;">${name}</a>`;
+                  }).join('')}
+                </div>
+                <div class="tab-panel" data-panel="upload" style="display:none;">
+                  <input type="file" id="swal-upload-input" style="width:100%;">
+                  <small>Choose a file and it will be uploaded & inserted</small>
+                </div>
+              </div>
+            `;
+
+            Swal.fire({
+              title: 'Media Manager',
+              html: tabs,
+              width: 800,
+              showCloseButton: true,
+              showCancelButton: true,
+              didOpen: () => {
+
+                // Tab switching
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                  btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+                    document.querySelectorAll('.tab-panel').forEach(p=>p.style.display='none');
+                    btn.classList.add('active');
+                    document.querySelector(`.tab-panel[data-panel="${btn.dataset.tab}"]`).style.display = btn.dataset.tab==='upload'?'block':'flex';
+                  });
+                });
+
+                // Insert media click
+                document.querySelectorAll('.tab-panel .swal-media-thumb').forEach(el => {
+                  el.addEventListener('click', () => {
+                    const url = el.dataset.url;
+                    if (url.match(/\.(jpg|jpeg|png|webp|gif)$/i)) {
+                      editor.insertContent(`<img src="${url}" />`);
+                    } else {
+                      const name = url.split('/').pop();
+                      editor.insertContent(`<a href="${url}" target="_blank">${name}</a>`);
+                    }
+                    Swal.close();
+                  });
+                });
+
+                // Upload logic
+                const uploadInput = document.getElementById('swal-upload-input');
+                uploadInput?.addEventListener('change', () => {
+                  const file = uploadInput.files[0];
+                  const formData = new FormData();
+                  formData.append('file', file);
+
+                  fetch('/admin/media/upload', { method: 'POST', body: formData })
+                    .then(res => res.json())
+                    .then(data => {
+                      if(data.url){
+                        //const url = basePath + data.url;
+                        const url = new URL(data.url, window.location.origin + '/admin/assets/dist/').href;
+                        if(file.type.startsWith('image/')){
+                          editor.insertContent(`<img src="${url}" />`);
+                        } else {
+                          editor.insertContent(`<a href="${url}" target="_blank">${file.name}</a>`);
+                        }
+                        Swal.close();
+                      } else {
+                        Swal.fire('Error','Upload failed','error');
+                      }
+                    }).catch(()=>Swal.fire('Error','Upload failed','error'));
+                });
+
+              }
+            });
+
+          })
+          .catch(err => {
+            console.error(err);
+            Swal.fire('Error','Could not fetch media','error');
+          });
+
+      }
+    });
+  }
+});
 
     </script>
 

@@ -947,6 +947,16 @@ app.get('/admin/media',(req,res)=>{
   res.render('add_media');
 });
 
+app.get('/admin/media/list', async (req, res) => {
+  const mediaFiles = await Media.find(); // Assuming your Media model
+  // send URL and maybe type
+  res.json(mediaFiles.map(m => ({
+    url: m.url,
+    type: m.type,
+    name: m.name
+  })));
+});
+
 //routes for media part come in here dude 
 
 app.post('/admin/media/upload', isAuthenticated, mediaUpload.single('file'), async (req, res) => {
