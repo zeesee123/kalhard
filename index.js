@@ -1679,6 +1679,50 @@ app.post('/admin/add_industry', async (req, res) => {
   }
 });
 
+
+//route for topics
+
+app.get('/admin/add_topics',(req,res)=>{
+
+
+  res.render('add_topics');
+})
+
+app.post('/admin/add_topics', async (req, res) => {
+try {
+console.log(req.body);
+console.log('hatt');
+const authorName = req.body.topic?.trim();
+
+if (!authorName) {
+ req.flash('error', 'Topic name is required.');
+ return res.redirect('/admin/add_topics');
+}
+
+const collection = mongoose.connection.db.collection('topics');
+
+const existing = await collection.findOne({ name: authorName });
+if (existing) {
+ req.flash('error', 'Topic already exists.');
+ return res.redirect('/admin/add_topics');
+}
+
+await collection.insertOne({
+ name: authorName,
+ createdAt: new Date()
+});
+
+req.flash('success', 'Topic added successfully!');
+res.redirect('/admin/add_topics');
+} catch (err) {
+console.error(err);
+req.flash('error', 'Something went wrong');
+res.redirect('/admin/add_topics');
+}
+});
+
+//routes end
+
 app.post('/admin/blog/create', upload.single('blog_image'), async (req, res) => {
   try {
     const {
@@ -3879,10 +3923,12 @@ app.get('/api/blogs', async (req, res) => {
 app.get('/api/blogs/filters',async(req,res)=>{
 
   const authors=await mongoose.connection.db.collection('authors').find().toArray();
-  const tags=await mongoose.connection.db.collection('categories').find().toArray();
-  const categories=await mongoose.connection.db.collection('tags').find().toArray();
+  const tags=await mongoose.connection.db.collection('tags').find().toArray();
+  const categories=await mongoose.connection.db.collection('categories').find().toArray();
+  const topics=await mongoose.connection.db.collection('topics').find().toArray();
+  const industries=await mongoose.connection.db.collection('industries').find().toArray();
 
-  res.json({authors:authors,topics:tags,industries:categories});
+  res.json({authors,tags,categories,topics,industries});
 });
 
 app.get('/api/tags',async(req,res)=>{
