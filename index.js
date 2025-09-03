@@ -5,10 +5,12 @@ const mongoose=require('mongoose');
 const multer=require('multer');
 const fs=require('fs');
 const ObjectId = mongoose.Types.ObjectId;
+const nodemailer=require('nodemailer');
 
 const routes=require('./routes/web');
 
 const Media=require('./models/Media');
+const CareerApplication=require('./models/CareerApplication');
 
 require('dotenv').config();
 console.log(process.env.PORT);
@@ -68,6 +70,12 @@ const calculateReadTime = (content) => {
     fs.mkdirSync(uploadsDir, { recursive: true });
     console.log('Uploads directory created:', uploadsDir);
   }
+
+   const resumeDir = path.join(__dirname, 'public','dist', 'cv');
+  if (!fs.existsSync(resumeDir)) {
+    fs.mkdirSync(resumeDir, { recursive: true });
+    console.log('Uploads directory created:', resumeDir);
+  };
 
   // ✅ Ensure uploads directory exists
   const casestudyDir = path.join(__dirname, 'public','dist', 'casestudies');
@@ -158,6 +166,9 @@ const storage = multer.diskStorage({
       cb(null, 'public/dist/authors/'); 
     }else if (file.fieldname === 'industry_report') {
       cb(null, 'public/dist/industry_reports/'); 
+    }else if(file.fieldname==='resume'){
+
+      cb(null, 'public/dist/cv/');
     }else{// <-- blog image goes here else {
       cb(null, 'public/dist/uploads/');
     }
@@ -4223,6 +4234,84 @@ app.get('/api/usecase/:id', async (req, res) => {
   }
 });
 
+
+app.post("/api/apply", upload.single("resume"), async (req, res) => {
+  try {
+    const {
+      name, email, phone, experience,
+      currentCTC, expectedCTC, noticePeriod,
+      currentLocation, designation, details
+    } = req.body;
+
+    // ✅ Build relative path for DB
+    const resumeRelativePath = req.file ? `/cv/${req.file.filename}` : null;
+
+    // Save to Mongo
+    const newApplication = new CareerApplication({
+      name,
+      email,
+      phone,
+      experience,
+      currentCTC,
+      expectedCTC,
+      noticePeriod,
+      currentLocation,
+      designation,
+      details,
+      resumePath: resumeRelativePath
+    });
+
+    await newApplication.save();
+
+    // ---- Nodemailer config ----
+    let transporter = nodemailer.createTransport({
+      service: "Gmail", // or SMTP config if you have a company mail server
+      auth: {
+        user: process.env.MAIL_USER, // your email (set in env)
+        pass: process.env.MAIL_PASS  // your password or app password
+      }
+    });
+
+    // ---- Mail options ----
+    let mailOptions = {
+      from: `"Careers App" <${process.env.MAIL_USER}>`,
+      to: "ta@calsoftinc.com",
+      subject: `New Application - ${designation || "Candidate"}`,
+      text: `
+New job application received:
+
+Name: ${name}
+Email: ${email}
+Phone: ${phone}
+Experience: ${experience}
+Current CTC: ${currentCTC}
+Expected CTC: ${expectedCTC}
+Notice Period: ${noticePeriod}
+Current Location: ${currentLocation}
+Designation: ${designation}
+
+Details: ${details}
+      `,
+      // ✅ Nodemailer still needs absolute path (req.file.path)
+      attachments: req.file
+        ? [{ filename: req.file.originalname, path: req.file.path }]
+        : []
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return res.json({
+      success: true,
+      message: "Application submitted and emailed successfully!"
+    });
+  } catch (err) {
+    console.error("Career application error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong"
+    });
+  }
+});
 
 // hello
 app.listen(process.env.PORT,(err)=>{
