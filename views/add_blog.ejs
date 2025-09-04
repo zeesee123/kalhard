@@ -87,6 +87,24 @@
   </select>
 </div>
 
+<div class="mb-3 col-6">
+  <label for="blog_author" class="form-label">Topics</label>
+  <select name="topics" id="blog_author" class="form-control" multiple>
+    <% topics.forEach(tag => { %>
+      <option value="<%= tag._id %>"><%= ucfirst(tag.name) %></option>
+    <% }); %>
+  </select>
+</div>
+
+<div class="mb-3 col-6">
+  <label for="blog_author" class="form-label">Industries</label>
+  <select name="industries" id="blog_author" class="form-control" multiple>
+    <% industries.forEach(tag => { %>
+      <option value="<%= tag._id %>"><%= ucfirst(tag.name) %></option>
+    <% }); %>
+  </select>
+</div>
+
         <div class="mb-3 col-6">
           <label for="" class="form-label">Date</label>
           <input type="date" class="form-control">

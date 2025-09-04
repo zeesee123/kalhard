@@ -2665,17 +2665,23 @@ app.get('/admin/get_resource/casestudy_business_cards/:docId/:cardId',isAuthenti
     const authorCollection = mongoose.connection.db.collection('authors');
     const categoryCollection = mongoose.connection.db.collection('categories');
     const tagCollection = mongoose.connection.db.collection('tags');
+    const industryCollection=mongoose.connection.db.collection('industries');
+    const topicCollection=mongoose.connection.db.collection('topics');
 
     const authors = await authorCollection.find({}).toArray();
     const categories = await categoryCollection.find({}).toArray();
 
         const tags = await tagCollection.find({}).toArray();
-    
+        const industries=await industryCollection.find({}).toArray();
+        const topics=await topicCollection.find({}).toArray();
+    console.log(topics);
 
     res.render('add_blog', {
       authors,
       categories,
       tags,
+      topics,
+      industries,
       ucfirst
     });
   } catch (err) {
@@ -2691,11 +2697,13 @@ app.get('/admin/get_resource/casestudy_business_cards/:docId/:cardId',isAuthenti
     const blogId = new ObjectId(req.params.id);
     const db = mongoose.connection.db;
 
-    const [blog, authors, categories, tags] = await Promise.all([
+    const [blog, authors, categories, tags,industries,topics] = await Promise.all([
       db.collection('blogs').findOne({ _id: blogId }),
       db.collection('authors').find({}).toArray(),
       db.collection('categories').find({}).toArray(),
-      db.collection('tags').find({}).toArray()
+      db.collection('tags').find({}).toArray(),
+      db.collection('industries').find({}).toArray(),
+      db.collection('topics').find({}).toArray()
     ]);
 
     if (!blog) {
@@ -2708,6 +2716,8 @@ app.get('/admin/get_resource/casestudy_business_cards/:docId/:cardId',isAuthenti
       authors,
       categories,
       tags,
+      industries,
+      topics,
       ucfirst
     });
 
@@ -2742,6 +2752,8 @@ app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) =
       meta_title,
       slug,
       tag,
+      topics,
+      industries,
       meta_description,
       schema_markup
     } = req.body;
@@ -2774,6 +2786,16 @@ app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) =
         : tag
         ? [new ObjectId(tag)]
         : [],
+      topics: Array.isArray(topics)
+        ? topics.map(t => new ObjectId(t))
+        : topics
+        ? [new ObjectId(topics)]
+        : [],
+      industries: Array.isArray(industries)
+        ? industries.map(t => new ObjectId(t))
+        : industries
+        ? [new ObjectId(industries)]
+        : [],  
       meta: {
         title: meta_title?.trim() || '',
         slug: slug?.trim() || '',
