@@ -6,6 +6,9 @@ const multer=require('multer');
 const fs=require('fs');
 const ObjectId = mongoose.Types.ObjectId;
 const nodemailer=require('nodemailer');
+//const expressListRoutes = require('express-list-routes');
+
+
 
 const routes=require('./routes/web');
 
@@ -331,7 +334,7 @@ app.post('/admin/logout',(req,res)=>{
       res.redirect('/admin/login');
     });
   
-})
+});
 
 
 app.get('/admin/home',isAuthenticated,async(req,res)=>{
@@ -4298,6 +4301,7 @@ app.post("/api/apply", upload.single("resume"), async (req, res) => {
     let mailOptions = {
       from: `"Careers App" <${process.env.MAIL_USER}>`,
       to: "ta@calsoftinc.com",
+      cc: "swanand.shinge@calsoftinc.com", 
       subject: `New Application - ${designation || "Candidate"}`,
       text: `
 New job application received:
@@ -4334,6 +4338,8 @@ Details: ${details}
     });
   }
 });
+
+//expressListRoutes(app, { prefix: '' });
 
 // hello
 app.listen(process.env.PORT,(err)=>{
