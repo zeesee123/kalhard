@@ -4260,6 +4260,64 @@ app.get('/api/usecase/:id', async (req, res) => {
 });
 
 
+app.get('/api/global-filter', async (req, res) => {
+  try {
+    const { keyword, industries, categories, tags, topics } = req.query;
+
+    const industryFilter = industries ? industries.split(',') : [];
+    const categoryFilter = categories ? categories.split(',') : [];
+    const tagFilter = tags ? tags.split(',') : [];
+    const topicFilter = topics ? topics.split(',') : [];
+
+    const keywordRegex = keyword ? new RegExp(keyword, 'i') : null;
+
+    // Collections to search
+    const collections = [
+      { name: 'blogs', fields: { title: 1, image: 1, featured_image: 1, category: 1, tag: 1, industries: 1, topics: 1 } },
+      { name: 'landingpages', fields: { title: 1, card_one: 1, card_two: 1, featured_image: 1, page: 1, tag: 1, industries: 1, topics: 1 } },
+      { name: 'usecases', fields: { title: 1, usecase_image: 1, tag: 1, industries: 1, topics: 1 } }
+    ];
+
+    const results = [];
+
+    for (const col of collections) {
+      const coll = mongoose.connection.db.collection(col.name);
+
+      const query = {};
+
+      // Keyword filter
+      if (keywordRegex) {
+        query.title = { $regex: keywordRegex };
+      }
+
+      // Apply filters based on the exact field names
+      if (categoryFilter.length) query.category = { $in: categoryFilter.map(id => new ObjectId(id)) };
+      if (tagFilter.length) query.tag = { $in: tagFilter.map(id => new ObjectId(id)) };
+      if (industryFilter.length) query.industries = { $in: industryFilter.map(id => new ObjectId(id)) };
+      if (topicFilter.length) query.topics = { $in: topicFilter.map(id => new ObjectId(id)) };
+
+      const data = await coll.find(query).toArray();
+
+      // Map results to minimal response
+      data.forEach(item => {
+        let cardImage = item.card_one || item.card_two || item.usecase_image || item.image || item.featured_image || null;
+        results.push({
+          _id: item._id,
+          title: item.title || item.hero_title1 || 'No Title',
+          card_image: cardImage,
+          collection: col.name
+        });
+      });
+    }
+
+    res.json({ results });
+  } catch (err) {
+    console.error('Global Filter Error:', err);
+    res.status(500).json({ error: 'Server Error' });
+  }
+});
+
+
 app.post("/api/apply", upload.single("resume"), async (req, res) => {
   try {
     const {
