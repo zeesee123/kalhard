@@ -2417,6 +2417,56 @@ app.post("/admin/edit_white_paper/:id", upload.fields([
   }
 });
 
+//routes for video
+
+app.get('/admin/add_video',(req,res)=>{
+
+  res.render('add_video');
+
+});
+
+app.post('/admin/add_video', upload.fields([
+  { name: 'video_image', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const title = req.body.title?.trim();
+    const youtubeScript = req.body.youtube_script?.trim();
+
+    if (!title || !youtubeScript) {
+      req.flash('error', 'Title and YouTube embed script are required.');
+      return res.redirect('/admin/add_video');
+    }
+
+    // Featured image
+    const videoImageFile = req.files?.video_image?.[0];
+    const videoImagePath = videoImageFile ? '/uploads/' + videoImageFile.filename : null;
+
+    const collection = mongoose.connection.db.collection('videos');
+
+    // Check duplicates
+    const existing = await collection.findOne({ title });
+    if (existing) {
+      req.flash('error', 'Video with this title already exists.');
+      return res.redirect('/admin/add_video');
+    }
+
+    await collection.insertOne({
+      title,
+      youtube_script: youtubeScript,
+      video_image: videoImagePath,
+      createdAt: new Date()
+    });
+
+    req.flash('success', 'Video added successfully!');
+    res.redirect('/admin/add_video');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Something went wrong');
+    res.redirect('/admin/add_video');
+  }
+});
+
+
 
 //routes for podcasts
 
@@ -3586,8 +3636,27 @@ app.get('/api/webinars', async (req, res) => {
   try {
     const collection = mongoose.connection.db.collection('landingpage');
 
-    // Query only documents where page is 'case_study'
-    const data = await collection.find({ page: 'webinar' }).toArray();
+    const data = await collection.aggregate([
+      { $match: { page: 'webinar' } },
+      // Lookup speakers
+      {
+        $lookup: {
+          from: 'speakerhost',              // collection name
+          localField: 'speakers',           // field in landingpage
+          foreignField: '_id',              // field in speakerhost
+          as: 'speakerDetails'
+        }
+      },
+      // Lookup hosts
+      {
+        $lookup: {
+          from: 'speakerhost',
+          localField: 'hosts',
+          foreignField: '_id',
+          as: 'hostDetails'
+        }
+      }
+    ]).toArray();
 
     if (!data || data.length === 0) {
       return res.status(404).json({ error: 'There are no webinars' });
@@ -3595,7 +3664,7 @@ app.get('/api/webinars', async (req, res) => {
 
     res.json({ data });
   } catch (error) {
-    console.error('Error fetching white webinars:', error);
+    console.error('Error fetching webinars:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
