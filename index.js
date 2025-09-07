@@ -3638,22 +3638,24 @@ app.get('/api/webinars', async (req, res) => {
 
     const data = await collection.aggregate([
       { $match: { page: 'webinar' } },
-      // Lookup speakers
+
+      // Replace speakers field with full objects
       {
         $lookup: {
-          from: 'speakerhost',              // collection name
-          localField: 'speakers',           // field in landingpage
-          foreignField: '_id',              // field in speakerhost
-          as: 'speakerDetails'
+          from: 'speakerhost',
+          localField: 'speakers',
+          foreignField: '_id',
+          as: 'speakers'
         }
       },
-      // Lookup hosts
+
+      // Replace hosts field with full objects
       {
         $lookup: {
           from: 'speakerhost',
           localField: 'hosts',
           foreignField: '_id',
-          as: 'hostDetails'
+          as: 'hosts'
         }
       }
     ]).toArray();
@@ -3668,7 +3670,6 @@ app.get('/api/webinars', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
-
 
 // app.get('/api/blogs', async (req, res) => {
 //   try {
