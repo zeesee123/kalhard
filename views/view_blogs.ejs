@@ -1386,6 +1386,57 @@ reloadTable(type);
   <% } %>
 </script>
 
+<script>
+  // Attach click handler to delete buttons
+  $(document).on('click', '.btn-delete', function () {
+  const id = $(this).data('id');
+  const type = $(this).data('type');
+
+  Swal.fire({
+    title: 'Are you sure?',
+    text: "This action cannot be undone!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: 'Yes, delete it!',
+    preConfirm: () => {
+      // Show loader
+      Swal.showLoading();
+
+      // Return a promise so SweetAlert waits
+      return $.ajax({
+        url: `/admin/delete/${type}/${id}`,
+        type: 'DELETE'
+      }).then(
+        (response) => {
+          return response; // resolves promise
+        },
+        (xhr) => {
+          Swal.showValidationMessage(
+            xhr.responseJSON?.message || 'Something went wrong!'
+          );
+        }
+      );
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Deleted!',
+        text: result.value?.message || 'The item has been deleted.',
+        timer: 1500,
+        showConfirmButton: false
+      });
+
+      // Reload DataTable
+      $('#yourDataTableId').DataTable().ajax.reload(null, false);
+    }
+  });
+});
+
+</script>
+
 
 
 

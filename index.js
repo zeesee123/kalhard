@@ -541,9 +541,9 @@ res.redirect('/admin/home');
         <a href="/admin/edit_blog/${item._id}" class="btn btn-success mx-1">
           <i class="bi bi-pencil-square"></i> Edit
         </a>
-        <button type="button" class="btn btn-danger mx-1 eradicator" data-id="${item._id}" data-type="blogs">
-          <i class="bi bi-trash3-fill"></i> Delete
-        </button>
+        <button type="button" class="btn btn-danger mx-1 btn-delete" data-id="${item._id}" data-type="blogs">
+    <i class="bi bi-trash3-fill"></i> Delete
+  </button>
       `
     }));
 
@@ -2995,11 +2995,11 @@ app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) =
 
 //edited part
 
-  app.get('/admin/create_subcategory',isAuthenticated,(req,res)=>{
+  // app.get('/admin/create_subcategory',isAuthenticated,(req,res)=>{
 
 
-    res.render('');
-  });
+  //   res.render('');
+  // });
 
   app.post('/admin/landingpage',upload.fields([
     { name: 'hero_image', maxCount: 1 },
@@ -4330,9 +4330,66 @@ app.get('/api/usecase/:id', async (req, res) => {
 });
 
 
+// app.get('/api/global-filter', async (req, res) => {
+//   try {
+//     const { keyword, industries, categories, tags, topics } = req.query;
+
+//     const industryFilter = industries ? industries.split(',') : [];
+//     const categoryFilter = categories ? categories.split(',') : [];
+//     const tagFilter = tags ? tags.split(',') : [];
+//     const topicFilter = topics ? topics.split(',') : [];
+
+//     const keywordRegex = keyword ? new RegExp(keyword, 'i') : null;
+
+//     // Collections to search
+//     const collections = [
+//       { name: 'blogs', fields: { title: 1, image: 1, featured_image: 1, category: 1, tag: 1, industries: 1, topics: 1 } },
+//       { name: 'landingpages', fields: { title: 1, card_one: 1, card_two: 1, featured_image: 1, page: 1, tag: 1, industries: 1, topics: 1 } },
+//       { name: 'usecases', fields: { title: 1, usecase_image: 1, tag: 1, industries: 1, topics: 1 } }
+//     ];
+
+//     const results = [];
+
+//     for (const col of collections) {
+//       const coll = mongoose.connection.db.collection(col.name);
+
+//       const query = {};
+
+//       // Keyword filter
+//       if (keywordRegex) {
+//         query.title = { $regex: keywordRegex };
+//       }
+
+//       // Apply filters based on the exact field names
+//       if (categoryFilter.length) query.category = { $in: categoryFilter.map(id => new ObjectId(id)) };
+//       if (tagFilter.length) query.tag = { $in: tagFilter.map(id => new ObjectId(id)) };
+//       if (industryFilter.length) query.industries = { $in: industryFilter.map(id => new ObjectId(id)) };
+//       if (topicFilter.length) query.topics = { $in: topicFilter.map(id => new ObjectId(id)) };
+
+//       const data = await coll.find(query).toArray();
+
+//       // Map results to minimal response
+//       data.forEach(item => {
+//         let cardImage = item.card_one || item.card_two || item.usecase_image || item.image || item.featured_image || null;
+//         results.push({
+//           _id: item._id,
+//           title: item.title || item.hero_title1 || 'No Title',
+//           card_image: cardImage,
+//           collection: col.name
+//         });
+//       });
+//     }
+
+//     res.json({ results });
+//   } catch (err) {
+//     console.error('Global Filter Error:', err);
+//     res.status(500).json({ error: 'Server Error' });
+//   }
+// });
+
 app.get('/api/global-filter', async (req, res) => {
   try {
-    const { keyword, industries, categories, tags, topics } = req.query;
+    const { keyword, industries, categories, tags, topics, collection } = req.query;
 
     const industryFilter = industries ? industries.split(',') : [];
     const categoryFilter = categories ? categories.split(',') : [];
@@ -4341,36 +4398,42 @@ app.get('/api/global-filter', async (req, res) => {
 
     const keywordRegex = keyword ? new RegExp(keyword, 'i') : null;
 
-    // Collections to search
-    const collections = [
+    // Base collections config
+    const allCollections = [
       { name: 'blogs', fields: { title: 1, image: 1, featured_image: 1, category: 1, tag: 1, industries: 1, topics: 1 } },
       { name: 'landingpages', fields: { title: 1, card_one: 1, card_two: 1, featured_image: 1, page: 1, tag: 1, industries: 1, topics: 1 } },
       { name: 'usecases', fields: { title: 1, usecase_image: 1, tag: 1, industries: 1, topics: 1 } }
     ];
 
+    // If ?collection= is passed, just use that one
+    let selectedCollections = allCollections;
+    if (collection) {
+      selectedCollections = allCollections.filter(col => col.name.toLowerCase() === collection.toLowerCase());
+      if (selectedCollections.length === 0) {
+        return res.status(400).json({ error: `Unknown collection "${collection}"` });
+      }
+    }
+
     const results = [];
 
-    for (const col of collections) {
+    for (const col of selectedCollections) {
       const coll = mongoose.connection.db.collection(col.name);
 
       const query = {};
 
-      // Keyword filter
       if (keywordRegex) {
         query.title = { $regex: keywordRegex };
       }
 
-      // Apply filters based on the exact field names
       if (categoryFilter.length) query.category = { $in: categoryFilter.map(id => new ObjectId(id)) };
       if (tagFilter.length) query.tag = { $in: tagFilter.map(id => new ObjectId(id)) };
       if (industryFilter.length) query.industries = { $in: industryFilter.map(id => new ObjectId(id)) };
       if (topicFilter.length) query.topics = { $in: topicFilter.map(id => new ObjectId(id)) };
 
-      const data = await coll.find(query).toArray();
+      const data = await coll.find(query, { projection: col.fields }).toArray();
 
-      // Map results to minimal response
       data.forEach(item => {
-        let cardImage = item.card_one || item.card_two || item.usecase_image || item.image || item.featured_image || null;
+        const cardImage = item.card_one || item.card_two || item.usecase_image || item.image || item.featured_image || null;
         results.push({
           _id: item._id,
           title: item.title || item.hero_title1 || 'No Title',
@@ -4386,7 +4449,6 @@ app.get('/api/global-filter', async (req, res) => {
     res.status(500).json({ error: 'Server Error' });
   }
 });
-
 
 app.post("/api/apply", upload.single("resume"), async (req, res) => {
   try {
