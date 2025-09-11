@@ -3494,6 +3494,27 @@ for (let i = 0; i < businessTitles3.length; i++) {
     }
   });
 
+ // GET all videos
+app.get('/api/videos', async (req, res) => {
+  try {
+    // get all documents from the videos collection
+    const videos = await mongoose.connection.db
+      .collection('videos')
+      .find({})
+      .toArray(); // convert the cursor to an array
+
+    // If no videos found
+    if (!videos || videos.length === 0) {
+      return res.status(404).json({ message: 'No videos found' });
+    }
+
+    // Send the videos back as JSON
+    res.json({ videos });
+  } catch (err) {
+    console.error('Error fetching videos:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
   
   app.get('/api/casestudy/:id', async (req, res) => {
