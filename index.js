@@ -4544,7 +4544,7 @@ app.get('/api/global-filter', async (req, res) => {
 
       // keyword matching per collection
       if (keywordRegex) {
-        if (col.name === 'landingpages') {
+        if (col.name === 'landingpage') {
           query.$or = [
             { hero_title1: { $regex: keywordRegex } },
             { title: { $regex: keywordRegex } },
