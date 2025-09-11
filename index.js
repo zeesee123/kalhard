@@ -4497,7 +4497,7 @@ app.get('/api/global-filter', async (req, res) => {
         },
       },
       {
-        name: 'landingpages',
+        name: 'landingpage',
         fields: {
           title: 1,
           hero_title1: 1,
