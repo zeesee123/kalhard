@@ -4408,6 +4408,69 @@ app.get('/api/usecase/:id', async (req, res) => {
 //   }
 // });
 
+// app.get('/api/global-filter', async (req, res) => {
+//   try {
+//     const { keyword, industries, categories, tags, topics, collection } = req.query;
+
+//     const industryFilter = industries ? industries.split(',') : [];
+//     const categoryFilter = categories ? categories.split(',') : [];
+//     const tagFilter = tags ? tags.split(',') : [];
+//     const topicFilter = topics ? topics.split(',') : [];
+
+//     const keywordRegex = keyword ? new RegExp(keyword, 'i') : null;
+
+//     // Base collections config
+//     const allCollections = [
+//       { name: 'blogs', fields: { title: 1, image: 1, featured_image: 1, category: 1, tag: 1, industries: 1, topics: 1 } },
+//       { name: 'landingpages', fields: { title: 1, card_one: 1, card_two: 1, featured_image: 1, page: 1, tag: 1, industries: 1, topics: 1 } },
+//       { name: 'usecases', fields: { title: 1, usecase_image: 1, tag: 1, industries: 1, topics: 1 } }
+//     ];
+
+//     // If ?collection= is passed, just use that one
+//     let selectedCollections = allCollections;
+//     if (collection) {
+//       selectedCollections = allCollections.filter(col => col.name.toLowerCase() === collection.toLowerCase());
+//       if (selectedCollections.length === 0) {
+//         return res.status(400).json({ error: `Unknown collection "${collection}"` });
+//       }
+//     }
+
+//     const results = [];
+
+//     for (const col of selectedCollections) {
+//       const coll = mongoose.connection.db.collection(col.name);
+
+//       const query = {};
+
+//       if (keywordRegex) {
+//         query.title = { $regex: keywordRegex };
+//       }
+
+//       if (categoryFilter.length) query.category = { $in: categoryFilter.map(id => new ObjectId(id)) };
+//       if (tagFilter.length) query.tag = { $in: tagFilter.map(id => new ObjectId(id)) };
+//       if (industryFilter.length) query.industries = { $in: industryFilter.map(id => new ObjectId(id)) };
+//       if (topicFilter.length) query.topics = { $in: topicFilter.map(id => new ObjectId(id)) };
+
+//       const data = await coll.find(query, { projection: col.fields }).toArray();
+
+//       data.forEach(item => {
+//         const cardImage = item.card_one || item.card_two || item.usecase_image || item.image || item.featured_image || null;
+//         results.push({
+//           _id: item._id,
+//           title: item.title || item.hero_title1 || 'No Title',
+//           card_image: cardImage,
+//           collection: col.name
+//         });
+//       });
+//     }
+
+//     res.json({ results });
+//   } catch (err) {
+//     console.error('Global Filter Error:', err);
+//     res.status(500).json({ error: 'Server Error' });
+//   }
+// });
+
 app.get('/api/global-filter', async (req, res) => {
   try {
     const { keyword, industries, categories, tags, topics, collection } = req.query;
@@ -4421,17 +4484,54 @@ app.get('/api/global-filter', async (req, res) => {
 
     // Base collections config
     const allCollections = [
-      { name: 'blogs', fields: { title: 1, image: 1, featured_image: 1, category: 1, tag: 1, industries: 1, topics: 1 } },
-      { name: 'landingpages', fields: { title: 1, card_one: 1, card_two: 1, featured_image: 1, page: 1, tag: 1, industries: 1, topics: 1 } },
-      { name: 'usecases', fields: { title: 1, usecase_image: 1, tag: 1, industries: 1, topics: 1 } }
+      {
+        name: 'blogs',
+        fields: {
+          title: 1,
+          image: 1,
+          featured_image: 1,
+          category: 1,
+          tag: 1,
+          industries: 1,
+          topics: 1,
+        },
+      },
+      {
+        name: 'landingpages',
+        fields: {
+          title: 1,
+          hero_title1: 1,
+          card_one: 1,
+          card_two: 1,
+          featured_image: 1,
+          page: 1,
+          tag: 1,
+          industries: 1,
+          topics: 1,
+        },
+      },
+      {
+        name: 'usecases',
+        fields: {
+          title: 1,
+          usecase_image: 1,
+          tag: 1,
+          industries: 1,
+          topics: 1,
+        },
+      },
     ];
 
     // If ?collection= is passed, just use that one
     let selectedCollections = allCollections;
     if (collection) {
-      selectedCollections = allCollections.filter(col => col.name.toLowerCase() === collection.toLowerCase());
+      selectedCollections = allCollections.filter(
+        (col) => col.name.toLowerCase() === collection.toLowerCase()
+      );
       if (selectedCollections.length === 0) {
-        return res.status(400).json({ error: `Unknown collection "${collection}"` });
+        return res
+          .status(400)
+          .json({ error: `Unknown collection "${collection}"` });
       }
     }
 
@@ -4442,24 +4542,46 @@ app.get('/api/global-filter', async (req, res) => {
 
       const query = {};
 
+      // keyword matching per collection
       if (keywordRegex) {
-        query.title = { $regex: keywordRegex };
+        if (col.name === 'landingpages') {
+          query.$or = [
+            { hero_title1: { $regex: keywordRegex } },
+            { title: { $regex: keywordRegex } },
+          ];
+        } else {
+          query.title = { $regex: keywordRegex };
+        }
       }
 
-      if (categoryFilter.length) query.category = { $in: categoryFilter.map(id => new ObjectId(id)) };
-      if (tagFilter.length) query.tag = { $in: tagFilter.map(id => new ObjectId(id)) };
-      if (industryFilter.length) query.industries = { $in: industryFilter.map(id => new ObjectId(id)) };
-      if (topicFilter.length) query.topics = { $in: topicFilter.map(id => new ObjectId(id)) };
+      if (categoryFilter.length)
+        query.category = { $in: categoryFilter.map((id) => new ObjectId(id)) };
+      if (tagFilter.length)
+        query.tag = { $in: tagFilter.map((id) => new ObjectId(id)) };
+      if (industryFilter.length)
+        query.industries = {
+          $in: industryFilter.map((id) => new ObjectId(id)),
+        };
+      if (topicFilter.length)
+        query.topics = { $in: topicFilter.map((id) => new ObjectId(id)) };
 
-      const data = await coll.find(query, { projection: col.fields }).toArray();
+      const data = await coll
+        .find(query, { projection: col.fields })
+        .toArray();
 
-      data.forEach(item => {
-        const cardImage = item.card_one || item.card_two || item.usecase_image || item.image || item.featured_image || null;
+      data.forEach((item) => {
+        const cardImage =
+          item.card_one ||
+          item.card_two ||
+          item.usecase_image ||
+          item.image ||
+          item.featured_image ||
+          null;
         results.push({
           _id: item._id,
           title: item.title || item.hero_title1 || 'No Title',
           card_image: cardImage,
-          collection: col.name
+          collection: col.name,
         });
       });
     }
