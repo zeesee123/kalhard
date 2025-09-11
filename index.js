@@ -1158,7 +1158,7 @@ app.get('/admin/get_webinars',isAuthenticated, async (req, res) => {
         <a href="${item.case_study}" target="_blank" class="btn btn-primary mx-1">
           <i class="bi bi-eye-fill"></i> Preview
         </a>
-        <a href="/admin/edit_case_study/${item._id}" class="btn btn-success mx-1">
+        <a href="/admin/edit_webinar/${item._id}" class="btn btn-success mx-1">
           <i class="bi bi-pencil-square"></i> Edit
         </a>
         <button type="button" class="btn btn-danger mx-1 eradicator" data-id="${item._id}" data-type="landingpage">
@@ -3013,9 +3013,12 @@ app.post('/admin/blog/edit/:id', upload.single('blog_image'), async (req, res) =
     {name:'datasheet',maxCount:1},
     { name: 'featured_image', maxCount: 1 },
   ]),async(req,res)=>{
+console.log('Mongoose readyState:', mongoose.connection.readyState);
 
     console.log('hit');
-  
+console.log('page',req.body.page);
+
+console.log(req.body);
 
 
   
@@ -3201,8 +3204,8 @@ for (let i = 0; i < businessTitles.length; i++) {
         //   { $set: formData },
         //   { upsert: true }
         // );
-        await collection.insertOne(formData);
-    
+       const result = await collection.insertOne(formData);
+        console.log('Insert result AMAN:', result);
        
         req.flash('success', 'All changes have been applied.');
         res.redirect(`/admin/landingpage/${req.body.page}`);
@@ -3231,6 +3234,9 @@ for (let i = 0; i < businessTitles.length; i++) {
 
     console.log('hit');
   
+    console.log(req.body);
+
+    // process.exit();
 
 
   
@@ -3447,6 +3453,13 @@ for (let i = 0; i < businessTitles3.length; i++) {
   },
       
         };
+
+        console.log('🔍 Before insertion - checking formData:');
+console.log('formData.tag:', formData.tag);
+console.log('formData.speakers:', formData.speakers);
+console.log('formData.hosts:', formData.hosts);
+console.log('Raw speakers value:', speakers);
+console.log('Raw hosts value:', hosts);
     
         await collection.insertOne(formData);
     
@@ -3463,6 +3476,197 @@ for (let i = 0; i < businessTitles3.length; i++) {
       
       
     });
+
+
+
+    //WEBINAR EDIT CODE
+    
+    
+    app.get('/admin/edit_webinar/:id', isAuthenticated, async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const id = new ObjectId(req.params.id);
+
+    // Fetch the webinar document
+    const webinar = await db.collection('landingpage').findOne({
+      _id: id,
+      page: 'webinar' // hardcoded to webinar page type
+    });
+
+    if (!webinar) {
+      req.flash('error', 'Webinar not found');
+      return res.redirect('/admin/dashboard');
+    }
+
+    // Fetch tags
+    const tagCollection = db.collection('tags');
+    const tags = await tagCollection.find({}).toArray();
+
+    // Fetch speakers and hosts
+    const speakerHostCollection = db.collection('speakerhost');
+    const speakers = await speakerHostCollection.find({}).toArray();
+    const hosts = await speakerHostCollection.find({}).toArray();
+
+    // Render edit page
+    res.render('edit_webinar', {
+      section: webinar,
+      page: 'webinar',
+      tags,
+      speakers,
+      hosts,
+      ucfirst
+    });
+
+  } catch (err) {
+    console.error('Error loading webinar:', err);
+    req.flash('error', 'Could not load webinar');
+    res.redirect('/admin');
+  }
+});
+
+app.post('/admin/webinar/edit/:id', upload.fields([
+  { name: 'hero_image', maxCount: 1 },
+  { name: 'knowmore_image', maxCount: 1 },
+  { name:'card_one', maxCount:1},
+  { name:'card_two', maxCount:1},
+  { name: 'businessinvalue_img' },
+  { name: 'webinar', maxCount: 1 },
+  { name: 'featured_image', maxCount: 1 },
+]), async (req, res) => {
+  try {
+    const collection = mongoose.connection.db.collection('landingpage');
+    const id = req.params.id;
+    const page = req.body.page;
+
+    // -----------------------------
+    // Images
+    const heroimageFile = req.files?.hero_image?.[0];
+    const newHeroImagePath = heroimageFile ? '/uploads/' + heroimageFile.filename : null;
+
+    const cardoneimageFile = req.files?.card_one?.[0];
+    const newcardoneImagePath = cardoneimageFile ? '/uploads/' + cardoneimageFile.filename : null;
+
+    const knowmoreImageFile = req.files?.knowmore_image?.[0];
+    const knowmoreImagePath = knowmoreImageFile ? '/uploads/' + knowmoreImageFile.filename : null;
+
+    const webinarFile = req.files?.webinar?.[0];
+    const webinarPath = webinarFile ? '/webinars/' + webinarFile.filename : null;
+
+    const featuredImageFile = req.files?.featured_image?.[0];
+    const featured_image = featuredImageFile ? '/uploads/' + featuredImageFile.filename : null;
+
+    // -----------------------------
+    // Fetch existing document
+    const existingDoc = await collection.findOne({ _id: new ObjectId(id) });
+    if (!existingDoc) throw new Error('Document not found');
+
+    // -----------------------------
+    // Business cards merge (append new ones)
+    const newBusinessCards = [];
+    const titles = req.body.businessinvalue_stitle || [];
+    const contents = req.body.businessinvalue_scontent || [];
+    const images = req.files?.businessinvalue_img || [];
+
+    let startCounter = existingDoc.business_cards?.length || 0;
+    for (let i = 0; i < titles.length; i++) {
+      if (!titles[i] && !contents[i] && !images[i]) continue;
+      newBusinessCards.push({
+        id: (startCounter + 1).toString(),
+        number: titles[i],
+        content: contents[i],
+        image: images[i] ? '/uploads/' + images[i].filename : null
+      });
+      startCounter++;
+    }
+
+    const mergedBusinessCards = [...(existingDoc.business_cards || []), ...newBusinessCards];
+
+    // -----------------------------
+    // Other business cards arrays (cards1, cards2, cards3)
+    const mergeCards = (existingArray, titlesKey, contentsKey) => {
+      const newCards = [];
+      const titlesArr = req.body[titlesKey] || [];
+      const contentsArr = req.body[contentsKey] || [];
+      let counter = (existingArray?.length) || 0;
+
+      for (let i = 0; i < titlesArr.length; i++) {
+        if (!titlesArr[i] && !contentsArr[i]) continue;
+        newCards.push({
+          id: (counter + 1).toString(),
+          number: titlesArr[i],
+          content: contentsArr[i],
+        });
+        counter++;
+      }
+
+      return [...(existingArray || []), ...newCards];
+    };
+
+    const businessCards1 = mergeCards(existingDoc.business_cards1, 'businessinvalue_stitle1', 'businessinvalue_scontent1');
+    const businessCards2 = mergeCards(existingDoc.business_cards2, 'businessinvalue_stitle2', 'businessinvalue_scontent2');
+    const businessCards3 = mergeCards(existingDoc.business_cards3, 'businessinvalue_stitle3', 'businessinvalue_scontent3');
+
+    // -----------------------------
+    // Tags, speakers, hosts
+    const mapIds = (value) => value
+      ? Array.isArray(value)
+        ? value.map(t => new ObjectId(t))
+        : [new ObjectId(value)]
+      : [];
+
+    const formData = {
+      page: page || "homepage",
+      hero_title1: req.body.hero_title1,
+      hero_title2: req.body.hero_title2,
+      hero_content: req.body.hero_content,
+      hero_image: newHeroImagePath || existingDoc.hero_image,
+      card_one: newcardoneImagePath || existingDoc.card_one,
+      webinar: webinarPath || existingDoc.webinar,
+      featured_image: featured_image || existingDoc.featured_image,
+      herobtn_text: req.body.herobtn_text,
+      herobtn_url: req.body.herobtn_url,
+      embedurl: req.body.embed_url,
+      calsoftinfocus_title: req.body.calsoftinfocus_title,
+      calsoftinfocus_checkboxtext: req.body.calsoftinfocus_checkboxtext,
+      calsoftinfocus_text: req.body.calsoftinfocus_text,
+      hubspot_form: req.body.hubspot_form,
+      continuingcommitment_title: req.body.continuingcommitment_title,
+      continuingcommitment_text: req.body.continuingcommitment_text,
+      recommendedfor_title: req.body.recommendedfor_title,
+      business_cards: mergedBusinessCards,
+      business_cards1,
+      business_cards2,
+      business_cards3,
+      knowmore_title1: req.body.knowmore_title1,
+      knowmore_title2: req.body.knowmore_title2,
+      knowmoreimage: knowmoreImagePath || existingDoc.knowmoreimage,
+      tag: mapIds(req.body.tag),
+      speakers: mapIds(req.body.speaker),
+      hosts: mapIds(req.body.host),
+      meta: {
+        title: req.body.meta_title?.trim() || existingDoc.meta?.title || '',
+        description: req.body.meta_description?.trim() || existingDoc.meta?.description || '',
+        schema: req.body.schema_markup?.trim() || existingDoc.meta?.schema || ''
+      }
+    };
+
+    // -----------------------------
+    // Update document
+    await collection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: formData }
+    );
+
+    req.flash('success', 'Webinar updated successfully.');
+    res.redirect(`/admin/landingpage/${page}`);
+    
+  } catch (er) {
+    console.error(er.message);
+    req.flash('error', 'Something went wrong while updating.');
+    res.redirect(`/admin/landingpage/${req.body.page}`);
+  }
+});
+    
 
 
 
@@ -3517,25 +3721,66 @@ app.get('/api/videos', async (req, res) => {
 });
 
   
-  app.get('/api/casestudy/:id', async (req, res) => {
+//   app.get('/api/casestudy/:id', async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     // 🛡️ Validate ID format
+//     if (!ObjectId.isValid(id)) {
+//       return res.status(400).json({ error: 'Invalid case study ID' });
+//     }
+
+//     // ✅ Convert to ObjectId
+//     const objectId = new ObjectId(id);
+
+//     // 🔍 Query MongoDB
+//     const data = await mongoose.connection.db
+//       .collection('landingpage')
+//       .findOne({ _id: objectId });
+
+//     if (!data) {
+//       return res.status(404).json({ error: 'Case study not found' });
+//     }
+
+//     res.json({ data });
+//   } catch (error) {
+//     console.error('Error fetching case study:', error);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// });
+
+app.get('/api/casestudy/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    // 🛡️ Validate ID format
+    // Validate ID
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: 'Invalid case study ID' });
     }
 
-    // ✅ Convert to ObjectId
     const objectId = new ObjectId(id);
+    const db = mongoose.connection.db;
 
-    // 🔍 Query MongoDB
-    const data = await mongoose.connection.db
-      .collection('landingpage')
-      .findOne({ _id: objectId });
-
+    // Fetch the case study or webinar document
+    const data = await db.collection('landingpage').findOne({ _id: objectId });
     if (!data) {
       return res.status(404).json({ error: 'Case study not found' });
+    }
+
+    const speakerCollection = db.collection('speakerhost');
+
+    // Populate speakers
+    if (Array.isArray(data.speakers) && data.speakers.length) {
+      data.speakers = await speakerCollection
+        .find({ _id: { $in: data.speakers.map(id => new ObjectId(id)) } })
+        .toArray();
+    }
+
+    // Populate hosts
+    if (Array.isArray(data.hosts) && data.hosts.length) {
+      data.hosts = await speakerCollection
+        .find({ _id: { $in: data.hosts.map(id => new ObjectId(id)) } })
+        .toArray();
     }
 
     res.json({ data });
@@ -3544,7 +3789,6 @@ app.get('/api/videos', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
-
 // app.get('/api/casestudy', async (req, res) => {
 //   try {
 //     const collection = mongoose.connection.db.collection('landingpage');
