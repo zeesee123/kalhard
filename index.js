@@ -6,7 +6,11 @@ const multer=require('multer');
 const fs=require('fs');
 const ObjectId = mongoose.Types.ObjectId;
 const nodemailer=require('nodemailer');
+const cookieParser = require('cookie-parser');
 //const expressListRoutes = require('express-list-routes');
+
+
+app.use(cookieParser()); // <– before your routes
 
 
 
@@ -299,6 +303,10 @@ app.set('view engine','ejs');
 // Middleware to parse URL-encoded form data
 app.use(express.urlencoded({ extended: true }));
 
+ 
+
+
+
 // Optional: If you expect JSON requests too
 app.use(express.json());
 
@@ -325,10 +333,79 @@ app.get('/admin',isAuthenticated,(req,res)=>{
 //   res.redirect('/admin/home');
 // });
 
+//og login code**************
+// app.post('/admin/login', async (req, res) => {
+//   const { email, password, remember } = req.body;
+//   const errors = {};
+
+//   if (!email) errors.email = 'Email is required';
+//   if (!password) errors.password = 'Password is required';
+
+//   if (Object.keys(errors).length) {
+//     req.flash('loginErrors', errors);
+//     req.flash('old', { email, remember });
+//     return res.redirect('/admin/login');
+//   }
+
+//   const user = await mongoose.connection.db.collection('users').findOne({ email });
+
+//   const bcrypt = require('bcrypt'); // if not already at top
+
+//   if (!user || !(await bcrypt.compare(password, user.password))) {
+//     req.flash('loginErrors', { email: 'Invalid email or password' });
+//     req.flash('old', { email, remember });
+//     return res.redirect('/admin/login');
+//   }
+
+//   req.session.userId = user._id;
+
+//   // Handle remember me
+//   if (remember) {
+//     req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+//   } else {
+//     req.session.cookie.expires = false;
+//   }
+
+//   req.flash('success', 'Logged in successfully');
+//   res.redirect('/admin');
+// });
+
+//middleware for auto login 
+
+// must come after cookieParser() and session() middlewares
+
+app.use(async (req, res, next) => {
+  // already logged in? skip
+  if (req.session.userId) return next();
+
+  const rememberToken = req.cookies.remember_token;
+  if (!rememberToken) return next();
+
+  try {
+    // find user by rememberToken
+    const user = await mongoose.connection.db.collection('users')
+      .findOne({ rememberToken });
+
+    if (user) {
+      // rebuild session automatically
+      req.session.userId = user._id;
+
+      // optionally refresh session cookie maxAge
+      req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+    }
+  } catch (err) {
+    console.error('Error checking remember token', err);
+  }
+
+  next();
+});
+
+//middleware ends
+
 app.post('/admin/login', async (req, res) => {
   const { email, password, remember } = req.body;
-  const errors = {};
 
+  const errors = {};
   if (!email) errors.email = 'Email is required';
   if (!password) errors.password = 'Password is required';
 
@@ -339,8 +416,7 @@ app.post('/admin/login', async (req, res) => {
   }
 
   const user = await mongoose.connection.db.collection('users').findOne({ email });
-
-  const bcrypt = require('bcrypt'); // if not already at top
+  const bcrypt = require('bcrypt');
 
   if (!user || !(await bcrypt.compare(password, user.password))) {
     req.flash('loginErrors', { email: 'Invalid email or password' });
@@ -348,12 +424,30 @@ app.post('/admin/login', async (req, res) => {
     return res.redirect('/admin/login');
   }
 
+  // normal session login
   req.session.userId = user._id;
 
-  // Handle remember me
+  // handle Laravel-style remember me:
   if (remember) {
-    req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+    const crypto = require('crypto');
+    const rememberToken = crypto.randomBytes(32).toString('hex');
+
+    await mongoose.connection.db.collection('users').updateOne(
+      { _id: user._id },
+      { $set: { rememberToken } }
+    );
+
+    // set a separate remember cookie
+    res.cookie('remember_token', rememberToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+    });
+
+    // also extend the session cookie
+    req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
   } else {
+    // expire at browser close
     req.session.cookie.expires = false;
   }
 
@@ -362,9 +456,36 @@ app.post('/admin/login', async (req, res) => {
 });
 
 
-app.post('/admin/logout',(req,res)=>{
+//new login ends**********
 
-  //rat goes for a walk
+
+// app.post('/admin/logout',(req,res)=>{
+
+//   //rat goes for a walk
+//     req.session.destroy(err => {
+//       if (err) {
+//         console.log('Logout failed', err);
+//         return res.redirect('/admin');
+//       }
+//       res.redirect('/admin/login');
+//     });
+  
+// });
+
+app.post('/admin/logout', async (req, res) => {
+  try {
+    // clear token in DB
+    if (req.session.userId) {
+      await mongoose.connection.db.collection('users').updateOne(
+        { _id: req.session.userId },
+        { $unset: { rememberToken: '' } }
+      );
+    }
+
+    // clear cookie on client
+    res.clearCookie('remember_token');
+
+    // destroy session
     req.session.destroy(err => {
       if (err) {
         console.log('Logout failed', err);
@@ -372,7 +493,10 @@ app.post('/admin/logout',(req,res)=>{
       }
       res.redirect('/admin/login');
     });
-  
+  } catch (err) {
+    console.error('Logout error', err);
+    res.redirect('/admin');
+  }
 });
 
 
@@ -4754,6 +4878,130 @@ app.get('/api/usecase/:id', async (req, res) => {
 //   }
 // });
 
+
+
+// app.get('/api/global-filter', async (req, res) => {
+//   try {
+//     const { keyword, industries, categories, tags, topics, collection } = req.query;
+
+//     const industryFilter = industries ? industries.split(',') : [];
+//     const categoryFilter = categories ? categories.split(',') : [];
+//     const tagFilter = tags ? tags.split(',') : [];
+//     const topicFilter = topics ? topics.split(',') : [];
+
+//     const keywordRegex = keyword ? new RegExp(keyword, 'i') : null;
+
+//     // Base collections config
+//     const allCollections = [
+//       {
+//         name: 'blogs',
+//         fields: {
+//           title: 1,
+//           image: 1,
+//           featured_image: 1,
+//           category: 1,
+//           tag: 1,
+//           industries: 1,
+//           topics: 1,
+//         },
+//       },
+//       {
+//         name: 'landingpage',
+//         fields: {
+//           title: 1,
+//           hero_title1: 1,
+//           card_one: 1,
+//           card_two: 1,
+//           featured_image: 1,
+//           page: 1,
+//           tag: 1,
+//           industries: 1,
+//           topics: 1,
+//         },
+//       },
+//       {
+//         name: 'usecases',
+//         fields: {
+//           title: 1,
+//           usecase_image: 1,
+//           tag: 1,
+//           industries: 1,
+//           topics: 1,
+//         },
+//       },
+//     ];
+
+//     // If ?collection= is passed, just use that one
+//     let selectedCollections = allCollections;
+//     if (collection) {
+//       selectedCollections = allCollections.filter(
+//         (col) => col.name.toLowerCase() === collection.toLowerCase()
+//       );
+//       if (selectedCollections.length === 0) {
+//         return res
+//           .status(400)
+//           .json({ error: `Unknown collection "${collection}"` });
+//       }
+//     }
+
+//     const results = [];
+
+//     for (const col of selectedCollections) {
+//       const coll = mongoose.connection.db.collection(col.name);
+
+//       const query = {};
+
+//       // keyword matching per collection
+//       if (keywordRegex) {
+//         if (col.name === 'landingpage') {
+//           query.$or = [
+//             { hero_title1: { $regex: keywordRegex } },
+//             { title: { $regex: keywordRegex } },
+//           ];
+//         } else {
+//           query.title = { $regex: keywordRegex };
+//         }
+//       }
+
+//       if (categoryFilter.length)
+//         query.category = { $in: categoryFilter.map((id) => new ObjectId(id)) };
+//       if (tagFilter.length)
+//         query.tag = { $in: tagFilter.map((id) => new ObjectId(id)) };
+//       if (industryFilter.length)
+//         query.industries = {
+//           $in: industryFilter.map((id) => new ObjectId(id)),
+//         };
+//       if (topicFilter.length)
+//         query.topics = { $in: topicFilter.map((id) => new ObjectId(id)) };
+
+//       const data = await coll
+//         .find(query, { projection: col.fields })
+//         .toArray();
+
+//       data.forEach((item) => {
+//         const cardImage =
+//           item.card_one ||
+//           item.card_two ||
+//           item.usecase_image ||
+//           item.image ||
+//           item.featured_image ||
+//           null;
+//         results.push({
+//           _id: item._id,
+//           title: item.title || item.hero_title1 || 'No Title',
+//           card_image: cardImage,
+//           collection: col.name,
+//         });
+//       });
+//     }
+
+//     res.json({ results });
+//   } catch (err) {
+//     console.error('Global Filter Error:', err);
+//     res.status(500).json({ error: 'Server Error' });
+//   }
+// });
+
 app.get('/api/global-filter', async (req, res) => {
   try {
     const { keyword, industries, categories, tags, topics, collection } = req.query;
@@ -4765,69 +5013,41 @@ app.get('/api/global-filter', async (req, res) => {
 
     const keywordRegex = keyword ? new RegExp(keyword, 'i') : null;
 
-    // Base collections config
-    const allCollections = [
-      {
-        name: 'blogs',
-        fields: {
-          title: 1,
-          image: 1,
-          featured_image: 1,
-          category: 1,
-          tag: 1,
-          industries: 1,
-          topics: 1,
-        },
-      },
-      {
-        name: 'landingpage',
-        fields: {
-          title: 1,
-          hero_title1: 1,
-          card_one: 1,
-          card_two: 1,
-          featured_image: 1,
-          page: 1,
-          tag: 1,
-          industries: 1,
-          topics: 1,
-        },
-      },
-      {
-        name: 'usecases',
-        fields: {
-          title: 1,
-          usecase_image: 1,
-          tag: 1,
-          industries: 1,
-          topics: 1,
-        },
-      },
-    ];
+    /**
+     * Map logical names -> real collection + extra filter.
+     * Add more page types from landingpage here.
+     */
+    const collectionMap = {
+      podcasts:  { collection: 'podcasts',   filter: {} },
+      videos:    { collection: 'videos',     filter: {} },
+      usecases:  { collection: 'usecases',   filter: {} },
 
-    // If ?collection= is passed, just use that one
-    let selectedCollections = allCollections;
-    if (collection) {
-      selectedCollections = allCollections.filter(
-        (col) => col.name.toLowerCase() === collection.toLowerCase()
-      );
-      if (selectedCollections.length === 0) {
-        return res
-          .status(400)
-          .json({ error: `Unknown collection "${collection}"` });
-      }
-    }
+      webinar:      { collection: 'landingpage', filter: { page: 'webinar' } },
+      case_study:   { collection: 'landingpage', filter: { page: 'case_study' } },
+      white_paper:  { collection: 'landingpage', filter: { page: 'white_paper' } },
+      datasheet:    { collection: 'landingpage', filter: { page: 'datasheet' } },
+      ebrief:    { collection: 'landingpage', filter: { page: 'ebrief' } },
+    };
+
+    // default to all if no ?collection=
+    const selectedKeys = collection ? [collection] : Object.keys(collectionMap);
 
     const results = [];
 
-    for (const col of selectedCollections) {
-      const coll = mongoose.connection.db.collection(col.name);
+    for (const key of selectedKeys) {
+      const entry = collectionMap[key];
+      if (!entry) {
+        return res.status(400).json({ error: `Unknown collection "${key}"` });
+      }
 
-      const query = {};
+      const coll = mongoose.connection.db.collection(entry.collection);
 
-      // keyword matching per collection
+      // base query = extra filter (e.g. page='case_study')
+      const query = { ...entry.filter };
+
+      // keyword search
       if (keywordRegex) {
-        if (col.name === 'landingpage') {
+        if (entry.collection === 'landingpage') {
           query.$or = [
             { hero_title1: { $regex: keywordRegex } },
             { title: { $regex: keywordRegex } },
@@ -4848,9 +5068,7 @@ app.get('/api/global-filter', async (req, res) => {
       if (topicFilter.length)
         query.topics = { $in: topicFilter.map((id) => new ObjectId(id)) };
 
-      const data = await coll
-        .find(query, { projection: col.fields })
-        .toArray();
+      const data = await coll.find(query).toArray();
 
       data.forEach((item) => {
         const cardImage =
@@ -4864,7 +5082,7 @@ app.get('/api/global-filter', async (req, res) => {
           _id: item._id,
           title: item.title || item.hero_title1 || 'No Title',
           card_image: cardImage,
-          collection: col.name,
+          collection: key, // return the logical name you asked for
         });
       });
     }
