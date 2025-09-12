@@ -221,6 +221,7 @@ const mediaUpload = multer({ storage: mediaStorage });
 
   const session = require('express-session');
 const flash = require('connect-flash');
+const MongoStore = require('connect-mongo'); // already installed
 
 // app.use(session({
 //   secret: 'someSecretKey', // keep this secure
@@ -228,14 +229,51 @@ const flash = require('connect-flash');
 //   saveUninitialized: true
 // }));
 
+// app.use(session({
+//   secret: 'someSecretKey',
+//   resave: false,
+//   saveUninitialized: false,
+//   cookie: {
+//     maxAge: null // default for non-remember
+//   }
+// }));
+
+//session settings *********************
+
+// app.use(session({
+//   secret: process.env.SESSION_SECRET || 'someSecretKey', // keep this stable
+//   resave: false,
+//   saveUninitialized: false,
+//   store: MongoStore.create({
+//     mongoUrl: process.env.MONGO_URI || 'mongodb://localhost:27017/yourdb',
+//     collectionName: 'sessions'
+//   }),
+//   cookie: {
+//     // default: expire when browser closes unless you set remember-me
+//     maxAge: null,
+//     sameSite: 'lax',       // optional but recommended
+//     httpOnly: true,        // security
+//   }
+// }));
+
+
 app.use(session({
-  secret: 'someSecretKey',
+  secret: process.env.SESSION_SECRET,     // from .env
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.CONNECTION_STRING, // Atlas connection
+    dbName: process.env.DB_NAME,             // your DB name
+    collectionName: 'sessions'               // optional custom name
+  }),
   cookie: {
-    maxAge: null // default for non-remember
+    maxAge: null,      // you override in login route for “remember me”
+    sameSite: 'lax',
+    httpOnly: true
   }
 }));
+
+//session settings end ***********************
 
 //middleware just to prevent the user to view the pages again after logging out
 
@@ -325,7 +363,8 @@ app.post('/admin/login', async (req, res) => {
 
 
 app.post('/admin/logout',(req,res)=>{
-  
+
+  //rat goes for a walk
     req.session.destroy(err => {
       if (err) {
         console.log('Logout failed', err);
