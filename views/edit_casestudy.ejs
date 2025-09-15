@@ -122,6 +122,31 @@ https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-
 </div>
 
 
+<div class="mb-3 col-6">
+  <label for="blog_topics" class="form-label">Topics</label>
+  <select name="topics" id="blog_topics" class="form-control" multiple>
+    <% topics.forEach(t => { %>
+      <option value="<%= t._id %>" 
+        <%= blog.topics && blog.topics.some(topicId => topicId.toString() === t._id.toString()) ? 'selected' : '' %>>
+        <%= ucfirst(t.name) %>
+      </option>
+    <% }); %>
+  </select>
+</div>
+
+<div class="mb-3 col-6">
+  <label for="blog_industries" class="form-label">Industries</label>
+  <select name="industries" id="blog_industries" class="form-control" multiple>
+    <% industries.forEach(t => { %>
+      <option value="<%= t._id %>" 
+        <%= blog.industries && blog.industries.some(indId => indId.toString() === t._id.toString()) ? 'selected' : '' %>>
+        <%= ucfirst(t.name) %>
+      </option>
+    <% }); %>
+  </select>
+</div>
+
+
 <div class="row">
   <div class="mb-3 col-6">
       <label for="" class="form-label">Card 1 (left card)</label>
