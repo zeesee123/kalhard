@@ -112,11 +112,23 @@ https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-
 </div>
 
 
- <div class="mb-3 col-6">
+ <!-- <div class="mb-3 col-6">
   <label for="blog_author" class="form-label">Tags</label>
   <select name="tag" class="form-control" multiple>
     <% tags.forEach(tag => { %>
       <option value="<%= tag._id %>"><%= ucfirst(tag.name) %></option>
+    <% }); %>
+  </select>
+</div> -->
+
+<div class="mb-3 col-6">
+  <label for="blog_tags" class="form-label">Tags</label>
+  <select name="tag" id="blog_tags" class="form-control" multiple>
+    <% tags.forEach(t => { %>
+      <option value="<%= t._id %>" 
+        <%= section.tag && section.tag.some(tagId => tagId.toString() === t._id.toString()) ? 'selected' : '' %>>
+        <%= ucfirst(t.name) %>
+      </option>
     <% }); %>
   </select>
 </div>
@@ -127,7 +139,7 @@ https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-
   <select name="topics" id="blog_topics" class="form-control" multiple>
     <% topics.forEach(t => { %>
       <option value="<%= t._id %>" 
-        <%= blog.topics && blog.topics.some(topicId => topicId.toString() === t._id.toString()) ? 'selected' : '' %>>
+        <%= section.topics && section.topics.some(topicId => topicId.toString() === t._id.toString()) ? 'selected' : '' %>>
         <%= ucfirst(t.name) %>
       </option>
     <% }); %>
@@ -139,7 +151,7 @@ https://cdn.jsdelivr.net/npm/filepond-plugin-image-preview@4.6.12/dist/filepond-
   <select name="industries" id="blog_industries" class="form-control" multiple>
     <% industries.forEach(t => { %>
       <option value="<%= t._id %>" 
-        <%= blog.industries && blog.industries.some(indId => indId.toString() === t._id.toString()) ? 'selected' : '' %>>
+        <%= section.industries && section.industries.some(indId => indId.toString() === t._id.toString()) ? 'selected' : '' %>>
         <%= ucfirst(t.name) %>
       </option>
     <% }); %>
