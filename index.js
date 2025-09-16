@@ -155,39 +155,78 @@ const calculateReadTime = (content) => {
 //     }
 //   });
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    if (file.fieldname === 'case_study') {
-      cb(null, 'public/dist/casestudies/');
-    } else if (file.fieldname === 'blog_image') {
-      cb(null, 'public/dist/blogs/'); // <-- blog image goes here
-    } else if (file.fieldname === 'white_paper') {
-      cb(null, 'public/dist/whitepapers/'); // <-- blog image goes here
-    }else if (file.fieldname === 'webinar') {
-      cb(null, 'public/dist/webinars/'); // <-- blog image goes here
-    }else if (file.fieldname === 'datasheet') {
-      cb(null, 'public/dist/datasheets/'); // <-- blog image goes here
-    }else if (file.fieldname === 'usecase') {
-      cb(null, 'public/dist/usecases/'); // <-- blog image goes here
-    }else if (file.fieldname === 'author_image') {
-      cb(null, 'public/dist/authors/'); 
-    }else if (file.fieldname === 'industry_report') {
-      cb(null, 'public/dist/industry_reports/'); 
-    }else if(file.fieldname==='resume'){
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     if (file.fieldname === 'case_study') {
+//       cb(null, 'public/dist/casestudies/');
+//     } else if (file.fieldname === 'blog_image') {
+//       cb(null, 'public/dist/blogs/'); // <-- blog image goes here
+//     } else if (file.fieldname === 'white_paper') {
+//       cb(null, 'public/dist/whitepapers/'); // <-- blog image goes here
+//     }else if (file.fieldname === 'webinar') {
+//       cb(null, 'public/dist/webinars/'); // <-- blog image goes here
+//     }else if (file.fieldname === 'datasheet') {
+//       cb(null, 'public/dist/datasheets/'); // <-- blog image goes here
+//     }else if (file.fieldname === 'usecase') {
+//       cb(null, 'public/dist/usecases/'); // <-- blog image goes here
+//     }else if (file.fieldname === 'author_image') {
+//       cb(null, 'public/dist/authors/'); 
+//     }else if (file.fieldname === 'industry_report') {
+//       cb(null, 'public/dist/industry_reports/'); 
+//     }else if(file.fieldname==='resume'){
 
-      cb(null, 'public/dist/cv/');
-    }else{// <-- blog image goes here else {
-      cb(null, 'public/dist/uploads/');
-    }
-  },
-  filename: function (req, file, cb) {
+//       cb(null, 'public/dist/cv/');
+//     }else{// <-- blog image goes here else {
+//       cb(null, 'public/dist/uploads/');
+//     }
+//   },
+//   filename: function (req, file, cb) {
+//     const uniqueName = Date.now() + '-' + file.originalname.replace(/\s+/g, '_');
+//     cb(null, uniqueName);
+//   }
+// });
+
+
+  // const upload = multer({ storage });
+
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+    const folders = {
+    case_study: 'public/dist/casestudies/',
+    blog_image: 'public/dist/blogs/',
+    white_paper: 'public/dist/whitepapers/',
+    webinar: 'public/dist/webinars/',
+    datasheet: 'public/dist/datasheets/',
+    usecase: 'public/dist/usecases/',
+    author_image: 'public/dist/authors/',
+    industry_report: 'public/dist/industry_reports/',
+    resume: 'public/dist/cv/',
+    default: 'public/dist/uploads/'
+    };
+    cb(null, folders[file.fieldname] || folders.default);
+    },
+    filename: function (req, file, cb) {
     const uniqueName = Date.now() + '-' + file.originalname.replace(/\s+/g, '_');
     cb(null, uniqueName);
-  }
-});
-
-
-  const upload = multer({ storage });
+    }
+    });
+    
+    // Validate file types for CMS uploads
+    const upload = multer({
+    storage,
+    fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+    'image/jpeg','image/jpg','image/png','image/gif','image/webp',
+    'application/pdf',
+    'application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'audio/mpeg','audio/wav','audio/mp4',
+    'video/mp4','video/quicktime','video/x-matroska'
+    ];
+    if (allowedTypes.includes(file.mimetype)) cb(null, true);
+    else cb(new Error(`❌ Invalid file type: ${file.originalname}`));
+    },
+    limits: { fileSize: 20 * 1024 * 1024 } // 20MB max
+    });
 
 
   //stuff for media upload goes in here
