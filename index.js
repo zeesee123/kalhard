@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express=require('express');
 const app=express();
 const path=require('path');
@@ -7,19 +9,95 @@ const fs=require('fs');
 const ObjectId = mongoose.Types.ObjectId;
 const nodemailer=require('nodemailer');
 const cookieParser = require('cookie-parser');
+const csurf = require('csurf');
 //const expressListRoutes = require('express-list-routes');
+const session = require('express-session');
+const flash = require('connect-flash');
+const helmet=require('helmet');
+const MongoStore = require('connect-mongo'); // already installed
+
+app.set('view engine','ejs');
+
+// Middleware to parse URL-encoded form data
+app.use(express.urlencoded({ extended: true }));
+
+ 
 
 
-app.use(cookieParser()); // <– before your routes
+
+// Optional: If you expect JSON requests too
+app.use(express.json());
 
 
+//csrf token
+
+
+
+//app.use(cookieParser()); // <– before your routes
+
+app.use(cookieParser());
+
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.CONNECTION_STRING,
+    dbName: process.env.DB_NAME,
+    collectionName: 'sessions'
+  }),
+  cookie: {
+    maxAge: null,
+    sameSite: 'lax',
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', // secure only on HTTPS
+  }
+}));
+
+// ⚠️ CSRF must come **after** session middleware
+const csrfProtection = csurf(); // <- remove { cookie: true }
+// app.use(csrfProtection); this one will be global for all dude
+
+
+
+//security stuff
+
+app.disable('x-powered-by')
+
+// Basic security headers
+app.use(helmet());
+
+// Optional: tighten CSP if needed
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"], // add CDNs if you load scripts externally
+      styleSrc: ["'self'", 'https:'],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: [],
+    },
+  })
+);
+
+// HSTS (via helmet)
+app.use(helmet.hsts({ maxAge: 31536000, includeSubDomains: true, preload: true }));
+
+// Clickjacking
+app.use(helmet.frameguard({ action: 'deny' }));
+
+// MIME sniffing
+app.use(helmet.noSniff());
+
+
+//security part ends in here
 
 const routes=require('./routes/web');
 
 const Media=require('./models/Media');
 const CareerApplication=require('./models/CareerApplication');
 
-require('dotenv').config();
 console.log(process.env.PORT);
 // console.log('this is mongoose',mongoose);
 mongoose.connect(process.env.CONNECTION_STRING,{dbName:process.env.DB_NAME}).then(() => {console.log('✅ MongoDB connected'); console.log('frontend url',process.env.FRONTEND_URL);})
@@ -262,9 +340,9 @@ const mediaUpload = multer({ storage: mediaStorage });
   //media upload ends here
 
 
-  const session = require('express-session');
-const flash = require('connect-flash');
-const MongoStore = require('connect-mongo'); // already installed
+//   const session = require('express-session');
+// const flash = require('connect-flash');
+// const MongoStore = require('connect-mongo'); // already installed
 
 // app.use(session({
 //   secret: 'someSecretKey', // keep this secure
@@ -300,23 +378,26 @@ const MongoStore = require('connect-mongo'); // already installed
 // }));
 
 
-app.use(session({
-  secret: process.env.SESSION_SECRET,     // from .env
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.CONNECTION_STRING, // Atlas connection
-    dbName: process.env.DB_NAME,             // your DB name
-    collectionName: 'sessions'               // optional custom name
-  }),
-  cookie: {
-    maxAge: null,      // you override in login route for “remember me”
-    sameSite: 'lax',
-    httpOnly: true
-  }
-}));
+// app.use(session({
+//   secret: process.env.SESSION_SECRET,     // from .env
+//   resave: false,
+//   saveUninitialized: false,
+//   store: MongoStore.create({
+//     mongoUrl: process.env.CONNECTION_STRING, // Atlas connection
+//     dbName: process.env.DB_NAME,             // your DB name
+//     collectionName: 'sessions'               // optional custom name
+//   }),
+//   cookie: {
+//     maxAge: null,      // you override in login route for “remember me”
+//     sameSite: 'lax',
+//     httpOnly: true
+//   }
+// }));
 
-//session settings end ***********************
+// // const csrfProtection = csurf({ cookie: true });
+// const csrfProtection = csurf();
+// app.use(csrfProtection);
+// //session settings end ***********************
 
 //middleware just to prevent the user to view the pages again after logging out
 
@@ -337,17 +418,17 @@ app.use((req, res, next) => {
   next();
 });
 
-app.set('view engine','ejs');
+// app.set('view engine','ejs');
 
-// Middleware to parse URL-encoded form data
-app.use(express.urlencoded({ extended: true }));
+// // Middleware to parse URL-encoded form data
+// app.use(express.urlencoded({ extended: true }));
 
  
 
 
 
-// Optional: If you expect JSON requests too
-app.use(express.json());
+// // Optional: If you expect JSON requests too
+// app.use(express.json());
 
 app.use('/admin/assets',express.static(path.join(__dirname,'public')));
 
@@ -441,7 +522,7 @@ app.use(async (req, res, next) => {
 
 //middleware ends
 
-app.post('/admin/login', async (req, res) => {
+app.post('/admin/login',csrfProtection, async (req, res) => {
   const { email, password, remember } = req.body;
 
   const errors = {};
@@ -511,7 +592,7 @@ app.post('/admin/login', async (req, res) => {
   
 // });
 
-app.post('/admin/logout', async (req, res) => {
+app.post('/admin/logout',csrfProtection, async (req, res) => {
   try {
     // clear token in DB
     if (req.session.userId) {
@@ -554,8 +635,10 @@ app.get('/admin/homenew',isAuthenticated,async(req,res)=>{
     res.render('homepagenew',{section:data||{}});
 });
 
-app.get('/admin/login',isGuest,(req,res)=>{
-  res.render('auth/login');
+app.get('/admin/login',isGuest,csrfProtection,(req,res)=>{
+
+  res.render('auth/login',{ csrfToken: req.csrfToken() });
+
 })
 
 // app.post('/admin/test', upload.single('sec1image'), async (req, res) => {
@@ -2033,7 +2116,7 @@ app.post('/admin/blog/create', upload.single('blog_image'), async (req, res) => 
 
     const section = await db.collection('landingpage').findOne({
       _id: id,
-      page: 'case_study' // hardcoded page type
+      page: 'case_study' // ha rdcoded page type
     });
 
     if (!section) {
