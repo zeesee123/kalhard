@@ -65,31 +65,60 @@ const csrfProtection = csurf(); // <- remove { cookie: true }
 app.disable('x-powered-by')
 
 // Basic security headers
-app.use(helmet());
+// app.use(helmet());
 
-// Optional: tighten CSP if needed
+// // Optional: tighten CSP if needed
+// app.use(
+//   helmet.contentSecurityPolicy({
+//     directives: {
+//       defaultSrc: ["'self'"],
+//       scriptSrc: ["'self'"], // add CDNs if you load scripts externally
+//       styleSrc: ["'self'", 'https:'],
+//       imgSrc: ["'self'", 'data:', 'https:'],
+//       objectSrc: ["'none'"],
+//       upgradeInsecureRequests: [],
+//     },
+//   })
+// );
+
+// // HSTS (via helmet)
+// app.use(helmet.hsts({ maxAge: 31536000, includeSubDomains: true, preload: true }));
+
+// // Clickjacking
+// app.use(helmet.frameguard({ action: 'deny' }));
+
+// // MIME sniffing
+// app.use(helmet.noSniff());
+
+
+// Helmet with your CSP in one go
+app.use(helmet()); // base Helmet headers
+
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'"], // add CDNs if you load scripts externally
-      styleSrc: ["'self'", 'https:'],
-      imgSrc: ["'self'", 'data:', 'https:'],
+      scriptSrc: ["'self'", "https:", "'unsafe-inline'"],
+      styleSrc: ["'self'", "https:", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      fontSrc: ["'self'", "https:"],
+      formAction: ["'self'", "https://dev.calsoft.org"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: [],
     },
   })
 );
 
-// HSTS (via helmet)
-app.use(helmet.hsts({ maxAge: 31536000, includeSubDomains: true, preload: true }));
+app.use(
+  helmet.hsts({
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  })
+);
 
-// Clickjacking
-app.use(helmet.frameguard({ action: 'deny' }));
-
-// MIME sniffing
+app.use(helmet.frameguard({ action: "deny" }));
 app.use(helmet.noSniff());
-
 
 //security part ends in here
 
