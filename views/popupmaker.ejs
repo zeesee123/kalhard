@@ -20,6 +20,7 @@
 
 <form action="/admin/popup_add" enctype="multipart/form-data" method="POST"  id="main_form">
 
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <div class="card pt-3 p-4">
 
       <div class="row">

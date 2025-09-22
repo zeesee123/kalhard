@@ -34,6 +34,7 @@
 <!-- <form action="/admin/create_tags" method="POST" id="main_form"> -->
     <form action="/admin/add_topics" method="POST" id="main_form">
 
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <div class="card pt-3 p-4">
 
       <div class="row">
