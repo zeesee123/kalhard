@@ -56,7 +56,7 @@ app.use(session({
 
 // ⚠️ CSRF must come **after** session middleware
 const csrfProtection = csurf(); // <- remove { cookie: true }
-// app.use(csrfProtection); this one will be global for all dude
+app.use(csrfProtection); //this one will be global for all dude
 
 
 
@@ -119,6 +119,13 @@ app.use(
 
 app.use(helmet.frameguard({ action: "deny" }));
 app.use(helmet.noSniff());
+
+
+//automatically include the csrf token in each route
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
 
 //security part ends in here
 
@@ -551,7 +558,7 @@ app.use(async (req, res, next) => {
 
 //middleware ends
 
-app.post('/admin/login',csrfProtection, async (req, res) => {
+app.post('/admin/login', async (req, res) => {
   const { email, password, remember } = req.body;
 
   const errors = {};
@@ -664,9 +671,9 @@ app.get('/admin/homenew',isAuthenticated,async(req,res)=>{
     res.render('homepagenew',{section:data||{}});
 });
 
-app.get('/admin/login',isGuest,csrfProtection,(req,res)=>{
+app.get('/admin/login',isGuest,(req,res)=>{
 
-  res.render('auth/login',{ csrfToken: req.csrfToken() });
+  res.render('auth/login');
 
 })
 
