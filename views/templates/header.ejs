@@ -201,7 +201,7 @@ href="https://cdn.jsdelivr.net/npm/sweetalert2@11.17.2/dist/sweetalert2.min.css
                 <a href="./settings.html" class="dropdown-item">Settings</a>
                 <form action="/admin/logout" method="post">
                
-                  
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                   <button>Logout</button>
                   
                 </form>
@@ -435,7 +435,7 @@ href="https://cdn.jsdelivr.net/npm/sweetalert2@11.17.2/dist/sweetalert2.min.css
               <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                
                 <form action="/admin/logout" method="post">
-                
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                   <div class="text-center">
                     <button style="border:none;background-color:white;"><i class="bi bi-power"></i>&nbsp;Logout</button>
                   </div>
