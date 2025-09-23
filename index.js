@@ -97,6 +97,14 @@ app.disable('x-powered-by')
 // Helmet with your CSP in one go
 app.use(helmet()); // base Helmet headers
 
+app.use((req, res, next) => {
+  console.log('req.protocol:', req.protocol);        // http or https
+  console.log('req.get("host"):', req.get('host'));  // dev.calsoft.org:4000
+  console.log('req.originalUrl:', req.originalUrl);  // path
+  console.log('Origin as self:', `${req.protocol}://${req.get('host')}`);
+  next();
+});
+
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
