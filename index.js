@@ -5569,12 +5569,19 @@ if (process.env.NODE_ENV === 'production') {
     cert: fs.readFileSync('/etc/ssl/certs/calsoft.org.crt')
   };
 
-  https.createServer(sslOptions, app).listen(process.env.PORT, (err) => {
+  // https.createServer(sslOptions, app).listen(process.env.PORT, (err) => {
+  //   if (err) {
+  //     console.error('❌ Failed to start HTTPS server:', err.message);
+  //     process.exit(1);
+  //   }
+  //   console.log(`✅ Production HTTPS server running at https://localhost:${process.env.PORT}`);
+  // });
+    https.createServer(sslOptions, app).listen(process.env.PORT, '0.0.0.0', (err) => {
     if (err) {
       console.error('❌ Failed to start HTTPS server:', err.message);
       process.exit(1);
     }
-    console.log(`✅ Production HTTPS server running at https://localhost:${process.env.PORT}`);
+    console.log(`✅ Production HTTPS server running at https://0.0.0.0:${process.env.PORT}`);
   });
 } else {
   // Local development (HTTP)
