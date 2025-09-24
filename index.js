@@ -6,6 +6,11 @@ const path=require('path');
 const mongoose=require('mongoose');
 const multer=require('multer');
 const fs=require('fs');
+
+//modules for ssl
+
+const https = require('https');
+
 const ObjectId = mongoose.Types.ObjectId;
 const nodemailer=require('nodemailer');
 const cookieParser = require('cookie-parser');
@@ -5549,12 +5554,37 @@ Details: ${details}
 //expressListRoutes(app, { prefix: '' });
 
 // hello
-app.listen(process.env.PORT,(err)=>{
-  if (err) {
-    console.error('❌ Failed to start server:', err.message);
-    process.exit(1);
-  }
-    console.log('the server is listening',`http://localhost:${process.env.PORT}`);
-});
+// app.listen(process.env.PORT,(err)=>{
+//   if (err) {
+//     console.error('❌ Failed to start server:', err.message);
+//     process.exit(1);
+//   }
+//     console.log('the server is listening',`http://localhost:${process.env.PORT}`);
+// });
+
+// Only use HTTPS in production
+if (process.env.NODE_ENV === 'production') {
+  const sslOptions = {
+    key: fs.readFileSync('/etc/ssl/private/calsoft.org.key'),
+    cert: fs.readFileSync('/etc/ssl/certs/calsoft.org.crt')
+  };
+
+  https.createServer(sslOptions, app).listen(process.env.PORT, (err) => {
+    if (err) {
+      console.error('❌ Failed to start HTTPS server:', err.message);
+      process.exit(1);
+    }
+    console.log(`✅ Production HTTPS server running at https://localhost:${process.env.PORT}`);
+  });
+} else {
+  // Local development (HTTP)
+  app.listen(process.env.PORT, (err) => {
+    if (err) {
+      console.error('❌ Failed to start HTTP server:', err.message);
+      process.exit(1);
+    }
+    console.log(`🟢 Development HTTP server running at http://localhost:${process.env.PORT}`);
+  });
+}
 
 
