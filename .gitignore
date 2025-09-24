@@ -3,6 +3,7 @@ node_modules/
 public/dist/uploads/
 public/dist/casestudies/
 public/dist/blogs/
+ssl/
 public/dist/usecases/
 public/dist/authors/
 public/dist/industry_reports/
