@@ -5564,9 +5564,18 @@ Details: ${details}
 
 // Only use HTTPS in production
 if (process.env.NODE_ENV === 'production') {
+  // const sslOptions = {
+  //   key: fs.readFileSync('/ssl/calsoft.org.key'),
+  //   cert: fs.readFileSync('/ssl/calsoft.org.crt')
+  // };
+
   const sslOptions = {
-    key: fs.readFileSync('/etc/ssl/private/calsoft.org.key'),
-    cert: fs.readFileSync('/etc/ssl/certs/calsoft.org.crt')
+    key: fs.readFileSync(
+      path.join(__dirname, 'ssl', 'calsoft.org.key')
+    ),
+    cert: fs.readFileSync(
+      path.join(__dirname, 'ssl', 'calsoft.org.crt')
+    )
   };
 
   // https.createServer(sslOptions, app).listen(process.env.PORT, (err) => {
