@@ -26,6 +26,8 @@
     "multer": "^2.0.1",
     "nodemailer": "^7.0.6",
     "nodemon": "^3.1.10",
+    "qrcode": "^1.5.4",
+    "speakeasy": "^2.0.0",
     "tinymce": "^7.9.1"
   }
 }

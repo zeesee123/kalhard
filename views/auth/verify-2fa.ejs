@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Enable 2FA - Calsoft</title>
+    <link href="/admin/assets/dist/css/tabler.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+      @import url('https://rsms.me/inter/inter.css');
+      :root {
+        --tblr-font-sans-serif: 'Inter Var', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, sans-serif;
+      }
+      body {
+        font-feature-settings: "cv03", "cv04", "cv11";
+      }
+    </style>
+  </head>
+  <body class="d-flex flex-column">
+    <div class="page page-center">
+      <div class="container container-tight py-4">
+        <div class="card card-md">
+          <div class="text-center">
+            <a href=".">
+              <img src="/admin/assets/dist/defaultimages/logo2.jpeg" style="height:5rem;" alt="Calsoft Logo" class="mb-1 mt-2">
+            </a>
+          </div>
+          <div class="card-body">
+            <h2 class="h2 text-center mb-4">Verify 2FA</h2>
+
+
+            <form action="/admin/verify-2fa" method="post">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <div class="mb-3">
+                  <label class="form-label">Enter 6-digit code from app</label>
+                  <input type="text" class="form-control" name="totp" placeholder="123456" maxlength="6" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Verify</button>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="./dist/js/tabler.min.js" defer></script>
+    <script src="./dist/js/demo.min.js" defer></script>
+  </body>
+</html>

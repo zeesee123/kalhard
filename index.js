@@ -7,6 +7,10 @@ const mongoose=require('mongoose');
 const multer=require('multer');
 const fs=require('fs');
 
+//mfa
+const speakeasy = require('speakeasy');
+const qrcode = require('qrcode');
+
 //modules for ssl
 
 const https = require('https');
@@ -161,6 +165,27 @@ mongoose.connect(process.env.CONNECTION_STRING,{dbName:process.env.DB_NAME}).the
 
 
 //helper functions
+
+//remember me
+
+function handleRememberMe(req, res, user, remember) {
+  if (remember) {
+    const crypto = require('crypto');
+    const rememberToken = crypto.randomBytes(32).toString('hex');
+    mongoose.connection.db.collection('users').updateOne(
+      { _id: user._id },
+      { $set: { rememberToken } }
+    );
+    res.cookie('remember_token', rememberToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000
+    });
+    req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+  } else {
+    req.session.cookie.expires = false;
+  }
+}
 
 //auth functions
 function isAuthenticated(req, res, next) {
@@ -576,13 +601,66 @@ app.use(async (req, res, next) => {
 
 //middleware ends
 
+// app.post('/admin/login', async (req, res) => {
+//   const { email, password, remember } = req.body;
+
+//   const errors = {};
+//   if (!email) errors.email = 'Email is required';
+//   if (!password) errors.password = 'Password is required';
+
+//   if (Object.keys(errors).length) {
+//     req.flash('loginErrors', errors);
+//     req.flash('old', { email, remember });
+//     return res.redirect('/admin/login');
+//   }
+
+//   const user = await mongoose.connection.db.collection('users').findOne({ email });
+//   const bcrypt = require('bcrypt');
+
+//   if (!user || !(await bcrypt.compare(password, user.password))) {
+//     req.flash('loginErrors', { email: 'Invalid email or password' });
+//     req.flash('old', { email, remember });
+//     return res.redirect('/admin/login');
+//   }
+
+//   // normal session login
+//   req.session.userId = user._id;
+
+//   // handle Laravel-style remember me:
+//   if (remember) {
+//     const crypto = require('crypto');
+//     const rememberToken = crypto.randomBytes(32).toString('hex');
+
+//     await mongoose.connection.db.collection('users').updateOne(
+//       { _id: user._id },
+//       { $set: { rememberToken } }
+//     );
+
+//     // set a separate remember cookie
+//     res.cookie('remember_token', rememberToken, {
+//       httpOnly: true,
+//       sameSite: 'lax',
+//       maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+//     });
+
+//     // also extend the session cookie
+//     req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+//   } else {
+//     // expire at browser close
+//     req.session.cookie.expires = false;
+//   }
+
+//   req.flash('success', 'Logged in successfully');
+//   res.redirect('/admin');
+// });
+
+
 app.post('/admin/login', async (req, res) => {
   const { email, password, remember } = req.body;
 
   const errors = {};
   if (!email) errors.email = 'Email is required';
   if (!password) errors.password = 'Password is required';
-
   if (Object.keys(errors).length) {
     req.flash('loginErrors', errors);
     req.flash('old', { email, remember });
@@ -598,36 +676,21 @@ app.post('/admin/login', async (req, res) => {
     return res.redirect('/admin/login');
   }
 
-  // normal session login
-  req.session.userId = user._id;
-
-  // handle Laravel-style remember me:
-  if (remember) {
-    const crypto = require('crypto');
-    const rememberToken = crypto.randomBytes(32).toString('hex');
-
-    await mongoose.connection.db.collection('users').updateOne(
-      { _id: user._id },
-      { $set: { rememberToken } }
-    );
-
-    // set a separate remember cookie
-    res.cookie('remember_token', rememberToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
-    });
-
-    // also extend the session cookie
-    req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
-  } else {
-    // expire at browser close
-    req.session.cookie.expires = false;
+  if (user.twoFactorEnabled) {
+    // store temp id for 2FA verification
+    req.session.tempUserId = user._id;
+    return res.redirect('/admin/verify-2fa');
   }
+
+  // normal login if 2FA not enabled
+  req.session.userId = user._id;
+  handleRememberMe(req, res, user, remember);
 
   req.flash('success', 'Logged in successfully');
   res.redirect('/admin');
 });
+
+
 
 
 //new login ends**********
@@ -693,7 +756,95 @@ app.get('/admin/login',isGuest,(req,res)=>{
 
   res.render('auth/login');
 
-})
+});
+
+
+//routes for mfa **********************
+
+
+app.get('/admin/enable-2fa', isAuthenticated, async (req, res) => {
+  const user = await mongoose.connection.db.collection('users').findOne({ _id: new ObjectId(req.session.userId) });
+  if (!user) return res.redirect('/admin/login');
+
+  // generate secret
+  const secret = speakeasy.generateSecret({
+    name: `Calsoft (${user.email})`
+  });
+
+  // store temporarily in session
+  req.session.tempMfaSecret = secret.base32;
+
+  // generate QR code
+  const qr = await qrcode.toDataURL(secret.otpauth_url);
+
+  res.render('auth/enable-2fa', { qr }); // <img src="<%= qr %>">
+});
+
+app.post('/admin/enable-2fa', isAuthenticated, async (req, res) => {
+  const { totp } = req.body;
+
+  const verified = speakeasy.totp.verify({
+    secret: req.session.tempMfaSecret,
+    encoding: 'base32',
+    token: totp
+  });
+
+  if (!verified) {
+    req.flash('error', 'Invalid code, try again');
+    return res.redirect('/admin/enable-2fa');
+  }
+
+  // save secret permanently in users collection
+  await mongoose.connection.db.collection('users').updateOne(
+    { _id: new ObjectId(req.session.userId) },
+    {
+      $set: {
+        twoFactorSecret: req.session.tempMfaSecret,
+        twoFactorEnabled: true
+      }
+    }
+  );
+
+  delete req.session.tempMfaSecret;
+
+  req.flash('success', '2FA enabled successfully!');
+  console.log('worked 2fa');
+  res.redirect('/admin');
+});
+
+
+app.get('/admin/verify-2fa', (req, res) => {
+  if (!req.session.tempUserId) return res.redirect('/admin/login');
+  res.render('auth/verify-2fa');
+});
+
+
+app.post('/admin/verify-2fa', async (req, res) => {
+  const { totp } = req.body;
+
+  if (!req.session.tempUserId) return res.redirect('/admin/login');
+
+  const user = await mongoose.connection.db.collection('users').findOne({ _id: new ObjectId(req.session.tempUserId) });
+  if (!user) return res.redirect('/admin/login');
+
+  const verified = speakeasy.totp.verify({
+    secret: user.twoFactorSecret,
+    encoding: 'base32',
+    token: totp
+  });
+
+  if (!verified) {
+    req.flash('error', 'Invalid code, try again');
+    return res.redirect('/admin/verify-2fa');
+  }
+
+  // 2FA verified → complete login
+  req.session.userId = user._id;
+  delete req.session.tempUserId;
+
+  req.flash('success', 'Logged in successfully');
+  res.redirect('/admin');
+});
 
 // app.post('/admin/test', upload.single('sec1image'), async (req, res) => {
 
