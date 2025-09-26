@@ -5726,7 +5726,8 @@ if (process.env.NODE_ENV === 'production') {
     ),
     cert: fs.readFileSync(
       path.join(__dirname, 'ssl', 'calsoft.org.crt')
-    )
+    ),
+    ca: fs.readFileSync(path.join(__dirname, 'ssl', 'STAR.calsoft.org.ca-bundle'))
   };
 
   // https.createServer(sslOptions, app).listen(process.env.PORT, (err) => {
