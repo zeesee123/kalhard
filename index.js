@@ -5719,7 +5719,7 @@ if (process.env.NODE_ENV === 'production') {
   //   key: fs.readFileSync('/ssl/calsoft.org.key'),
   //   cert: fs.readFileSync('/ssl/calsoft.org.crt')
   // };
-let var='x';
+
   const sslOptions = {
     key: fs.readFileSync(
       path.join(__dirname, 'ssl', 'calsoft.org.key')
