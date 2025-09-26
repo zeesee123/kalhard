@@ -5850,81 +5850,41 @@ app.use((err, req, res, next) => {
 // Only use HTTPS in production
 
 //old server setup start ****************/////////
-
-// if (process.env.NODE_ENV === 'production') {
-//   // const sslOptions = {
-//   //   key: fs.readFileSync('/ssl/calsoft.org.key'),
-//   //   cert: fs.readFileSync('/ssl/calsoft.org.crt')
-//   // };
-
-//   const sslOptions = {
-//     key: fs.readFileSync(
-//       path.join(__dirname, 'ssl', 'calsoft.org.key')
-//     ),
-//     // cert: fs.readFileSync(
-//     //   path.join(__dirname, 'ssl', 'calsoft.org.crt')
-//     // ),
-//     cert: fs.readFileSync(
-//       path.join(__dirname, 'ssl', 'STAR.calsoft.org_fullchain.pem')
-//     ),//test
-//     // ca: fs.readFileSync(path.join(__dirname, 'ssl', 'STAR.calsoft.org.ca-bundle'))
-//   };
-
-//   // https.createServer(sslOptions, app).listen(process.env.PORT, (err) => {
-//   //   if (err) {
-//   //     console.error('❌ Failed to start HTTPS server:', err.message);
-//   //     process.exit(1);
-//   //   }
-//   //   console.log(`✅ Production HTTPS server running at https://localhost:${process.env.PORT}`);
-//   // });
-//     https.createServer(sslOptions, app).listen(process.env.PORT, '0.0.0.0', (err) => {
-//     if (err) {
-//       console.error('❌ Failed to start HTTPS server:', err.message);
-//       process.exit(1);
-//     }
-//     console.log(`✅ Production HTTPS server running at https://0.0.0.0:${process.env.PORT}`);
-//   });
-// } else {
-//   // Local development (HTTP)
-//   app.listen(process.env.PORT, (err) => {
-//     if (err) {
-//       console.error('❌ Failed to start HTTP server:', err.message);
-//       process.exit(1);
-//     }
-//     console.log(`🟢 Development HTTP server running at http://localhost:${process.env.PORT}`);
-//   });
-// }
-
-//old server setup end************//////////
-
-
-// -----------------------------
 if (process.env.NODE_ENV === 'production') {
+  // const sslOptions = {
+  //   key: fs.readFileSync('/ssl/calsoft.org.key'),
+  //   cert: fs.readFileSync('/ssl/calsoft.org.crt')
+  // };
+
   const sslOptions = {
-    key: fs.readFileSync(path.join(__dirname, 'ssl', 'calsoft.org.key')),
-    cert: fs.readFileSync(path.join(__dirname, 'ssl', 'STAR.calsoft.org_fullchain.pem')),
+    key: fs.readFileSync(
+      path.join(__dirname, 'ssl', 'calsoft.org.key')
+    ),
+    // cert: fs.readFileSync(
+    //   path.join(__dirname, 'ssl', 'calsoft.org.crt')
+    // ),
+    cert: fs.readFileSync(
+      path.join(__dirname, 'ssl', 'STAR.calsoft.org_fullchain.pem')
+    ),//test
+    // ca: fs.readFileSync(path.join(__dirname, 'ssl', 'STAR.calsoft.org.ca-bundle'))
   };
 
-  // HTTPS server
-  https.createServer(sslOptions, app).listen(process.env.PORT, '0.0.0.0', (err) => {
+  // https.createServer(sslOptions, app).listen(process.env.PORT, (err) => {
+  //   if (err) {
+  //     console.error('❌ Failed to start HTTPS server:', err.message);
+  //     process.exit(1);
+  //   }
+  //   console.log(`✅ Production HTTPS server running at https://localhost:${process.env.PORT}`);
+  // });
+    https.createServer(sslOptions, app).listen(process.env.PORT, '0.0.0.0', (err) => {
     if (err) {
       console.error('❌ Failed to start HTTPS server:', err.message);
       process.exit(1);
     }
     console.log(`✅ Production HTTPS server running at https://0.0.0.0:${process.env.PORT}`);
   });
-
-  // HTTP → HTTPS redirect
-  const redirectApp = express();
-  redirectApp.get('*', (req, res) => {
-    res.redirect(`https://${req.hostname}:${process.env.PORT}${req.url}`);
-  });
-  redirectApp.listen(80, () => {
-    console.log('➡️ HTTP (port 80) → HTTPS redirect running');
-  });
-
 } else {
-  // Development HTTP server
+  // Local development (HTTP)
   app.listen(process.env.PORT, (err) => {
     if (err) {
       console.error('❌ Failed to start HTTP server:', err.message);
@@ -5933,3 +5893,5 @@ if (process.env.NODE_ENV === 'production') {
     console.log(`🟢 Development HTTP server running at http://localhost:${process.env.PORT}`);
   });
 }
+
+//old server setup end************//////////
