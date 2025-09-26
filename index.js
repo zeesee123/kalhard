@@ -179,6 +179,7 @@ function handleRememberMe(req, res, user, remember) {
     res.cookie('remember_token', rememberToken, {
       httpOnly: true,
       sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
       maxAge: 30 * 24 * 60 * 60 * 1000
     });
     req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
@@ -218,6 +219,11 @@ function slugify(text) {
 }
 
 
+const staticBasePath =
+  process.env.NODE_ENV === 'production'
+    ? '/var/www/images'           // Prod folder
+    : path.join(__dirname, 'public'); // Local folder
+
 
 const calculateReadTime = (content) => {
   const wordsPerMinute = 200; // or 250
@@ -229,77 +235,114 @@ const calculateReadTime = (content) => {
 
 
   // ✅ Ensure uploads directory exists
-  const uploadsDir = path.join(__dirname, 'public','dist', 'uploads');
-  if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-    console.log('Uploads directory created:', uploadsDir);
-  }
+  // const uploadsDir = path.join(__dirname, 'public','dist', 'uploads');
+  // if (!fs.existsSync(uploadsDir)) {
+  //   fs.mkdirSync(uploadsDir, { recursive: true });
+  //   console.log('Uploads directory created:', uploadsDir);
+  // }
 
-   const resumeDir = path.join(__dirname, 'public','dist', 'cv');
-  if (!fs.existsSync(resumeDir)) {
-    fs.mkdirSync(resumeDir, { recursive: true });
-    console.log('Uploads directory created:', resumeDir);
-  };
+  //  const resumeDir = path.join(__dirname, 'public','dist', 'cv');
+  // if (!fs.existsSync(resumeDir)) {
+  //   fs.mkdirSync(resumeDir, { recursive: true });
+  //   console.log('Uploads directory created:', resumeDir);
+  // };
 
-  // ✅ Ensure uploads directory exists
-  const casestudyDir = path.join(__dirname, 'public','dist', 'casestudies');
-  if (!fs.existsSync(casestudyDir)) {
-    fs.mkdirSync(casestudyDir, { recursive: true });
-    console.log('Uploads directory created:', casestudyDir);
-  }
+  // // ✅ Ensure uploads directory exists
+  // const casestudyDir = path.join(__dirname, 'public','dist', 'casestudies');
+  // if (!fs.existsSync(casestudyDir)) {
+  //   fs.mkdirSync(casestudyDir, { recursive: true });
+  //   console.log('Uploads directory created:', casestudyDir);
+  // }
 
 
-    // ✅ Ensure uploads directory exists
-  const industryDir = path.join(__dirname, 'public','dist', 'industry_reports');
+  //   // ✅ Ensure uploads directory exists
+  // const industryDir = path.join(__dirname, 'public','dist', 'industry_reports');
   
-  if (!fs.existsSync(industryDir)) {
-    fs.mkdirSync(industryDir, { recursive: true });
-    console.log('Uploads directory created:', industryDir);
-  }
+  // if (!fs.existsSync(industryDir)) {
+  //   fs.mkdirSync(industryDir, { recursive: true });
+  //   console.log('Uploads directory created:', industryDir);
+  // }
 
 
-  // ✅ Ensure uploads directory exists
-  const blogDir = path.join(__dirname, 'public','dist', 'blogs');
-  if (!fs.existsSync(blogDir)) {
-    fs.mkdirSync(blogDir, { recursive: true });
-    console.log('Uploads directory created:', blogDir);
-  }
+  // // ✅ Ensure uploads directory exists
+  // const blogDir = path.join(__dirname, 'public','dist', 'blogs');
+  // if (!fs.existsSync(blogDir)) {
+  //   fs.mkdirSync(blogDir, { recursive: true });
+  //   console.log('Uploads directory created:', blogDir);
+  // }
 
-   // ✅ Ensure whitepapers directory exists
-  const whitepaperDir = path.join(__dirname, 'public','dist', 'whitepapers');
-  if (!fs.existsSync(whitepaperDir)) {
-    fs.mkdirSync(whitepaperDir, { recursive: true });
-    console.log('Uploads directory created:', whitepaperDir);
-  }
-
-
-  const webinarDir = path.join(__dirname, 'public','dist', 'webinars');
-  if (!fs.existsSync(webinarDir)) {
-    fs.mkdirSync(webinarDir, { recursive: true });
-    console.log('Uploads directory created:', webinarDir);
-  }
+  //  // ✅ Ensure whitepapers directory exists
+  // const whitepaperDir = path.join(__dirname, 'public','dist', 'whitepapers');
+  // if (!fs.existsSync(whitepaperDir)) {
+  //   fs.mkdirSync(whitepaperDir, { recursive: true });
+  //   console.log('Uploads directory created:', whitepaperDir);
+  // }
 
 
-  const datasheetDir = path.join(__dirname, 'public','dist', 'datasheets');
-  if (!fs.existsSync(datasheetDir)) {
-    fs.mkdirSync(datasheetDir, { recursive: true });
-    console.log('Uploads directory created:', datasheetDir);
-  }
+  // const webinarDir = path.join(__dirname, 'public','dist', 'webinars');
+  // if (!fs.existsSync(webinarDir)) {
+  //   fs.mkdirSync(webinarDir, { recursive: true });
+  //   console.log('Uploads directory created:', webinarDir);
+  // }
 
 
-  // ✅ Ensure uploads directory exists
-  const usecaseDir = path.join(__dirname, 'public','dist', 'usecases');
-  if (!fs.existsSync(usecaseDir)) {
-    fs.mkdirSync(usecaseDir, { recursive: true });
-    console.log('Uploads directory created:', usecaseDir);
-  }
+  // const datasheetDir = path.join(__dirname, 'public','dist', 'datasheets');
+  // if (!fs.existsSync(datasheetDir)) {
+  //   fs.mkdirSync(datasheetDir, { recursive: true });
+  //   console.log('Uploads directory created:', datasheetDir);
+  // }
 
 
-  const authorDir=path.join(__dirname, 'public','dist', 'authors');
-  if (!fs.existsSync(authorDir)) {
-    fs.mkdirSync(authorDir, { recursive: true });
-    console.log('Uploads directory created:', authorDir);
-  }
+  // // ✅ Ensure uploads directory exists
+  // const usecaseDir = path.join(__dirname, 'public','dist', 'usecases');
+  // if (!fs.existsSync(usecaseDir)) {
+  //   fs.mkdirSync(usecaseDir, { recursive: true });
+  //   console.log('Uploads directory created:', usecaseDir);
+  // }
+
+
+  // const authorDir=path.join(__dirname, 'public','dist', 'authors');
+  // if (!fs.existsSync(authorDir)) {
+  //   fs.mkdirSync(authorDir, { recursive: true });
+  //   console.log('Uploads directory created:', authorDir);
+  // }
+
+  //old logic just above *************************************
+
+  //new logic just below*********************************
+
+  // Use staticBasePath instead of __dirname/public
+const uploadsDir = path.join(staticBasePath, 'dist', 'uploads');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+const resumeDir = path.join(staticBasePath, 'dist', 'cv');
+if (!fs.existsSync(resumeDir)) fs.mkdirSync(resumeDir, { recursive: true });
+
+const casestudyDir = path.join(staticBasePath, 'dist', 'casestudies');
+if (!fs.existsSync(casestudyDir)) fs.mkdirSync(casestudyDir, { recursive: true });
+
+const industryDir = path.join(staticBasePath, 'dist', 'industry_reports');
+if (!fs.existsSync(industryDir)) fs.mkdirSync(industryDir, { recursive: true });
+
+const blogDir = path.join(staticBasePath, 'dist', 'blogs');
+if (!fs.existsSync(blogDir)) fs.mkdirSync(blogDir, { recursive: true });
+
+const whitepaperDir = path.join(staticBasePath, 'dist', 'whitepapers');
+if (!fs.existsSync(whitepaperDir)) fs.mkdirSync(whitepaperDir, { recursive: true });
+
+const webinarDir = path.join(staticBasePath, 'dist', 'webinars');
+if (!fs.existsSync(webinarDir)) fs.mkdirSync(webinarDir, { recursive: true });
+
+const datasheetDir = path.join(staticBasePath, 'dist', 'datasheets');
+if (!fs.existsSync(datasheetDir)) fs.mkdirSync(datasheetDir, { recursive: true });
+
+const usecaseDir = path.join(staticBasePath, 'dist', 'usecases');
+if (!fs.existsSync(usecaseDir)) fs.mkdirSync(usecaseDir, { recursive: true });
+
+const authorDir = path.join(staticBasePath, 'dist', 'authors');
+if (!fs.existsSync(authorDir)) fs.mkdirSync(authorDir, { recursive: true });
+
+
 //multer for file uploads
 // Multer setup for file uploads
 // const storage = multer.diskStorage({
@@ -346,50 +389,127 @@ const calculateReadTime = (content) => {
 
   // const upload = multer({ storage });
 
-  const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
+  //old multer stuff ********************************
+
+//   const storage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//     const folders = {
+//     case_study: 'public/dist/casestudies/',
+//     blog_image: 'public/dist/blogs/',
+//     white_paper: 'public/dist/whitepapers/',
+//     webinar: 'public/dist/webinars/',
+//     datasheet: 'public/dist/datasheets/',
+//     usecase: 'public/dist/usecases/',
+//     author_image: 'public/dist/authors/',
+//     industry_report: 'public/dist/industry_reports/',
+//     resume: 'public/dist/cv/',
+//     default: 'public/dist/uploads/'
+//     };
+//     cb(null, folders[file.fieldname] || folders.default);
+//     },
+//     filename: function (req, file, cb) {
+//     const uniqueName = Date.now() + '-' + file.originalname.replace(/\s+/g, '_');
+//     cb(null, uniqueName);
+//     }
+//     });
+    
+//     // Validate file types for CMS uploads
+//     const upload = multer({
+//     storage,
+//     fileFilter: (req, file, cb) => {
+//     const allowedTypes = [
+//     'image/jpeg','image/jpg','image/png','image/gif','image/webp',
+//     'application/pdf',
+//     'application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+//     'audio/mpeg','audio/wav','audio/mp4',
+//     'video/mp4','video/quicktime','video/x-matroska'
+//     ];
+//     if (allowedTypes.includes(file.mimetype)) cb(null, true);
+//     else cb(new Error(`❌ Invalid file type: ${file.originalname}`));
+//     },
+//     limits: { fileSize: 20 * 1024 * 1024 } // 20MB max
+//     });
+
+
+//   //stuff for media upload goes in here
+  
+//   // ----------------- MEDIA LIBRARY SETUP -----------------
+// const mediaBaseDir = path.join(__dirname, 'public','dist','media'); // <-- main media folder
+// const mediaFolders = ['images', 'pdfs', 'docs', 'others'];
+
+// // Ensure media folders exist
+// mediaFolders.forEach(folder => {
+//   const dir = path.join(mediaBaseDir, folder);
+//   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+// });
+
+// // Multer storage for media library
+// const mediaStorage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     let folder = 'others';
+//     const ext = file.originalname.split('.').pop().toLowerCase();
+//     if (['png','jpg','jpeg','gif','webp'].includes(ext)) folder = 'images';
+//     else if (['pdf'].includes(ext)) folder = 'pdfs';
+//     else if (['doc','docx','txt'].includes(ext)) folder = 'docs';
+//     cb(null, path.join(mediaBaseDir, folder));
+//   },
+//   filename: function (req, file, cb) {
+//     const uniqueName = Date.now() + '-' + file.originalname.replace(/\s+/g, '_');
+//     cb(null, uniqueName);
+//   }
+// });
+
+// const mediaUpload = multer({ storage: mediaStorage });
+
+//media upload ends here
+
+//multer ends in here old one*****************************888
+
+
+//multer stuff new one comes in here ************\\\\\\\\\\\\\\\\
+
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
     const folders = {
-    case_study: 'public/dist/casestudies/',
-    blog_image: 'public/dist/blogs/',
-    white_paper: 'public/dist/whitepapers/',
-    webinar: 'public/dist/webinars/',
-    datasheet: 'public/dist/datasheets/',
-    usecase: 'public/dist/usecases/',
-    author_image: 'public/dist/authors/',
-    industry_report: 'public/dist/industry_reports/',
-    resume: 'public/dist/cv/',
-    default: 'public/dist/uploads/'
+      case_study: path.join(staticBasePath, 'dist', 'casestudies'),
+      blog_image: path.join(staticBasePath, 'dist', 'blogs'),
+      white_paper: path.join(staticBasePath, 'dist', 'whitepapers'),
+      webinar: path.join(staticBasePath, 'dist', 'webinars'),
+      datasheet: path.join(staticBasePath, 'dist', 'datasheets'),
+      usecase: path.join(staticBasePath, 'dist', 'usecases'),
+      author_image: path.join(staticBasePath, 'dist', 'authors'),
+      industry_report: path.join(staticBasePath, 'dist', 'industry_reports'),
+      resume: path.join(staticBasePath, 'dist', 'cv'),
+      default: path.join(staticBasePath, 'dist', 'uploads')
     };
     cb(null, folders[file.fieldname] || folders.default);
-    },
-    filename: function (req, file, cb) {
+  },
+  filename: function (req, file, cb) {
     const uniqueName = Date.now() + '-' + file.originalname.replace(/\s+/g, '_');
     cb(null, uniqueName);
-    }
-    });
-    
-    // Validate file types for CMS uploads
-    const upload = multer({
-    storage,
-    fileFilter: (req, file, cb) => {
+  }
+});
+
+// Validate file types remains same
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
     const allowedTypes = [
-    'image/jpeg','image/jpg','image/png','image/gif','image/webp',
-    'application/pdf',
-    'application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'audio/mpeg','audio/wav','audio/mp4',
-    'video/mp4','video/quicktime','video/x-matroska'
+      'image/jpeg','image/jpg','image/png','image/gif','image/webp',
+      'application/pdf',
+      'application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'audio/mpeg','audio/wav','audio/mp4',
+      'video/mp4','video/quicktime','video/x-matroska'
     ];
     if (allowedTypes.includes(file.mimetype)) cb(null, true);
     else cb(new Error(`❌ Invalid file type: ${file.originalname}`));
-    },
-    limits: { fileSize: 20 * 1024 * 1024 } // 20MB max
-    });
+  },
+  limits: { fileSize: 20 * 1024 * 1024 } // 20MB max
+});
 
 
-  //stuff for media upload goes in here
-  
-  // ----------------- MEDIA LIBRARY SETUP -----------------
-const mediaBaseDir = path.join(__dirname, 'public','dist','media'); // <-- main media folder
+const mediaBaseDir = path.join(staticBasePath, 'dist', 'media'); // dynamic path
 const mediaFolders = ['images', 'pdfs', 'docs', 'others'];
 
 // Ensure media folders exist
@@ -416,7 +536,9 @@ const mediaStorage = multer.diskStorage({
 
 const mediaUpload = multer({ storage: mediaStorage });
 
-  //media upload ends here
+
+//multer stuff ends new new************////////////
+  
 
 
 //   const session = require('express-session');
@@ -5702,6 +5824,18 @@ Details: ${details}
   }
 });
 
+
+//global security handler
+
+app.use((err, req, res, next) => {
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' https:; style-src 'self' https:; img-src 'self' data: https:; object-src 'none'; upgrade-insecure-requests");
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'no-referrer-when-downgrade');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  res.status(err.status || 500).send('Internal Server Error');
+});
+
 //expressListRoutes(app, { prefix: '' });
 
 // hello
@@ -5714,41 +5848,83 @@ Details: ${details}
 // });
 
 // Only use HTTPS in production
-if (process.env.NODE_ENV === 'production') {
-  // const sslOptions = {
-  //   key: fs.readFileSync('/ssl/calsoft.org.key'),
-  //   cert: fs.readFileSync('/ssl/calsoft.org.crt')
-  // };
 
+//old server setup start ****************/////////
+
+// if (process.env.NODE_ENV === 'production') {
+//   // const sslOptions = {
+//   //   key: fs.readFileSync('/ssl/calsoft.org.key'),
+//   //   cert: fs.readFileSync('/ssl/calsoft.org.crt')
+//   // };
+
+//   const sslOptions = {
+//     key: fs.readFileSync(
+//       path.join(__dirname, 'ssl', 'calsoft.org.key')
+//     ),
+//     // cert: fs.readFileSync(
+//     //   path.join(__dirname, 'ssl', 'calsoft.org.crt')
+//     // ),
+//     cert: fs.readFileSync(
+//       path.join(__dirname, 'ssl', 'STAR.calsoft.org_fullchain.pem')
+//     ),//test
+//     // ca: fs.readFileSync(path.join(__dirname, 'ssl', 'STAR.calsoft.org.ca-bundle'))
+//   };
+
+//   // https.createServer(sslOptions, app).listen(process.env.PORT, (err) => {
+//   //   if (err) {
+//   //     console.error('❌ Failed to start HTTPS server:', err.message);
+//   //     process.exit(1);
+//   //   }
+//   //   console.log(`✅ Production HTTPS server running at https://localhost:${process.env.PORT}`);
+//   // });
+//     https.createServer(sslOptions, app).listen(process.env.PORT, '0.0.0.0', (err) => {
+//     if (err) {
+//       console.error('❌ Failed to start HTTPS server:', err.message);
+//       process.exit(1);
+//     }
+//     console.log(`✅ Production HTTPS server running at https://0.0.0.0:${process.env.PORT}`);
+//   });
+// } else {
+//   // Local development (HTTP)
+//   app.listen(process.env.PORT, (err) => {
+//     if (err) {
+//       console.error('❌ Failed to start HTTP server:', err.message);
+//       process.exit(1);
+//     }
+//     console.log(`🟢 Development HTTP server running at http://localhost:${process.env.PORT}`);
+//   });
+// }
+
+//old server setup end************//////////
+
+
+// -----------------------------
+if (process.env.NODE_ENV === 'production') {
   const sslOptions = {
-    key: fs.readFileSync(
-      path.join(__dirname, 'ssl', 'calsoft.org.key')
-    ),
-    // cert: fs.readFileSync(
-    //   path.join(__dirname, 'ssl', 'calsoft.org.crt')
-    // ),
-    cert: fs.readFileSync(
-      path.join(__dirname, 'ssl', 'STAR.calsoft.org_fullchain.pem')
-    ),//test
-    // ca: fs.readFileSync(path.join(__dirname, 'ssl', 'STAR.calsoft.org.ca-bundle'))
+    key: fs.readFileSync(path.join(__dirname, 'ssl', 'calsoft.org.key')),
+    cert: fs.readFileSync(path.join(__dirname, 'ssl', 'STAR.calsoft.org_fullchain.pem')),
   };
 
-  // https.createServer(sslOptions, app).listen(process.env.PORT, (err) => {
-  //   if (err) {
-  //     console.error('❌ Failed to start HTTPS server:', err.message);
-  //     process.exit(1);
-  //   }
-  //   console.log(`✅ Production HTTPS server running at https://localhost:${process.env.PORT}`);
-  // });
-    https.createServer(sslOptions, app).listen(process.env.PORT, '0.0.0.0', (err) => {
+  // HTTPS server
+  https.createServer(sslOptions, app).listen(process.env.PORT, '0.0.0.0', (err) => {
     if (err) {
       console.error('❌ Failed to start HTTPS server:', err.message);
       process.exit(1);
     }
     console.log(`✅ Production HTTPS server running at https://0.0.0.0:${process.env.PORT}`);
   });
+
+  // HTTP → HTTPS redirect
+  const redirectApp = express();
+  redirectApp.get('*', (req, res) => {
+    res.redirect(`https://${req.hostname}:${process.env.PORT}${req.url}`);
+  });
+  redirectApp.listen(80, () => {
+    console.log('➡️ HTTP (port 80) → HTTPS redirect running');
+  });
+
 } else {
-  // Local development (HTTP)
+  // Development HTTP server
   app.listen(process.env.PORT, (err) => {
     if (err) {
       console.error('❌ Failed to start HTTP server:', err.message);
@@ -5757,5 +5933,3 @@ if (process.env.NODE_ENV === 'production') {
     console.log(`🟢 Development HTTP server running at http://localhost:${process.env.PORT}`);
   });
 }
-
-
